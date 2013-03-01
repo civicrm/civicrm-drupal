@@ -1,11 +1,9 @@
 <?php
-// $Id$
-
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.4                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2011                                |
+ | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -30,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2011
+ * @copyright CiviCRM LLC (c) 2004-2013
  * $Id$
  *
  */
@@ -47,16 +45,47 @@ function civicrm_uninstall() {
   }
 
   require_once 'CRM/Core/Config.php';
-  $config = &CRM_Core_Config::singleton();
+  $config = CRM_Core_Config::singleton();
 
   require_once 'CRM/Core/DAO.php';
   CRM_Core_DAO::dropAllTables();
 }
 
+function civicrm_requirements($phase) {
+  global $base_url;
+  $civicrm_path = drupal_get_path('module', 'civicrm');
+
+  //remove the last occurrence of 'drupal' from path
+  $pos = strrpos($civicrm_path, 'drupal');
+
+  if ($pos !== false) {
+   $civicrm_path = substr_replace($civicrm_path, '', $pos, strlen($civicrm_path));
+  }
+
+  $url = $base_url . '/' . $civicrm_path . '/install/index.php';
+
+  $settings = glob('sites/*/civicrm.settings.php');
+  $problems = array();
+  if (empty($settings) &&
+    $phase == 'install'
+  ) {
+    $problems[] = array(
+      'title' => t('CiviCRM settings does not exist'),
+      'value' =>
+      t('CiviCRM settings file does not exist. It should be created by CiviCRM <a href="!link">install</a>',
+        array('!link' => $url)
+      ),
+      'severity' => REQUIREMENT_ERROR,
+    );
+  }
+
+  return $problems;
+}
+
 /**
  * Update CiviCRM module weight
  */
-function civicrm_update_6300(&$sandbox) {
-  return array(update_sql("UPDATE {system} SET weight = 100 WHERE name = 'civicrm'"));
+function civicrm_update_7400(&$sandbox) {
+  db_query("UPDATE {system} SET weight = 100 WHERE name = 'civicrm'");
 }
 

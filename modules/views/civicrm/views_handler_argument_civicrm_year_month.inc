@@ -1,9 +1,7 @@
 <?php
-// $Id$
-
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.4                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -44,15 +42,20 @@ class views_handler_argument_civicrm_year_month extends views_handler_argument_d
    * Provide a link to the next level of the view
    */
   function summary_name($data) {
-    $created = $data->{$this->name_alias};
-    return format_date(strtotime($created . "15"), 'custom', $this->format, 0);
+    $timestamp = strtotime($data->{$this->name_alias});
+    if ($timestamp !== FALSE) {
+      return format_date($timestamp, 'custom', $this->format);
+    }
   }
 
   /**
    * Provide a link to the next level of the view
    */
   function title() {
-    return format_date(strtotime($this->argument . "15"), 'custom', $this->format, 0);
+    $timestamp = strtotime($this->argument);
+    if ($timestamp !== FALSE) {
+      return format_date($timestamp, 'custom', $this->format);
+    }
   }
 }
 

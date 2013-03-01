@@ -1,9 +1,7 @@
 <?php
-// $Id$
-
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.4                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -35,7 +33,8 @@
 /**
  * Implementation of hook_help()
  */
-function civicrm_group_roles_help($section, $args = array()) {
+function civicrm_group_roles_help($section, $args = array(
+  )) {
   switch ($section) {
     case 'admin/modules#description':
       return t('Adds users to a matching CiviCRM group on account creation, update, or login for each of their Drupal roles.');
@@ -45,64 +44,113 @@ function civicrm_group_roles_help($section, $args = array()) {
   }
 }
 
-/**
- * Implementation of hook_user().
- * This provides sync from Drupal -> CiviCRM
- * TO DO: Remove User From Group when role is removed
- */
-function civicrm_group_roles_user($op, $edit, &$user, $category = NULL) {
-  if ($op == 'login' OR $op == 'after_update' OR $op == 'insert') {
-    if (!civicrm_initialize()) {
-      return;
-    }
+function civicrm_group_roles_user_insert(&$edit, $account, $category) {
+  if (!civicrm_initialize()) {
+    return;
+  }
 
-    // get user's roles, ignoring built-in roles
-    if ($op == 'insert') {
-      // $user->roles isn't set on insert, we have to get them from the form directly...
-      $all = user_roles(TRUE);
-      // the insert form only stores role ids. :-P
-      $rids  = $edit['roles'];
-      $rids  = is_array($rids) ? $rids : array($rids);
-      $roles = array_intersect_key($all, $rids);
-    }
-    else {
-      $roles = array_diff_key($user->roles, array(1 => 'anonymous user', 2 => 'authenticated user'));
-    }
+  $all = user_roles(TRUE);
+  // the insert form only stores role ids. :-P
+  $rids  = $edit['roles'];
+  $rids  = is_array($rids) ? $rids : array($rids);
+  $roles = array_intersect_key($all, $rids);
+  if ($roles) {
+    civicrm_group_roles_add_groups_oncreate($account, $roles);
+  }
+}
 
-    // make sure user has other roles other than authenticated
-    if ($roles) {
-      civicrm_group_roles_add_remove_groups($roles, $user, 'add');
-    }
-    //endif $roles
+function civicrm_group_roles_user_update(&$edit, $account, $category) {
+  if (!civicrm_initialize()) {
+    return;
+  }
+  $roles = array_diff_key($account->roles, array(1 => 'anonymous user', 2 => 'authenticated user'));
 
-    //sync for civicrm to drupal for user role
-    if ($op == 'login') {
-      //civicrm to drupal sync
-      //assign user role if contact is present in group
-      $roles = array_diff($all = user_roles(TRUE), array('anonymous user', 'authenticated user'));
+  if ($roles) {
+    civicrm_group_roles_add_remove_groups($roles, $account, 'add');
+  }
+}
 
-      //find the contact record
-      $contactid = civicrm_api('uf_match', 'getvalue',array('version' => 3, 'uf_id' => $user->uid, 'return' => 'contact_id'));
+function civicrm_group_roles_user_login(&$edit, $account) {
+  if (!civicrm_initialize()) {
+    return;
+  }
 
-      if (empty($contact)) {
-        return;
-      }
+  $roles = array_diff($all = user_roles(TRUE), array('anonymous user', 'authenticated user'));
 
-      $params = array('version' => '3', 'contact_id' => $contactid);
-      $groups = civicrm_api('group_contact','get',$params);
-      $groups = $groups['values'];
+  require_once 'api/api.php';
+  require_once 'CRM/Core/BAO/UFMatch.php';
 
-      foreach ($groups as $key) {
-        $rid = db_result(db_query("SELECT role_id FROM {civicrm_group_roles_rules} WHERE group_id IN (%d)", $key['group_id']));
-        if ($rid) {
-          $role_name = db_result(db_query('SELECT name FROM {role} WHERE rid = %d', $rid));
-          //assign the role for user
-          civicrm_group_roles_add_role($user->uid, $rid, $role_name);
-        }
-      }
+  //find the contact record
+  $contact = CRM_Core_BAO_UFMatch::getContactId($account->uid);
+  if (!$contact) {
+    return;
+  }
+
+  // To account for the case of smart groups, we grab *all* the rules,
+  // and look for this contact in a list of group members
+  // CRM-11161
+  $query = db_select('civicrm_group_roles_rules', 'cgr');
+  $query->join('role', 'r', 'r.rid=cgr.role_id');
+  $query->fields('r', array('name'))->fields('cgr', array('role_id', 'group_id'));
+
+  $result = $query->execute();
+  foreach ($result as $group) {
+    $params = array(
+      'filter.group_id' => $group->group_id,
+      'id' => $contact,
+      'version'  => 3,
+    );
+    $contacts = civicrm_api('contact', 'get', $params);
+    if ($contacts['count'] > 0) { // The user is in there
+      $msg = sprintf('assigning role %s (%d) to user %s because they are part of group %d (contactID: %d)',
+             $group->name, $group->role_id, $account->uid, $group->group_id, $contact);
+      watchdog('civicrm_group_roles', $msg);
+      civicrm_group_roles_add_role($account->uid, $group->role_id, $group->name);
     }
   }
-  //endif $op
+}
+
+function civicrm_group_roles_add_groups_oncreate($account, $roles) {
+  if (!civicrm_initialize()) {
+    return;
+  }
+
+  require_once 'CRM/Core/BAO/UFMatch.php';
+  $contactId = CRM_Core_BAO_UFMatch::getContactId($account->uid);
+
+  if (!$contactId) {
+
+    return;
+
+  }
+
+  $groups = db_select('civicrm_group_roles_rules', 'cgr')->fields('cgr', array('group_id'))->condition('role_id', array_keys($roles))->execute()->fetchAll();
+  if (empty($groups)) {
+    return;
+  }
+
+  require_once 'CRM/Contact/BAO/GroupContact.php';
+  foreach ($groups as $group) {
+    $groupContact = new CRM_Contact_DAO_GroupContact();
+    $groupContact->group_id = $group->group_id;
+    $groupContact->contact_id = $contactId;
+
+
+    if (!$groupContact->find(TRUE)) {
+      // add the contact to group
+      $historyParams = array(
+        'contact_id' => $contactId,
+        'group_id' => $group->group_id,
+        'method' => 'API',
+        'status' => 'Added',
+        'date' => date('YmdHis'),
+        'tracking' => NULL,
+      );
+      CRM_Contact_BAO_SubscriptionHistory::create($historyParams);
+      $groupContact->status = 'Added';
+      $groupContact->save();
+    }
+  }
 }
 
 /**
@@ -111,14 +159,19 @@ function civicrm_group_roles_user($op, $edit, &$user, $category = NULL) {
  */
 function civicrm_group_roles_form_alter(&$form, &$form_state, $form_id) {
   // append this to change user edit submit function
-  if ($form['#id'] == 'user-profile-form' &&
-    isset($form['#uid']) &&
-    module_exists('content_profile') ||
+    if ( ( $form['#id'] == 'user-profile-form' &&
+         isset( $form['#user'] ) &&
+         (module_exists('content_profile') || isset( $form['account'] )) ) ||
     $form['#id'] == 'user-edit-form'
   ) {
+    $uid = $form['#user']->uid;
+    if (!$uid) {
+      return;
+    }
     // make sure there is a civicrm record
     civicrm_initialize(TRUE);
-    $contact_id = civicrm_api('uf_match', 'getvalue',array('version' => 3, 'uf_id' => $form['#uid'], 'return' => 'contact_id'));
+    require_once 'CRM/Core/BAO/UFMatch.php';
+    $contact_id = CRM_Core_BAO_UFMatch::getContactId($uid);
     if (!$contact_id) {
       return;
     }
@@ -129,8 +182,9 @@ function civicrm_group_roles_form_alter(&$form, &$form_state, $form_id) {
 /*
  * Helper function to remove Groups when Drupal user form is saved, if a role is removed in Drupal
  */
-function _civicrm_group_update($form_id, $form_values) {
-  $user = user_load($form_id['#uid']);
+function _civicrm_group_update ($form, $form_values) {
+  $uid = $form['#user']->uid;
+  $user = user_load($uid);
   //load the currently saved roles
   $roles = $user->roles;
   //get the roles as submitted on the user form
@@ -164,16 +218,21 @@ function civicrm_group_roles_civicrm_post($op, $objectName, $objectId, &$objectR
   $group_id = $objectId;
 
   //Do we have any Role sync rules for this group?
-  $query = db_query("SELECT role_id FROM {civicrm_group_roles_rules} WHERE group_id=%d", $group_id);
-  while ($rid = db_result($query)) {
+  $groupRoles = db_select('civicrm_group_roles_rules', 'cgr')->fields('cgr', array('role_id'))->condition('group_id', $group_id)->execute()->fetchAll();
 
+  $rolesProcessed = array();
+  foreach ($groupRoles as $groupRole) {
+    $rid = $groupRole->role_id;
     // we need this to properly save the user account below.
-    $role_name = db_result(db_query('SELECT name FROM {role} WHERE rid = %d', $rid));
-
+    $role_name = db_select('role', 'r')->range(0, 1)->fields('r', array('name'))->condition('rid', $rid)->execute()->fetchField();
     foreach ($objectRef AS $contact_id) {
+      if (isset($rolesProcessed[$rid])) {
+        continue;
+      }
 
       //Do we have a Drupal Account?
-      $uid = civicrm_api('uf_match', 'getvalue',array('version' => 3, 'contact_id' => $contact_id, 'return' => 'uf_id'));
+      require_once 'CRM/Core/BAO/UFMatch.php';
+      $uid = CRM_Core_BAO_UFMatch::getUFId($contact_id);
       // make sure we have an actual user account
       if (!$uid) {
         continue;
@@ -182,11 +241,13 @@ function civicrm_group_roles_civicrm_post($op, $objectName, $objectId, &$objectR
       switch ($op) {
         case 'create':
         case 'edit':
+          $rolesProcessed[$rid] = $rid;
           //Contact added or re-joined to group; add to corresponding role
           civicrm_group_roles_add_role($uid, $rid, $role_name);
           break;
 
         case 'delete':
+          $rolesProcessed[$rid] = $rid;
           //Contact is removed from group.
           //Remove the role, but only if the contact is in no other groups that grant this role
           if (!civicrm_role_granted_by_other_group($contact_id, $rid, $group_id)) {
@@ -206,10 +267,11 @@ function civicrm_group_roles_civicrm_post($op, $objectName, $objectId, &$objectR
  * Copied from user.module function user_multiple_role_edit()
  *
  * @param $uid The user id of the account to modify
- * @param $rid The role id being added
+ * @param $rid Thedebug_backtrace role id being added
  */
 function civicrm_group_roles_add_role($uid, $rid, $role_name) {
-  $account = user_load(array('uid' => (int)$uid));
+  $account = user_load((int)$uid, TRUE);
+
   // Skip adding the role to the user if they already have it.
   if ($account !== FALSE && !isset($account->roles[$rid])) {
     $roles = $account->roles + array($rid => $role_name);
@@ -225,7 +287,7 @@ function civicrm_group_roles_add_role($uid, $rid, $role_name) {
  * @param $rid The role id being removd
  */
 function civicrm_group_roles_del_role($uid, $rid, $role_name) {
-  $account = user_load(array('uid' => (int)$uid));
+  $account = user_load((int)$uid);
   // Skip removing the role from the user if they already don't have it.
   if ($account !== FALSE && isset($account->roles[$rid])) {
     $roles = array_diff($account->roles, array($rid => $role_name));
@@ -240,33 +302,31 @@ function civicrm_role_granted_by_other_group($contact_id, $rid, $group_id) {
   if (!civicrm_initialize()) {
     return;
   }
-  require_once 'api/v2/GroupContact.php';
+
   //get all the groups this contact belongs to
-  $params = array('version' => '3', 'contact_id' => $contact_id);
-  $result =  civicrm_api('group_contact','get',$params);
+  $params = array('version' => 3, 'contact_id' => $contact_id);
+  $result = civicrm_api('group_contact', 'get', $params);
 
   if (civicrm_error($result)) {
-    drupal_set_message($result['error_message']);
+    return TRUE;
   }
   else {
     //contact is not in *any* other groups so delete the role
-    if ($result['count'] == 0) {
-      return (FALSE);
+    if (count($result) == 0) {
+      return FALSE;
     }
     //contact is in some groups, determine if any of them grant this role
     else {
-      //get ids of the groups as , delim list
-      foreach ($result['values'] as $grpid => $grp) {
-        $grpsuserin .= $grp["group_id"] . ',';
+      // check if group has been added by api or not.
+      $groupIds = array();
+      foreach ($result as $grpid => $grp) {
+        $groupIds[] = CRM_Utils_Array::value('group_id', $grp);
       }
-      $grpsuserin = drupal_substr($grpsuserin, 0, -1);
-
-      //do any of them grant this role?
-      $rolecount = db_result(db_query('SELECT count(*) FROM {civicrm_group_roles_rules} WHERE group_id in(%s) AND role_id=%d', $grpsuserin, $rid));
-
-      //flip to boolean
-      return ($rolecount > 0);
     }
+
+    $groupRules = db_query('SELECT COUNT(*) FROM {civicrm_group_roles_rules} WHERE group_id IN ( :group_ids ) ', array(':group_ids' => implode(",", $groupIds)))->fetchField();
+
+    return ($groupRules > 0);
   }
 }
 
@@ -275,37 +335,59 @@ function civicrm_role_granted_by_other_group($contact_id, $rid, $group_id) {
  */
 function civicrm_group_roles_menu() {
   $items = array();
-  $items['admin/settings/civicrm_group_roles'] = array(
+  $items['admin/config/civicrm/civicrm_group_roles'] = array(
     'title' => t('CiviGroup Roles Sync'),
     'description' => t('Add/remove association rules and configure settings. Also perform manual synchronization.'),
     'page callback' => 'civicrm_group_roles_show_rules',
     'access callback' => 'user_access',
-    'access arguments' => array('access settings'),
+    'access arguments' => array('access civicrm group role setting'),
     'type' => MENU_NORMAL_ITEM,
   );
-  $items['admin/settings/civicrm_group_roles/show_rules'] = array(
+  $items['admin/config/civicrm/civicrm_group_roles/show_rules'] = array(
     'title' => t('List Association Rule(s)'),
     'access callback' => 'user_access',
-    'access arguments' => array('access settings'),
+    'access arguments' => array('access civicrm group role setting'),
     'weight' => -5,
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
-  $items['admin/settings/civicrm_group_roles/add_rule'] = array(
+  $items['admin/config/civicrm/civicrm_group_roles/add_rule'] = array(
     'title' => t('Add Association Rule'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('civicrm_group_roles_add_rule_form'),
     'access callback' => 'user_access',
-    'access arguments' => array('access settings'),
+    'access arguments' => array('access civicrm group role setting'),
     'type' => MENU_LOCAL_TASK,
   );
+  $items['admin/config/civicrm/civicrm_group_roles/add_rule/%rule_id'] = array(
+    'title' => t('Add Association Rule'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('civicrm_group_roles_add_rule_form', 1),
+    'access callback' => 'user_access',
+    'access arguments' => array('access civicrm group role setting'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/config/civicrm/civicrm_group_roles/manual_sync'] =
+    array(
+    'title' => t('Manually Synchronize'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('civicrm_group_roles_manual_sync'),
+    'access callback' => 'user_access',
+    'access arguments' => array('access civicrm group role setting'),
+    'type' => MENU_LOCAL_TASK,
+    );
   return $items;
 }
 
 /**
- * Implementation of hook_perm().
+ * Implementation of hook_permission().
  */
-function civicrm_group_roles_perm() {
-  return array('access settings');
+function civicrm_group_roles_permission() {
+  return array(
+    'access civicrm group role setting' =>
+    array('title' => t('Access CiviCRM group role setting'),
+      'description' => t('Access Civicrm group roles synchronization.'),
+    ),
+  );
 }
 
 /**
@@ -317,8 +399,8 @@ function civicrm_group_roles_show_rules($action = NULL, $id = NULL) {
   }
   if ($action == 'delete') {
     if (is_numeric($id)) {
-      $delete = db_query('DELETE FROM {civicrm_group_roles_rules} WHERE id = %d', $id);
 
+      $delete = db_delete('civicrm_group_roles_rules')->condition('id', $id)->execute();
       if ($delete) {
         drupal_set_message(t('Rule ID !1 was successfully deleted.', array('!1' => $id)));
       }
@@ -331,28 +413,32 @@ function civicrm_group_roles_show_rules($action = NULL, $id = NULL) {
   $roles = user_roles(TRUE);
 
   // get civicrm groups
-  $params = array(
-    'version' => '3',
-  );
+  $params = array('version' => 3);
+  $groups = civicrm_api('group', 'get', $params);
+  $groups = CRM_Utils_Array::value('values', $groups);
 
-  $groups = civicrm_api('group_contact','get',$params);
-  $groups = $groups['values'];
   //Begin building main output table.
-  $header = array(t('Rule ID'), t('Rule Name (\'CiviCRM Group\' <--> \'Drupal Role\')'), t('Operation'));
+  $header = array('rid' => t('Rule ID'), 'name' => t('Rule Name (\'CiviCRM Group\' <--> \'Drupal Role\')'), 'op' => t('Operation'));
   $data = array();
 
-  $rules = db_query('SELECT * FROM {civicrm_group_roles_rules} ORDER BY id ASC');
-  while ($result = db_fetch_object($rules)) {
+  $rules = db_query('SELECT * FROM {civicrm_group_roles_rules} ORDER BY id ASC')->fetchAll();
+  foreach ($rules as $result) {
+    $gid = CRM_Utils_Array::value($result->group_id, $groups);
     $data[] = array(
-      check_plain($result->id),
-      check_plain($groups[$result->group_id]['title'] . " <--> " . $roles[$result->role_id]),
-      l(t('edit'), 'admin/settings/civicrm_group_roles/add_rule' . '/' . check_plain($result->id)) . '&nbsp;&nbsp;' . l(t('delete'), 'admin/settings/civicrm_group_roles/delete' . '/' . check_plain($result->id)),
+      'rid' => check_plain($result->id),
+      'name' => check_plain(CRM_Utils_Array::value('title', $gid) . " <--> " . $roles[$result->role_id]),
+      'op' => l(t('edit'), 'admin/config/civicrm/civicrm_group_roles/add_rule' . '/' . check_plain($result->id)) . '&nbsp;&nbsp;' . l(t('delete'), 'admin/config/civicrm/civicrm_group_roles/delete' . '/' . check_plain($result->id)),
     );
   }
 
   if (!empty($data)) {
-    $output = t('Use the \'Add Association Rule\' form to add new rules.');
-    $output .= theme('table', $header, $data);
+
+    $output['data'] = array(
+      '#prefix' => t("Use the 'Add Association Rule' form to add new rules.") . '<br/><br/>',
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => $data,
+    );
   }
   else {
     $output = t('There are no rules currently set.') . ' ' . ts('Use the \'Add Association Rule\' form to add one.');
@@ -367,7 +453,8 @@ function civicrm_group_roles_show_rules($action = NULL, $id = NULL) {
  * @see civimember_roles_add_rule_validate()
  * @see civicrm_group_roles_add_rule_submit()
  */
-function civicrm_group_roles_add_rule_form($form, $edit_id = NULL) {
+function civicrm_group_roles_add_rule_form($form, $form_state = array(
+  ), $edit_id = NULL) {
   if (!civicrm_initialize()) {
     return;
   }
@@ -377,7 +464,7 @@ function civicrm_group_roles_add_rule_form($form, $edit_id = NULL) {
 
   // get civicrm groups
   require_once "CRM/Core/PseudoConstant.php";
-  $groups = &CRM_Core_PseudoConstant::group();
+  $groups = CRM_Core_PseudoConstant::group();
 
   //Let's get rid of the authenticated role as it is a useless option for this module
   unset($roles[2]);
@@ -394,13 +481,13 @@ function civicrm_group_roles_add_rule_form($form, $edit_id = NULL) {
   $form['add_rule']['select_group'] = array(
     '#type' => 'select',
     '#title' => t('CiviCRM Group'),
-    '#options' => array(0 => t('-- Select --')) + $groups,
+    '#options' => $groups,
     '#required' => TRUE,
   );
   $form['add_rule']['select_role'] = array(
     '#type' => 'select',
     '#title' => t('Drupal Role'),
-    '#options' => array(0 => t('-- Select --')) + $roles,
+    '#options' => $roles,
     '#required' => TRUE,
   );
   $form['submit'] = array(
@@ -410,9 +497,10 @@ function civicrm_group_roles_add_rule_form($form, $edit_id = NULL) {
 
   //Begin edit form
   if (!empty($edit_id) && is_numeric($edit_id)) {
-    $default_values = db_fetch_object(db_query('SELECT * FROM {civicrm_group_roles_rules} WHERE id = %d', $edit_id));
+    $default_values = db_select('civicrm_group_roles_rules', 'cgr')->fields('cgr')->condition('id', $edit_id)->execute()->fetchObject();
     if (!$default_values) {
       drupal_set_message(t('There was an error in obtaining the association rule for edit. Please check your database settings and try again. If you continue to get this error message then try to reinstall CiviGroup Roles Sync.'));
+      return $form;
     }
 
 
@@ -455,31 +543,25 @@ function civicrm_group_roles_add_rule_form_submit($form, &$form_state) {
   }
   //If edit_flag is set then process as an edit form, if not then process as an add form.
   if (isset($form_state['values']['edit_flag'])) {
-    $edit_rule = db_query('UPDATE {civicrm_group_roles_rules}
-                          SET role_id = %d, group_id = %d
-                          WHERE id = %d',
-      (int) $form_state['values']['add_rule']['select_role'],
-      (int) $form_state['values']['add_rule']['select_group'],
-      $form_state['values']['edit_flag']
-    );
+
+    $edit_rule = db_update('civicrm_group_roles_rules')->fields(array(
+        'role_id' => (int) $form_state['values']['add_rule']['select_role'],
+        'group_id' => (int) $form_state['values']['add_rule']['select_group'],
+      ))->condition('id', (int)$form_state['values']['edit_flag'])->execute();
+
     if ($edit_rule) {
       drupal_set_message(t('Your association rule has been edited.'));
     }
-    else {
-      drupal_set_message(t('There was an error editing the association rule. Please check your database settings and try again. If you continue to get this error message then try to reinstall CiviGroup Roles Sync.'), $type = 'error');
-    }
   }
   else {
-    $add_rule = db_query('INSERT INTO {civicrm_group_roles_rules} (role_id, group_id )
-                          VALUES( %d, %d)',
-      (int) $form_state['values']['add_rule']['select_role'],
-      (int) $form_state['values']['add_rule']['select_group']
-    );
+
+    $add_rule = db_insert('civicrm_group_roles_rules')->fields(array(
+        'role_id' => (int)$form_state['values']['add_rule']['select_role'],
+        'group_id' => (int)$form_state['values']['add_rule']['select_group'],
+      ))->execute();
+
     if ($add_rule) {
       drupal_set_message(t('Your association rule has been added.'));
-    }
-    else {
-      drupal_set_message(t('There was an error adding the association rule. Please check your database settings and try again. If you continue to get this error message then try to reinstall CiviGroup Roles Sync.'), $type = 'error');
     }
   }
 }
@@ -500,43 +582,50 @@ function civicrm_group_roles_add_remove_groups($roles, $user, $op) {
   else {
     return;
   }
+  $debug_mode = FALSE;
 
   // make sure user has other roles other than authenticated
   if ($roles) {
 
     //find the contact record
-    $params  = array('version' => '3', 'email' => $user->mail, 'sequential' => 1, 'options' => array('limit' => 1));
-    $contact = civicrm_api('contact','get',$params);
-    if($contact['count'] > 0){
-      $contact_id = $contact['values'][0]['id'];
+        $params = array('version' => 3, 'sequential' => 1, 'email' => $user->mail );
+        $contact = civicrm_api('contact', 'get', $params);
+
+        if ( empty($contact) || $contact['is_error'] == 1 || $contact['count'] < 1 ) {
+            $msg = 'CiviCRM contact not found for @mail';
+            $variables = array( '@mail' => $user->mail );
+            watchdog( 'civicrm',  $msg, $variables );
+            if ( $debug_mode ) drupal_set_message( t( 'CiviCRM contact not found for %mail', array( '%mail' => $user->mail ) ) );
+        }
+
+        $contact_id = CRM_Utils_Array::value( 'contact_id', $contact['values'][0] );
+
+        if ( $contact_id ) {
 
       //loop over user's roles
       foreach ($roles as $rid => $role) {
 
         //find the group(s) for the role
-        $query = db_query("SELECT group_id FROM {civicrm_group_roles_rules} WHERE role_id=%d", $rid);
-
-        while ($gid = db_result($query)) {
+                $groups = db_select('civicrm_group_roles_rules', 'cgr' )->fields( 'cgr', array('group_id') )->condition('role_id', $rid)->execute( )->fetchAll( );
+                foreach ( $groups as $group ) {
 
           //add the contact
-
-          $gparams = array('version' => '3', 'group_id' => $gid, 'contact_id' => $contact_id);
+                    $groupId = $group->group_id;
+          $contacts = array($contact);
+          $gparams = array('version' => 3, 'group_id' => $groupId, 'contact_id' => $contact_id);
           if ($op == 'add') {
-            $result = civicrm_api('group_contact','create',$gparams + array('status' => 'Added'));
+                        $result = civicrm_api('GroupContact', 'create', $gparams);
           }
           else {
-            $result = civicrm_api('group_contact','create',$gparams + array('status' => 'Removed'));
+                        $result = civicrm_api('GroupContact', 'delete', $gparams);
           }
 
           if ($result['is_error'] > 0) {
             $msg = 'Error: Unable to sync role @role';
             $variables = array('@role' => $role);
             watchdog('civicrm_group_roles', $msg, $variables);
-            if ($debug_mode) {
-              drupal_set_message(t('Error: Unable to sync role %role', array('%role' => $role)));
-            }
-          }
-          elseif ($debug_mode && $result['added'] > 0) {
+                        if ( $debug_mode ) drupal_set_message( t( 'Error: Unable to sync role %role', array( '%role' => $role ) ) );
+                    } elseif ( $debug_mode && $result['values'][$txt] > 0 ) {
             drupal_set_message("$txt user $user->name Group: $role");
             drupal_set_message(var_export($result, TRUE));
           }
@@ -544,21 +633,98 @@ function civicrm_group_roles_add_remove_groups($roles, $user, $op) {
             drupal_set_message("User $user->name NOT $txt Group: $role");
             drupal_set_message(var_export($result, TRUE));
           }
-        }
-        //end while
+                } //end foreach
+            } //end foreach
+
+        } //end if $contact
+    } //endif $roles
       }
-      //end foreach
-    }
-    else {
-      $msg = 'CiviCRM contact not found for @mail';
-      $variables = array('@mail' => $user->mail);
-      watchdog('civicrm', $msg, $variables);
-      if ($debug_mode) {
-        drupal_set_message(t('CiviCRM contact not found for %mail', array('%mail' => $user->mail)));
-      }
-    }
-    //end if $contact
-  }
-  //endif $roles
+
+
+/**
+ * Manual sync form. Provides a sumbit button to manually sync memberships to roles.
+ *
+ * @ingroup forms
+ * @see civicrm_member_roles_manual_sync_submit()
+ */
+function civicrm_group_roles_manual_sync()
+{
+  $form = array();
+  $form['manual_sync'] = array(
+             '#type' => 'fieldset',
+             '#title' => t('Manual Synchronization:'),
+             );
+  $form['manual_sync']['manual_sync_submit'] = array(
+                 '#type' => 'submit',
+                 '#value' => t('Synchronize CiviCRM Groups to Drupal Roles now'),
+                 );
+
+  return $form;
 }
 
+/**
+ * Implementation of hook_submit() for the manual sync form.
+ */
+function civicrm_group_roles_manual_sync_submit($form, &$form_state)
+{
+  if ( ! civicrm_initialize( ) ) {
+    return;
+  }
+
+  return civicrm_group_roles_batch_init();
+}
+
+/**
+ * Batch functions to manually update large number of users
+ */
+function civicrm_group_roles_batch_init() {
+
+  $batch = array(
+     'title' => t('Updating Users...'),
+     'operations' => array(),
+     'init_message' => t('Starting Update'),
+     'progress_message' => t('Processed @current out of @total.'),
+     'error_message' => t('An error occurred during processing'),
+     'finished' => 'civicrm_group_roles_batch_finished',
+     'progressive' => FALSE
+     );
+
+  //query all existing users
+
+  $result = db_query('SELECT uid FROM {users}');
+
+  foreach ($result as $record) {
+    $batch['operations'][] = array('civicrm_group_roles_batch_worker', array($record->uid));
+  }
+
+  batch_set($batch);
+
+  batch_process('admin/config/civicrm/civicrm_group_roles');
+}
+
+function civicrm_group_roles_batch_worker($uid, &$context) {
+  if ( ! civicrm_initialize( ) ) {
+    return;
+  }
+  $account = user_load($uid);
+
+  $roles = array_diff_key( $account->roles, array( 1 => 'anonymous user', 2 => 'authenticated user' ) );
+
+  if ( $roles ) {
+    civicrm_group_roles_add_remove_groups ( $roles, $account, 'add' );
+  }
+
+  $context['results']['processed']++;
+  $context['message'] = 'Successfully synchronized ' . $context['results']['processed'] . ' users';
+}
+
+function civicrm_group_roles_batch_finished($success, $results, $operations) {
+  if ($success) {
+    $message = format_plural($results['processed'], 'One user processed.', '@count users processed.');
+  }
+  else {
+    $message = 'some errors';
+  }
+
+  drupal_set_message($message);
+}

@@ -1,4 +1,4 @@
-{if !$printOnly}  
+{if !$printOnly}
 {include file="CRM/Report/Form.tpl"}
 {else}
 <h1>{$reportTitle}</h1>
@@ -7,10 +7,10 @@
         <h2>{$row.title} &nbsp:{$row.value}</h2>
     {/foreach}
 {/if}
-    
+
 {*include the graph*}
 {include file="CRM/Report/Form/Layout/Graph.tpl"}
-    
+
 {*modified table layout*}
 {if (!$chartEnabled || !$chartSupported )&& $rows}
     {if $pager and $pager->_response and $pager->_response.numPages > 1}
@@ -22,11 +22,11 @@
 
     <table class={if !$printOnly}"report-layout"{else}"body"{/if}>
         <thead class="sticky">
-        <tr> 
+        <tr>
             {foreach from=$columnHeaders item=header key=field}
                 {assign var=class value=""}
                 {if $header.type eq 1024 OR $header.type eq 1}
-        		    {assign var=class value="class='reports-header-right'"}
+                {assign var=class value="class='reports-header-right'"}
                 {else}
                     {assign var=class value="class='reports-header'"}
                 {/if}
@@ -37,7 +37,7 @@
                       {assign var=skipCount value=`$header.colspan`}
                       {assign var=skipMade  value=1}
                    {else}
-                       <th {$class} {$header.class}>{$header.title}</th> 
+                       <th {$class} {$header.class}>{$header.title}</th>
                    {assign var=skip value=false}
                    {/if}
                 {else} {* for skip case *}
@@ -45,9 +45,9 @@
                    {if $skipMade >= $skipCount}{assign var=skip value=false}{/if}
                 {/if}
             {/foreach}
-        </tr>          
+        </tr>
         </thead>
-       
+
         {assign var=rowCount  value=0}
         {foreach from=$rows item=row}
         {assign var=rowCount  value=`$rowCount+1`}
@@ -60,23 +60,23 @@
                         {if $row.$fieldLink}
                             <a title="{$row.$fieldHover}" href="{$row.$fieldLink}">
                         {/if}
-                        
+
                         {if $row.$field eq 'Subtotal'}
                             {$row.$field}
                         {elseif $header.type & 4}
                             {if $header.group_by eq 'MONTH' or $header.group_by eq 'QUARTER'}
                                 {$row.$field|crmDate:$config->dateformatPartial}
-                            {elseif $header.group_by eq 'YEAR'}	
+                            {elseif $header.group_by eq 'YEAR'}
                                 {$row.$field|crmDate:$config->dateformatYear}
-                            {else}		
+                            {else}
                                 {$row.$field|truncate:10:''|crmDate}
-                            {/if}	
+                            {/if}
                         {elseif $header.type eq 1024}
                             <span class="nowrap">{$row.$field|crmMoney}</span>
                         {else}
                             {$row.$field}
                         {/if}
-                        
+
                         {if $row.$fieldLink}</a>{/if}
                     </td>
                 {/foreach}
@@ -86,11 +86,11 @@
 
         </tbody>
         </table>
-        <p>Response Codes: Y= Yes; N= No; U= Undecided; D= Declined to State</p>	
+        <p>Response Codes: Y= Yes; N= No; U= Undecided; D= Declined to State</p>
         <p>Status Codes: NH= Not Home; MV= Moved; D= Deceased; WN= Wrong Number</p>
-	{assign var=pageNum value= `$rowCount/7` }
+  {assign var=pageNum value= `$rowCount/7` }
         <p style="text-align: right;">Page {$pageNum|Ceil} of {$pageTotal}</p>
- 	<div class="page"></div>
+   <div class="page"></div>
         <h1>{$reportTitle}</h1>
         {if $statistics }
         {foreach from=$statistics.filters item=row}
@@ -99,11 +99,11 @@
         {/if}
         <table class={if !$printOnly}"report-layout"{else}"body"{/if}>
         <thead class="sticky">
-        <tr> 
+        <tr>
             {foreach from=$columnHeaders item=header key=field}
                 {assign var=class value=""}
                 {if $header.type eq 1024 OR $header.type eq 1}
-        		    {assign var=class value="class='reports-header-right'"}
+                {assign var=class value="class='reports-header-right'"}
                 {else}
                     {assign var=class value="class='reports-header'"}
                 {/if}
@@ -114,7 +114,7 @@
                       {assign var=skipCount value=`$header.colspan`}
                       {assign var=skipMade  value=1}
                    {else}
-                       <th {$class} {$header.class}>{$header.title}</th> 
+                       <th {$class} {$header.class}>{$header.title}</th>
                    {assign var=skip value=false}
                    {/if}
                 {else} {* for skip case *}
@@ -122,13 +122,13 @@
                    {if $skipMade >= $skipCount}{assign var=skip value=false}{/if}
                 {/if}
             {/foreach}
-        </tr>          
+        </tr>
         </thead>
 
         {/if}
 
         {/foreach}
-        
+
         {if $grandStat}
             {* foreach from=$grandStat item=row*}
             <tr class="total-row">
@@ -151,14 +151,14 @@
     <p>Status Codes: NH= Not Home; MV= Moved; D= Deceased; WN= Wrong Number</p>
     {assign var=pageNum value= `$rowCount/7` }
     <p style="text-align: right;">Page {$pageNum|Ceil} of {$pageTotal}</p>
-   
+
     {/if}
-{/if}        
+{/if}
 
 {* table layout ends *}
-{if !$printOnly}    
+{if !$printOnly}
 {*Statistics at the bottom of the page*}
-{include file="CRM/Report/Form/Statistics.tpl" bottom=true}    
-{/if}    
+{include file="CRM/Report/Form/Statistics.tpl" bottom=true}
+{/if}
 {include file="CRM/Report/Form/ErrorMessage.tpl"}
 {/if}

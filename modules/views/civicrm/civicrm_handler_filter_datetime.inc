@@ -1,9 +1,7 @@
 <?php
-// $Id$
-
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.4                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -54,7 +52,7 @@ class civicrm_handler_filter_datetime extends views_handler_filter_date {
 
     $value = $this->format_date($value);
 
-    $this->query->add_where($this->options['group'], "$field $this->operator '%s'", $value);
+    $this->query->add_where($this->options['group'], $field, $value, $this->operator);
   }
 
   function op_between($field) {
@@ -81,8 +79,8 @@ class civicrm_handler_filter_datetime extends views_handler_filter_date {
     $b = $this->format_date($b);
 
     // %s is safe here because strtotime + format_date scrubbed the input
-    $this->query->add_where($this->options['group'], "$field >= '%s'", $a);
-    $this->query->add_where($this->options['group'], "$field <= '%s'", $b);
+    $this->query->add_where($this->options['group'], $field, $a, '>=');
+    $this->query->add_where($this->options['group'], $field, $b, '<=');
   }
 
   function format_date($unixtime) {

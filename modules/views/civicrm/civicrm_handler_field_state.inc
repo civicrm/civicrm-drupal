@@ -1,9 +1,7 @@
 <?php
-// $Id$
-
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.4                                                |
+ | CiviCRM version 4.3                                               |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -30,10 +28,11 @@
  *
  * @ingroup civicrm_field_handlers
  */
-class civicrm_handler_field_state extends views_handler_field {
+class civicrm_handler_field_state extends civicrm_handler_field_address {
   static $_states;
   static $_states_full;
   function construct() {
+    parent::construct();
     if (!self::$_states || !self::$_states_full) {
       if (!civicrm_initialize()) {
         return;
@@ -70,7 +69,7 @@ class civicrm_handler_field_state extends views_handler_field {
     parent::options_form($form, $form_state);
     $form['prov_display'] = array(
       '#type' => 'radios',
-      '#title' => 'Phone type for this field',
+      '#title' => 'Display complete name or abbreviation',
       '#options' => array(1 => 'Display state/province abbreviations', 2 => 'Display full state/province name'),
       '#description' => t('Display full or abbreviated province name'),
       '#default_value' => $this->options['prov_display'],

@@ -4,22 +4,22 @@
         <tr>
             <td class="label">{ts}Gender{/ts}</td><td>{$gender_display}</td>
         </tr>
-	{if isset($birth_date_display)}
+  {if isset($birth_date_display)}
         <tr>
             <td class="label">{ts}Date of birth{/ts}</td><td>
             {if !empty($birthDateViewFormat)}
                 {$birth_date_display|crmDate:$birthDateViewFormat}
             {else}
                 {$birth_date_display|crmDate}</td>
-            {/if} 
+            {/if}
         </tr>
-	{/if}
+  {/if}
         {if $is_deceased eq 1}
            {if $deceased_date}<td class="label">{ts}Date Deceased{/ts}</td>
         <tr>
              <td>
-             {if $birthDateViewFormat}          
-		{$deceased_date_display|crmDate:$birthDateViewFormat}
+             {if $birthDateViewFormat}
+    {$deceased_date_display|crmDate:$birthDateViewFormat}
              {else}
                 {$deceased_date_display|crmDate}
              {/if}

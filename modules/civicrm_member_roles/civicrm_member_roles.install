@@ -13,9 +13,13 @@
 /**
  * Implementation of hook_install().
  */
-function civicrm_member_roles_install() {
-  //Create table.
-  drupal_install_schema('civicrm_member_roles');
+function civicrm_member_roles_install() {}
+
+/*
+ * Implemenation of hook_enable()
+ */
+function civicrm_member_roles_enable() {
+  db_query("UPDATE {system} SET weight = 110 WHERE name = 'civicrm_member_roles'");
 }
 
 /**
@@ -52,7 +56,6 @@ function civicrm_member_roles_schema() {
  * Implementation of hook_uninstall().
  */
 function civicrm_member_roles_uninstall() {
-  drupal_uninstall_schema('civicrm_member_roles');
   variable_del('civicrm_member_roles_sync_method');
 }
 

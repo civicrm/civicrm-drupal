@@ -1,9 +1,7 @@
 <?php
-// $Id$
-
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.4                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -33,10 +31,11 @@
  * Displays Country after grabbing the label from the database
  *
  */
-class civicrm_handler_field_country extends views_handler_field {
+class civicrm_handler_field_country extends civicrm_handler_field_address {
   static $_countries;
   static $_countries_full;
   function construct() {
+    parent::construct();
     if (!self::$_countries) {
       if (!civicrm_initialize()) {
         return;

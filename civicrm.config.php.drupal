@@ -43,16 +43,6 @@ function civicrm_conf_init() {
     }
 
     /**
-     * Quick test to see if the config file is in the standalone directory
-     */
-    $standalonedir = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'standalone';
-    if ( file_exists( $standalonedir . DIRECTORY_SEPARATOR . 'civicrm.settings.php' ) ) {
-      	return $standalonedir;
-    } elseif ( file_exists( $standalonedir . DIRECTORY_SEPARATOR . 'sites' . DIRECTORY_SEPARATOR .  'default'  . DIRECTORY_SEPARATOR . 'civicrm.settings.php' ) ) {
-        $confdir = $standalonedir;
-    }
-
-    /**
      * We are within the civicrm module, the drupal root is 2 links
      * above us, so use that
      */
@@ -62,16 +52,23 @@ function civicrm_conf_init() {
     }
 
     if ( defined( 'CIVICRM_CONFDIR' ) && ! isset( $confdir ) ) {
-      	$confdir = CIVICRM_CONFDIR;
+        $confdir = CIVICRM_CONFDIR;
     } else {
         // make it relative to civicrm.config.php, else php makes it relative
         // to the script that invokes it
-        // simple check to see if this is under sites/all or just modules
-        if ( strpos( $currentDir, 'sites' . DIRECTORY_SEPARATOR . 'all' . DIRECTORY_SEPARATOR . 'modules' ) !== false ) {
-            // seems like this is in drupal5 dir location
+        $moduleDir  = 'sites' . DIRECTORY_SEPARATOR . 'all' . DIRECTORY_SEPARATOR . 'modules';
+        $contribDir = $moduleDir . DIRECTORY_SEPARATOR . 'contrib';
+        // check to see if this is under sites/all/modules/contrib
+        if ( strpos( $currentDir, $contribDir ) !== false ) {
+            $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..';
+        // check to see if this is under sites/all/modules
+        } else if ( strpos( $currentDir, $moduleDir ) !== false ) {
             $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..';
+        } else if ( strpos( $currentDir, 'plugins' . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR . 'civicrm' ) !== false ) {
+             //if its wordpress
+            $confdir = $currentDir . DIRECTORY_SEPARATOR . '..';
         } else {
-            $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'sites';
+            $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
         }
     }
 
@@ -81,12 +78,9 @@ function civicrm_conf_init() {
 
     if ( ! file_exists( $confdir ) && ! $skipConfigError ) {
         echo "Could not find valid configuration dir, best guess: $confdir<br/><br/>\n";
-        echo "If this is a standalone installation (i.e. not a Drupal or ";
-        echo "Joomla module) and you'd like to re-initialize it, ";
-        echo "<a href=\"../install/index.php?mode=standalone\">click here</a>.\n";
         exit( );
     }
-            
+
     $phpSelf  = array_key_exists( 'PHP_SELF' , $_SERVER ) ? $_SERVER['PHP_SELF' ] : '';
     $httpHost = array_key_exists( 'HTTP_HOST', $_SERVER ) ? $_SERVER['HTTP_HOST'] : '';
 
@@ -109,4 +103,13 @@ function civicrm_conf_init() {
 
 $settingsFile = civicrm_conf_init( ) . '/civicrm.settings.php';
 define('CIVICRM_SETTINGS_PATH', $settingsFile);
-include_once $settingsFile;
+$error = @include_once( $settingsFile );
+if ( $error == false ) {
+    echo "Could not load the settings file at: {$settingsFile}\n";
+    exit( );
+}
+
+// Load class loader
+global $civicrm_root;
+require_once $civicrm_root . '/CRM/Core/ClassLoader.php';
+CRM_Core_ClassLoader::singleton()->register();

@@ -1,9 +1,7 @@
 <?php
-// $Id$
-
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.4                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -27,15 +25,14 @@
 
 
 /*
- * Heavily based on anonymous code contribution. No claim.
- *
  * civicrm_handler_field_county.inc
  * Displays County after grabbing the label from the database
  *
  */
-class civicrm_handler_field_county extends views_handler_field {
+class civicrm_handler_field_county extends civicrm_handler_field_address {
   static $_counties;
   function construct() {
+    parent::construct();
     if (!self::$_counties) {
       if (!civicrm_initialize()) {
         return;
@@ -55,6 +52,14 @@ class civicrm_handler_field_county extends views_handler_field {
 
     return self::$_counties[$values->{$this->field_alias}];
   }
-}
 
+  function option_definition() {
+    $options = parent::option_definition();
+    return $options;
+  }
+
+  function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+  }
+}
 

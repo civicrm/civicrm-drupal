@@ -1,6 +1,4 @@
 <?php
-// $Id$
-
 
 /**
  * @file
@@ -47,6 +45,7 @@ class civicrm_handler_relationship extends views_handler_relationship {
   }
 
   function construct() {
+    parent::construct();
     if (!civicrm_initialize()) {
       return;
     }
@@ -73,7 +72,7 @@ class civicrm_handler_relationship extends views_handler_relationship {
    */
   function label() {
     if (!isset($this->options['label'])) {
-      return $this->ui_name();
+      return '';
     }
     return $this->options['label'];
   }
@@ -83,6 +82,7 @@ class civicrm_handler_relationship extends views_handler_relationship {
     $label = !empty($this->definition['label']) ? $this->definition['label'] : $this->definition['title'];
     $options['label'] = array('default' => $label, 'translatable' => TRUE);
     $options['relationship_type'] = array('default' => 0);
+    $options['relationship_state'] = array('default' => 1);
     return $options;
   }
 
@@ -106,6 +106,13 @@ class civicrm_handler_relationship extends views_handler_relationship {
       '#description' => t('Use this drop down to limit this relatioship to a specific type of CiviCRM relationship'),
       '#default_value' => $this->options['relationship_type'],
     );
+
+    $form['relationship_state'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Limit results only to active relationships?'),
+      '#default_value' => $this->options['relationship_state'],
+      '#description' => t('Exclude relationships that are inactive.')
+    );
   }
 
   /**
@@ -121,7 +128,7 @@ class civicrm_handler_relationship extends views_handler_relationship {
     // Make sure the join to civicrm_contact form the civicrm_relationship table
     // Is is to the opposite field (contact_id_a vs contact_id_b or vice versa)
     // Otherwise the displayed field will always be the same as the base table's record
-    if (isset($this->view->query->table_queue['civicrm_relationship']['join']->field)) {
+    if ($this->table == 'civicrm_relationship' && isset($this->view->query->table_queue[$this->table_alias]['join']->field)) {
       $this->view->query->table_queue[$this->table_alias]['join']->field = $this->definition['relationship field'];
     }
 
@@ -149,15 +156,21 @@ class civicrm_handler_relationship extends views_handler_relationship {
 
     // Add a join condition to the on clause to narrow down the relationship type shown
     if (isset($this->options['relationship_type']) && $this->options['relationship_type']) {
-      $extraTable = !empty($def['left_table']) ? $def['left_table'] : $this->table;
-      $extra[] = array(
+      $this->query->table_queue[$this->table_alias]['join']->extra[] = array(
         'value' => $this->options['relationship_type'],
         'numeric' => TRUE,
-        'table' => $extraTable,
         'field' => 'relationship_type_id',
         'operator' => '=',
       );
-      $join->extra = $extra;
+    }
+
+    if (isset($this->options['relationship_state']) && $this->options['relationship_state']) {
+      $this->query->table_queue[$this->table_alias]['join']->extra[] = array(
+        'value' => 1,
+        'numeric' => TRUE,
+        'field' => 'is_active',
+        'operator' => '=',
+      );
     }
 
     // use a short alias for this:

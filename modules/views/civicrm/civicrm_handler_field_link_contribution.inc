@@ -1,9 +1,7 @@
 <?php
-// $Id$
-
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.4                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -55,7 +53,7 @@ class civicrm_handler_field_link_contribution extends views_handler_field {
     $options = parent::option_definition();
     $options['link_to_civicrm_contribution'] = array('default' => 'view');
     $options['custom_link'] = array('default' => '');
-    $options['link_text'] = array('default' => '');
+    $options['link_text'] = array('default' => 'View Contribution');
     return $options;
   }
 

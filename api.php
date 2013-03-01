@@ -1,11 +1,9 @@
 <?php
-// $Id$
-
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.4                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2011                                |
+ | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -30,10 +28,23 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2011
+ * @copyright CiviCRM LLC (c) 2004-2013
  * $Id$
  *
  */
+
+/**
+ * Utilties for Drupal 7 compatibility
+ */
+function _civicrm_get_user_table_name() {
+  if (function_exists('db_select')) {
+    //docs say 'user', but not the schema in alpha 3.
+    $user_tab = 'users';
+  }
+  else {
+    $user_tab = 'users';
+  }
+}
 
 /**
  * Create a Drupal user and return Drupal ID
@@ -50,8 +61,10 @@ function civicrm_drupal_create_user($email, $rid = NULL) {
     return FALSE;
   }
 
+  $user_tab = _civicrm_get_user_table_name();
+
   // If user already exists, return Drupal id
-  $uid = db_result(db_query("SELECT uid FROM {users} WHERE mail = '%s'", $email));
+  $uid = db_result(db_query("SELECT uid FROM {$user_tab} WHERE mail = '%s'", $email));
   if ($uid) {
     return $uid;
   }
@@ -61,8 +74,11 @@ function civicrm_drupal_create_user($email, $rid = NULL) {
   $email = $dao->escape($email);
 
   // Default values for new user
-  $params           = array();
-  $params['uid']    = db_next_id('{users}_uid');
+  $params = array();
+  //WARNING -- this is likely *wrong* since it will crash Drupal 6.
+  //calling conventions for Drupal 7 are different, as well.
+  //$params['uid']     = db_next_id('{users}_uid');
+
   $params['name']   = $email;
   $params['pass']   = md5(uniqid(rand(), TRUE));
   $params['mail']   = $email;
@@ -85,38 +101,17 @@ function civicrm_drupal_create_user($email, $rid = NULL) {
   $db_fields .= ')';
   $db_values .= ')';
 
-  $q = "INSERT INTO {users} $db_fields VALUES $db_values";
+  $q = "INSERT INTO {$user_tab} $db_fields VALUES $db_values";
   db_query($q);
 
   if ($rid) {
     // Delete any previous roles entry before adding the role id
+    //NOTE: weirdly, D7 schema from alpha 3 allows the following:
     db_query('DELETE FROM {users_roles} WHERE uid = %d', $params['uid']);
     db_query('INSERT INTO {users_roles} (uid, rid) VALUES (%d, %d)', $params['uid'], $rid);
   }
 
   return $params['uid'];
-}
-
-function civicrm_modify_role_id($op, $uid, $rid, $roleName = NULL) {
-  $a = func_get_args();
-  if ($roleName) {
-    $rid = civicrm_drupal_role_id($roleName);
-    if (!$rid) {
-      return;
-    }
-  }
-
-  if ($op == 'insert') {
-    // check if this combination is already there
-    $roles_result = db_query('SELECT rid FROM {users_roles} WHERE uid = %d AND rid = %d', $uid, $rid);
-    if (!db_fetch_object($roles_result)) {
-      // insert only if not present
-      db_query('INSERT INTO {users_roles} (uid, rid) VALUES (%d, %d)', $uid, $rid);
-    }
-  }
-  elseif ($op == 'delete') {
-    db_query('DELETE FROM {users_roles} WHERE uid = %d AND rid = %d', $uid, $rid);
-  }
 }
 
 /**

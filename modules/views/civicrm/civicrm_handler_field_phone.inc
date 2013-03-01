@@ -1,9 +1,37 @@
 <?php
-// $Id$
+/*
+ +--------------------------------------------------------------------+
+ | CiviCRM version 4.3                                               |
+ +--------------------------------------------------------------------+
+ | This file is a part of CiviCRM.                                    |
+ |                                                                    |
+ | CiviCRM is free software; you can copy, modify, and distribute it  |
+ | under the terms of the GNU Affero General Public License           |
+ | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
+ |                                                                    |
+ | CiviCRM is distributed in the hope that it will be useful, but     |
+ | WITHOUT ANY WARRANTY; without even the implied warranty of         |
+ | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
+ | See the GNU Affero General Public License for more details.        |
+ |                                                                    |
+ | You should have received a copy of the GNU Affero General Public   |
+ | License and the CiviCRM Licensing Exception along                  |
+ | with this program; if not, contact CiviCRM LLC                     |
+ | at info[AT]civicrm[DOT]org. If you have questions about the        |
+ | GNU Affero General Public License or the licensing of CiviCRM,     |
+ | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ +--------------------------------------------------------------------+
+*/
 
-class civicrm_handler_field_phone extends views_handler_field {
+/**
+ * Field handler for phone field
+ *
+ * @ingroup civicrm_field_handlers
+ */
+class civicrm_handler_field_phone extends civicrm_handler_field_location {
   static $_phoneType;
   function construct() {
+    parent::construct();
     if (!self::$_phoneType) {
       if (!civicrm_initialize()) {
         return;
@@ -15,7 +43,7 @@ class civicrm_handler_field_phone extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['phone_type'] = array('default' => '');
+    $options['phone_type'] = array('default' => 0);
     return $options;
   }
 
@@ -29,8 +57,9 @@ class civicrm_handler_field_phone extends views_handler_field {
       '#type' => 'radios',
       '#title' => 'Phone type for this field',
       '#options' => $phoneOptions,
-      '#description' => t('Phone type to be used for this field'),
+      '#description' => t('Phone type to be displayed for this field'),
       '#default_value' => $this->options['phone_type'],
+      '#fieldset' => 'location_choices',
     );
   }
 
@@ -41,17 +70,24 @@ class civicrm_handler_field_phone extends views_handler_field {
         exit;
       }
       if (isset($this->options['phone_type']) && $this->options['phone_type']) {
-        $join = $this->get_join();
-        $join->extra = array(
-          array(
-            'value' => $this->options['phone_type'],
-            'numeric' => TRUE,
-            'field' => 'phone_type_id',
-          ),
+        $join    = $this->get_join();
+        $extra   = parent::location_extras();
+        $extra[] = array(
+          'value' => $this->options['phone_type'],
+          'numeric' => TRUE,
+          'field' => 'phone_type_id',
+          'operator' => '=',
         );
+        $join->extra       = $extra;
+        $join->extra_type  = self::$_locationOps[$this->options['location_op']];
+        $this->table_alias = $this->query->add_table($this->table, $this->relationship, $join);
       }
-      //$this->table_alias = $this->query->ensure_table($this->table, $this->relationship, $join);
-      $this->table_alias = $this->query->add_table($this->table, $this->telationship, $join);
+      else {
+        $join              = $this->get_join();
+        $join->extra       = parent::location_extras();
+        $join->extra_type  = self::$_locationOps[$this->options['location_op']];
+        $this->table_alias = $this->query->add_table($this->table, $this->relationship, $join);
+      }
     }
     return $this->table_alias;
   }
