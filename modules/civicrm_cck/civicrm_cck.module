@@ -1,0 +1,873 @@
+<?php
+// $Id$
+
+/*
+ +--------------------------------------------------------------------+
+ | CiviCRM version 3.4                                                |
+ +--------------------------------------------------------------------+
+ | This file is a part of CiviCRM.                                    |
+ |                                                                    |
+ | CiviCRM is free software; you can copy, modify, and distribute it  |
+ | under the terms of the GNU Affero General Public License           |
+ | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
+ |                                                                    |
+ | CiviCRM is distributed in the hope that it will be useful, but     |
+ | WITHOUT ANY WARRANTY; without even the implied warranty of         |
+ | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
+ | See the GNU Affero General Public License for more details.        |
+ |                                                                    |
+ | You should have received a copy of the GNU Affero General Public   |
+ | License and the CiviCRM Licensing Exception along                  |
+ | with this program; if not, contact CiviCRM LLC                     |
+ | at info[AT]civicrm[DOT]org. If you have questions about the        |
+ | GNU Affero General Public License or the licensing of CiviCRM,     |
+ | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ +--------------------------------------------------------------------+
+*/
+function civicrm_cck_menu() {
+  $items = array();
+  $items['civicrm_cck/autocomplete'] = array(
+    'title' => t('Contacts'),
+    'page callback' => 'civicrm_cck_autocomplete',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+/**
+ * Menu callback; Retrieve a pipe delimited string of autocomplete suggestions for existing users
+ */
+function civicrm_cck_autocomplete($field_name, $string = '') {
+  if (!civicrm_initialize()) {
+    return;
+  }
+  $fields  = content_fields();
+  $field   = $fields[$field_name];
+  $matches = array();
+
+  $references = _civicrm_cck_potential_references($field, $string);
+  foreach ($references as $id => $row) {
+    // Add a class wrapper for a few required CSS overrides.
+    $matches["{$row['title']} [cid:{$id}]"] = '<div class="reference-autocomplete">' . $row['rendered'] . '</div>';
+  }
+  drupal_json($matches);
+}
+
+/**
+ * Changes here need to be cleared from cache
+ * By going to drupal --> Admin --> Modules
+ * After viewing the modules list then you theme updates will work
+ *
+ * The first theme function is to create the array to let
+ * drupal know there is a theme array
+ * The ones that follow define the theme
+ */
+function civicrm_cck_theme() {
+  return array(
+    'civicrm_cck' => array(
+      'arguments' => array('node'),
+    ),
+    'civicrm_cck_select' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'civicrm_cck_buttons' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'civicrm_cck_autocomplete' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'civicrm_cck_formatter_default' => array(
+      'arguments' => array('element'),
+    ),
+    'civicrm_cck_formatter_plain' => array(
+      'arguments' => array('element'),
+    ),
+  );
+}
+
+// TODO
+function theme_civicrm_cck($node) {}
+
+/**
+ * Implementation of hook_field_info().
+ *
+ * Here we indicate that the content module will use its default
+ * handling for the view of this field.
+ *
+ * Callbacks can be omitted if default handing is used.
+ * They're included here just so this module can be used
+ * as an example for custom modules that might do things
+ * differently.
+ */
+function civicrm_cck_field_info() {
+  return array(
+    'civicrm_cck_contact' => array(
+      'label' => t('CiviCRM Contact'),
+      'description' => t('Reference a CiviCRM contact.'),
+      'callbacks' => array(
+        'tables' => CONTENT_CALLBACK_DEFAULT,
+        'arguments' => CONTENT_CALLBACK_DEFAULT,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_field_settings().
+ */
+function civicrm_cck_field_settings($op, $field) {
+  if (!civicrm_initialize()) {
+    return;
+  }
+
+  require_once 'CRM/Contact/BAO/ContactType.php';
+  $contactTypes = CRM_Contact_BAO_ContactType::basicTypePairs();
+
+  switch ($op) {
+    case 'database columns':
+      $columns = array(
+        'contact_id' => array('type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => FALSE,
+        ),
+      );
+      return $columns;
+
+    case 'views data':
+      $data        = content_views_field_views_data($field);
+      $db_info     = content_database_info($field);
+      $table_alias = content_views_tablename($field);
+
+      // Swap the filter handler to the 'in' operator.
+      $data[$table_alias][$field['field_name'] . '_contact_id']['filter']['handler'] = 'civicrm_cck_handler_filter';
+
+      // Add a relationship for related node.
+      $data[$table_alias][$field['field_name'] . '_contact_id']['relationship'] = array(
+        'base' => 'node',
+        'field' => $db_info['columns']['contact_id']['column'],
+        'handler' => 'views_handler_relationship',
+      );
+      return $data;
+
+    case 'form':
+      foreach ($contactTypes as $name => $label) {
+        $subTypes = CRM_Contact_BAO_ContactType::subTypePairs($name);
+        $form[$name] = array(
+          '#type' => 'checkboxes',
+          '#title' => ts('CiviCRM Contact Type %1', array(1 => $label)),
+          '#options' => CRM_Utils_Array::crmArrayMerge(array($name => $label), $subTypes),
+          '#default_value' => empty($field[$name]) ? array() : $field[$name],
+          '#weight' => 1,
+        );
+      }
+      return $form;
+
+    case 'save':
+      return array_values($contactTypes);
+  }
+}
+
+/**
+ * Implementation of hook_field().
+ */
+function civicrm_cck_field($op, &$node, $field, &$items, $teaser, $page) {
+  if (!civicrm_initialize()) {
+    return;
+  }
+  switch ($op) {
+    case 'validate':
+      $refs = _civicrm_cck_potential_references($field);
+      foreach ($items as $delta => $item) {
+        if (is_array($item)) {
+          $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
+          unset($item['_error_element']);
+          if (!empty($item['contact_id'])) {
+            if (!isset($item[$item['contact_id']])) {
+              $string = $item['contact_id'];
+              $position = stripos($string, civi_id);
+              // civi_id
+              $position = $position + 7;
+              $final_cid_string = substr_replace($string, '', 0, $position);
+              if ($final_cid_string != '' && !is_numeric($final_cid_string)) {
+                form_set_error('civicrm_cck_civi', t('Please ensure that the CiviCRM Contact exists'));
+              }
+            }
+          }
+        }
+      }
+      return $items;
+  }
+}
+
+/**
+ * Implementation of hook_content_is_empty().
+ */
+function civicrm_cck_content_is_empty($item, $field) {
+  return empty($item['contact_id']) ? TRUE : FALSE;
+}
+
+/**
+ * Implementation of hook_field_formatter_info().
+ */
+function civicrm_cck_field_formatter_info() {
+  return array(
+    'default' => array(
+      'label' => t('Title (link)'),
+      'field types' => array('civicrm_cck_contact'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+    'plain' => array(
+      'label' => t('Title (plain)'),
+      'field types' => array('civicrm_cck_contact'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+  );
+}
+
+/**
+ * Theme function for 'default' civicrm_cck field formatter.
+ */
+function theme_civicrm_cck_formatter_default($element) {
+  if (!civicrm_initialize()) {
+    return;
+  }
+  $output = '';
+  if (!empty($element['#item']['contact_id']) &&
+    is_numeric($element['#item']['contact_id']) &&
+    ($title = _civicrm_cck_titles($element['#item']['contact_id']))
+  ) {
+    $output = '<div class="civicrm_cck">' . l($title, 'civicrm/contact/view', array('query' => "reset=1&cid={$element['#item']['contact_id']}")) . '</div>';
+  }
+  return $output;
+}
+
+function theme_civicrm_cck_formatter_plain($element) {
+  $output = '';
+  if (!empty($element['#item']['contact_id']) &&
+    is_numeric($element['#item']['contact_id']) &&
+    ($title = _civicrm_cck_titles($element['#item']['contact_id']))
+  ) {
+    $output = '<span class="civicrm_cck">' . check_plain($title) . '</span>';
+  }
+  return $output;
+}
+
+/**
+ * Helper function for formatters.
+ *
+ * Store node titles collected in the curent request.
+ */
+function _civicrm_cck_titles($cid) {
+  if (!civicrm_initialize()) {
+    return;
+  }
+  static $titles = array();
+
+  if (!isset($titles[$cid])) {
+    $q = "
+SELECT display_name
+FROM   civicrm_contact
+WHERE  id = %1";
+    $params = array(1 => array($cid, "Integer"));
+    $dao = &CRM_Core_DAO::executeQuery($q, $params);
+
+    $titles[$cid] = $dao->fetch() ? $dao->display_name : '';
+  }
+  return $titles[$cid];
+}
+
+/**
+ * Implementation of hook_widget_info().
+ *
+ * We need custom handling of multiple values for the civicrm_cck_select
+ * widget because we need to combine them into a options list rather
+ * than display multiple elements.
+ *
+ * We will use the content module's default handling for default value.
+ *
+ * Callbacks can be omitted if default handing is used.
+ * They're included here just so this module can be used
+ * as an example for custom modules that might do things
+ * differently.
+ */
+function civicrm_cck_widget_info() {
+  return array(
+    'civicrm_cck_select' => array(
+      'label' => t('Select list'),
+      'field types' => array('civicrm_cck_contact'),
+      'multiple values' => CONTENT_HANDLE_MODULE,
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+      ),
+    ),
+    'civicrm_cck_buttons' => array(
+      'label' => t('Check boxes/radio buttons'),
+      'field types' => array('civicrm_cck_contact'),
+      'multiple values' => CONTENT_HANDLE_MODULE,
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+      ),
+    ),
+    'civicrm_cck_autocomplete' => array(
+      'label' => t('Autocomplete text field'),
+      'field types' => array('civicrm_cck_contact'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implementation of FAPI hook_elements().
+ *
+ * Any FAPI callbacks needed for individual widgets can be declared here,
+ * and the element will be passed to those callbacks for processing.
+ *
+ * Drupal will automatically theme the element using a theme with
+ * the same name as the hook_elements key.
+ *
+ * Autocomplete_path is not used by text_widget but other widgets can use it
+ * (see civicrm_cck and userreference).
+ */
+function civicrm_cck_elements() {
+  return array(
+    'civicrm_cck_select' => array(
+      '#input' => TRUE,
+      '#columns' => array('uid'), '#delta' => 0,
+      '#process' => array('civicrm_cck_select_process'),
+    ),
+    'civicrm_cck_buttons' => array(
+      '#input' => TRUE,
+      '#columns' => array('uid'), '#delta' => 0,
+      '#process' => array('civicrm_cck_buttons_process'),
+    ),
+    'civicrm_cck_autocomplete' => array(
+      '#input' => TRUE,
+      '#columns' => array('name'), '#delta' => 0,
+      '#process' => array('civicrm_cck_autocomplete_process'),
+      '#autocomplete_path' => FALSE,
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_widget().
+ *
+ * Attach a single form element to the form. It will be built out and
+ * validated in the callback(s) listed in hook_elements. We build it
+ * out in the callbacks rather than here in hook_widget so it can be
+ * plugged into any module that can provide it with valid
+ * $field information.
+ *
+ * Content module will set the weight, field name and delta values
+ * for each form element. This is a change from earlier CCK versions
+ * where the widget managed its own multiple values.
+ *
+ * If there are multiple values for this field, the content module will
+ * call this function as many times as needed.
+ *
+ * @param $form
+ *   the entire form array, $form['#node'] holds node information
+ * @param $form_state
+ *   the form_state, $form_state['values'][$field['field_name']]
+ *   holds the field's form values.
+ * @param $field
+ *   the field array
+ * @param $items
+ *   array of default values for this field
+ * @param $delta
+ *   the order of this item in the array of subelements (0, 1, 2, etc)
+ *
+ * @return
+ *   the form item for a single element for this field
+ */
+function civicrm_cck_widget(&$form, &$form_state, $field, $items, $delta = 0) {
+  switch ($field['widget']['type']) {
+    case 'civicrm_cck_select':
+      $element = array(
+        '#type' => 'civicrm_cck_select',
+        '#default_value' => $items,
+      );
+      break;
+
+    case 'civicrm_cck_buttons':
+      $element = array(
+        '#type' => 'civicrm_cck_buttons',
+        '#default_value' => $items,
+      );
+      break;
+
+    case 'civicrm_cck_autocomplete':
+      $element = array(
+        '#type' => 'civicrm_cck_autocomplete',
+        '#default_value' => isset($items[$delta]) ? $items[$delta] : NULL,
+        '#value_callback' => 'civicrm_cck_autocomplete_value',
+      );
+      break;
+  }
+  return $element;
+}
+
+/**
+ * Value for a civicrm_cck autocomplete element.
+ *
+ * Substitute in the node title for the node nid.
+ */
+function civicrm_cck_autocomplete_value($element, $edit = FALSE) {
+  $field_key = $element['#columns'][0];
+  if (!empty($element['#default_value'][$field_key]) &&
+    is_numeric($element['#default_value'][$field_key])
+  ) {
+    $nid = $element['#default_value'][$field_key];
+
+    if (!civicrm_initialize()) {
+      return;
+    }
+    $q = "
+SELECT sort_name
+FROM   civicrm_contact
+WHERE  id = %1";
+    $params = array(1 => array($nid, "Integer"));
+    $dao = &CRM_Core_DAO::executeQuery($q, $params);
+
+    $value = $dao->fetch() ? $dao->sort_name : '';
+
+    $value .= " [cid:{$nid}]";
+    return array($field_key => $value);
+  }
+  return array($field_key => NULL);
+}
+
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
+ */
+function civicrm_cck_select_process($element, $edit, $form_state, $form) {
+  // The civicrm_cck_select widget doesn't need to create its own
+  // element, it can wrap around the optionwidgets_select element.
+  // Add a validation step where the value can be unwrapped.
+  $field_key = $element['#columns'][0];
+  $element[$field_key] = array(
+    '#type' => 'optionwidgets_select',
+    '#default_value' => isset($element['#value']) ? $element['#value'] : '',
+    '#element_validate' => array('optionwidgets_validate',
+      'civicrm_cck_optionwidgets_validate',
+    ),
+    // The following values were set by the content module and need
+    // to be passed down to the nested element.
+    '#title' => $element['#title'],
+    '#required' => $element['#required'],
+    '#description' => $element['#description'],
+    '#field_name' => $element['#field_name'],
+    '#type_name' => $element['#type_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
+  );
+  return $element;
+}
+
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
+ */
+function civicrm_cck_buttons_process($element, $edit, $form_state, $form) {
+  // The civicrm_cck_select widget doesn't need to create its own
+  // element, it can wrap around the optionwidgets_select element.
+  // Add a validation step where the value can be unwrapped.
+  $field_key = $element['#columns'][0];
+  $element[$field_key] = array(
+    '#type' => 'optionwidgets_buttons',
+    '#default_value' => isset($element['#value']) ? $element['#value'] : '',
+    '#element_validate' => array('optionwidgets_validate',
+      'civicrm_cck_optionwidgets_validate',
+    ),
+    // The following values were set by the content module and need
+    // to be passed down to the nested element.
+    '#title' => $element['#title'],
+    '#required' => $element['#required'],
+    '#description' => $element['#description'],
+    '#field_name' => $element['#field_name'],
+    '#type_name' => $element['#type_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
+  );
+  return $element;
+}
+
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ */
+function civicrm_cck_autocomplete_process($element, $edit, $form_state, $form) {
+  // The civicrm_cck autocomplete widget doesn't need to create its own
+  // element, it can wrap around the text_textfield element and add an autocomplete
+  // path and some extra processing to it.
+  // Add a validation step where the value can be unwrapped.
+  $field_key = $element['#columns'][0];
+
+  $element[$field_key] = array(
+    '#type' => 'text_textfield',
+    '#default_value' => isset($element['#value']) ? $element['#value'] : '',
+    '#autocomplete_path' => 'civicrm_cck/autocomplete/' . $element['#field_name'],
+    '#element_validate' => array('civicrm_cck_autocomplete_validate'),
+    // The following values were set by the content module and need
+    // to be passed down to the nested element.
+    '#title' => $element['#title'],
+    '#required' => $element['#required'],
+    '#description' => $element['#description'],
+    '#field_name' => $element['#field_name'],
+    '#type_name' => $element['#type_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
+  );
+
+  // Used so that hook_field('validate') knows where to flag an error.
+  $element['_error_element'] = array(
+    '#type' => 'value',
+    // TODO: why do we need to repeat $field_key twice ?
+    '#value' => implode('][', array_merge($element['#parents'], array($field_key, $field_key))),
+  );
+  return $element;
+}
+
+/**
+ * Validate a select/buttons element.
+ *
+ * Remove the wrapper layer and set the right element's value.
+ * We don't know exactly where this element is, so we drill down
+ * through the element until we get to our key.
+ */
+function civicrm_cck_optionwidgets_validate($element, &$form_state) {
+  $field_key   = $element['#columns'][0];
+  $new_parents = array();
+  $value       = $form_state['values'];
+  foreach ($element['#parents'] as $parent) {
+    $value = $value[$parent];
+    if ($parent == $field_key) {
+      $element['#parents'] = $new_parents;
+      form_set_value($element, $value, $form_state);
+      break;
+    }
+    $new_parents[] = $parent;
+  }
+}
+
+/**
+ * Validate an autocomplete element.
+ *
+ * Remove the wrapper layer and set the right element's value.
+ */
+function civicrm_cck_autocomplete_validate($element, &$form_state) {
+  $field_name = $element['#field_name'];
+  $type_name  = $element['#type_name'];
+  $field      = content_fields($field_name, $type_name);
+  $field_key  = $element['#columns'][0];
+  $delta      = $element['#delta'];
+  $value      = $element['#value'][$field_key];
+  $nid        = NULL;
+  if (!empty($value)) {
+    preg_match('/^(?:\s*|(.*) )?\[\s*cid\s*:\s*(\d+)\s*\]$/', $value, $matches);
+
+    if (!empty($matches)) {
+      // Explicit [nid:n].
+      list(, $title, $nid) = $matches;
+      //if (!empty($title) && ($n = civicrm_cck_get_contact($nid)) &&
+      //        $title != $n->display_name) {
+      //  form_error($element[$field_key], t('%name: title mismatch. Please check your selection. '.$n->title, array('%name' => t($field['widget']['label']))));
+      //}
+    }
+    else {
+      // No explicit nid.
+      $nids = _civicrm_cck_potential_references($field, $value, TRUE);
+      if (empty($nids)) {
+        form_error($element[$field_key], t('%name: found no valid post with that title.', array('%name' => $field['widget']['label'])));
+      }
+      else {
+        // TODO:
+        // the best thing would be to present the user with an additional form,
+        // allowing the user to choose between valid candidates with the same title
+        // ATM, we pick the first matching candidate...
+        $nid = array_shift(array_keys($nids));
+      }
+    }
+  }
+  form_set_value($element, $nid, $form_state);
+  return $element;
+}
+
+/**
+ * Implementation of hook_allowed_values().
+ */
+function civicrm_cck_allowed_values($field) {
+  $references = _civicrm_cck_potential_references($field);
+
+  $options = array();
+  foreach ($references as $key => $value) {
+    // Views theming runs check_plain (htmlentities) on the values.
+    // We reverse that with html_entity_decode.
+    $options[$key] = html_entity_decode(strip_tags($value['rendered']));
+  }
+  return $options;
+}
+
+/**
+ * Fetch an array of all candidate referenced nodes.
+ *
+ * This info is used in various places (aloowed values, autocomplete results,
+ * input validation...). Some of them only need the nids, others nid + titles,
+ * others yet nid + titles + rendered row (for display in widgets).
+ * The array we return contains all the potentially needed information, and lets
+ * consumers use the parts they actually need.
+ *
+ * @param $field
+ *   The field description.
+ * @param $string
+ *   Optional string to filter titles on (used by autocomplete)
+ * @param $exact_string
+ *   Optional: should the title filter be an exact match.
+ *
+ * @return
+ *   An array of valid nodes in the form:
+ *   array(
+ *     nid => array(
+ *       'title' => The node title,
+ *       'rendered' => The text to display in widgets (can be HTML)
+ *     ),
+ *     ...
+ *   )
+ */
+function _civicrm_cck_potential_references($field, $string = '', $exact_string = FALSE) {
+  static $results = array();
+
+  $references = _civicrm_cck_potential_references_standard($field, $string, $exact_string);
+
+  // Store the results.
+  $results[$field['field_name']][$string][$exact_string] = $references;
+
+  return $results[$field['field_name']][$string][$exact_string];
+}
+
+/**
+ * Helper function for _civicrm_cck_potential_references():
+ * referenceable nodes defined by content types.
+ */
+function _civicrm_cck_potential_references_standard($field, $string = '', $exact_string = FALSE, $limit = '10') {
+  $args = $whereClause = $contactTypes = $contactSubTypes = array();
+
+  if (!civicrm_initialize()) {
+    return;
+  }
+
+  require_once 'CRM/Contact/BAO/ContactType.php';
+  $basicTypes = CRM_Contact_BAO_ContactType::basicTypePairs();
+
+  foreach ($basicTypes as $name => $label) {
+    if (is_array($field[$name])) {
+      $contactNames = array_filter($field[$name]);
+      if (!empty($contactNames)) {
+        if (in_array($name, $contactNames)) {
+          $contactTypes[] = $name;
+        }
+        else {
+          $contactSubTypes = array_merge($contactSubTypes, array_keys($contactNames));
+        }
+      }
+    }
+  }
+
+  if (!empty($contactTypes)) {
+    $contactTypes = implode("','", $contactTypes);
+    $whereClause[] = "contact_type IN ( '{$contactTypes}' )";
+  }
+
+  if (!empty($contactSubTypes)) {
+    $contactSubTypes = implode("','", $contactSubTypes);
+    $whereClause[] = "contact_sub_type IN ( '{$contactSubTypes}' )";
+  }
+
+  $whereClause = empty($whereClause) ? '' : '(' . implode(' OR ', $whereClause) . ') AND';
+  $related_clause = "";
+
+  if (isset($string)) {
+    if ($exact_string) {
+      $string_clause = " AND sort_name = %1";
+      $args[] = $string;
+    }
+    else {
+      $string_clause = " AND sort_name LIKE %1";
+      $args[] = "%%" . $string . "%";
+    }
+  }
+
+  $q = "
+    SELECT sort_name, id, organization_name
+    FROM civicrm_contact
+    WHERE $whereClause
+    sort_name IS NOT NULL
+    AND sort_name NOT LIKE ''
+    AND sort_name NOT LIKE '<Last>%%'
+    AND sort_name NOT LIKE '%@%%'
+    AND sort_name NOT LIKE '--%%'
+    AND sort_name NOT LIKE '- -%%'
+    AND sort_name NOT LIKE ',%%'
+    AND sort_name NOT LIKE '..%%'
+    AND is_deleted = 0
+    " . $string_clause . " LIMIT $limit";
+  $params = array(1 => array($args[0], "String"));
+  $dao = CRM_Core_DAO::executeQuery($q, $params);
+
+  $references = array();
+  while ($dao->fetch()) {
+    $organization_name = '';
+    if ($dao->sort_name != $dao->organization_name) {
+      $organization_name = (strlen($dao->organization_name) > 0) ? " - {$dao->organization_name}" : '';
+    }
+
+    $references[$dao->id] = array(
+      'title' => $dao->sort_name,
+      'rendered' => $dao->sort_name . $organization_name,
+    );
+  }
+
+  return $references;
+}
+
+/**
+ * Implementation of hook_node_types.
+ */
+function civicrm_cck_node_type($op, $info) {
+  switch ($op) {
+    case 'update':
+      // Reflect type name changes to the 'referenceable types' settings.
+      if (!empty($info->old_type) && $info->old_type != $info->type) {
+        // content.module's implementaion of hook_node_type() has already
+        // refreshed _content_type_info().
+        $fields = content_fields();
+        foreach ($fields as $field_name => $field) {
+          if ($field['type'] == 'civicrm_cck' && isset($field['referenceable_types'][$info->old_type])) {
+            $field['referenceable_types'][$info->type] = empty($field['referenceable_types'][$info->old_type]) ? 0 : $info->type;
+            unset($field['referenceable_types'][$info->old_type]);
+            content_field_instance_update($field);
+          }
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * Theme preprocess function.
+ *
+ * Allows specific node templates for nodes displayed as values of a
+ * civicrm_cck field with the 'full node' / 'teaser' formatters.
+ */
+function civicrm_cck_preprocess_node(&$vars) {
+  // The 'referencing_field' attribute of the node is added by the 'teaser'
+  // and 'full node' formatters.
+  if (!empty($vars['node']->referencing_field)) {
+    $node = $vars['node'];
+    $field = $node->referencing_field;
+    $vars['template_files'][] = 'node-civicrm_cck';
+    $vars['template_files'][] = 'node-civicrm_cck-' . $field['field_name'];
+    $vars['template_files'][] = 'node-civicrm_cck-' . $node->type;
+    $vars['template_files'][] = 'node-civicrm_cck-' . $field['field_name'] . '-' . $node->type;
+  }
+}
+
+/**
+ * FAPI theme for an individual elements.
+ *
+ * The textfield or select is already rendered by the
+ * textfield or select themes and the html output
+ * lives in $element['#children']. Override this theme to
+ * make custom changes to the output.
+ *
+ * $element['#field_name'] contains the field name
+ * $element['#delta]  is the position of this element in the group
+ */
+function theme_civicrm_cck_select($element) {
+  return $element['#children'];
+}
+
+function theme_civicrm_cck_buttons($element) {
+  return $element['#children'];
+}
+
+function theme_civicrm_cck_autocomplete($element) {
+  return $element['#children'];
+}
+
+function civicrm_cck_get_contact($cid) {
+  if (!civicrm_initialize()) {
+    return;
+  }
+
+  $q = "SELECT *
+        FROM civicrm_contact
+        WHERE id = %1";
+
+  $params = array(1 => array($cid, "Integer"));
+  $dao = &CRM_Core_DAO::executeQuery($q, $params);
+
+  if ($dao->fetch()) {
+    return $dao;
+  }
+  else {
+    return '';
+  }
+}
+
+function civicrm_cck_token_values($type, $object = NULL, $options =
+  array()
+) {
+  if ($type == 'field') {
+    $item = $object[0];
+
+    $tokens['id'] = $item['contact_id'];
+    $tokens['view'] = isset($item['view']) ? $item['view'] : "Contact ID " . $item['contact_id'];
+    return $tokens;
+  }
+}
+
+function civicrm_cck_token_list($type = 'all') {
+  if ($type == 'field' || $type == 'all') {
+    $tokens = array();
+
+    $tokens['civicrm_cck']['id'] = t('CiviCRM Contact ID');
+    $tokens['civicrm_cck']['view'] = t('CiviCRM Contact Display');
+
+    return $tokens;
+  }
+}
+
+/**
+ * Implementation of hook_views_handlers().
+ */
+function civicrm_cck_views_handlers() {
+  return array(
+    'info' => array(
+      'path' => drupal_get_path('module', 'civicrm_cck'),
+    ),
+    'handlers' => array(
+      // filter handlers
+      'civicrm_cck_handler_filter' => array(
+        'parent' => 'views_handler_filter_in_operator',
+      ),
+    ),
+  );
+}
+

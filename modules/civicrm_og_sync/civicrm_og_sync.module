@@ -1,0 +1,344 @@
+<?php
+// $Id$
+
+/*
+ +--------------------------------------------------------------------+
+ | CiviCRM version 3.4                                                |
+ +--------------------------------------------------------------------+
+ | Copyright CiviCRM LLC (c) 2004-2011                                |
+ +--------------------------------------------------------------------+
+ | This file is a part of CiviCRM.                                    |
+ |                                                                    |
+ | CiviCRM is free software; you can copy, modify, and distribute it  |
+ | under the terms of the GNU Affero General Public License           |
+ | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
+ |                                                                    |
+ | CiviCRM is distributed in the hope that it will be useful, but     |
+ | WITHOUT ANY WARRANTY; without even the implied warranty of         |
+ | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
+ | See the GNU Affero General Public License for more details.        |
+ |                                                                    |
+ | You should have received a copy of the GNU Affero General Public   |
+ | License and the CiviCRM Licensing Exception along                  |
+ | with this program; if not, contact CiviCRM LLC                     |
+ | at info[AT]civicrm[DOT]org. If you have questions about the        |
+ | GNU Affero General Public License or the licensing of CiviCRM,     |
+ | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ +--------------------------------------------------------------------+
+*/
+
+/**
+ *
+ * @package CRM
+ * @copyright CiviCRM LLC (c) 2004-2011
+ * $Id$
+ *
+ */
+
+/**
+ * Reimplementation of civicrm_og_sync
+ *
+ * The implementation of this module in versions up to 3.3 is one way --
+ * actions taken in Drupal are reflected in CiviCRM, but not the other way
+ * around.  The work here now implements some events going the other way.
+ *
+ * Groups will still be synced one way only.  This is necessary, since CiviCRM
+ * does not know enough about OG enabled content types to create them on its own.
+ * Folks who need this would probably need at least a callback of some kind, and
+ * probably a configuration UI.  This is beyond the scope of the work here.
+ *
+ * Changes in contacts and group memberships, however, can readily be handled.
+ * The old code calls into group creation code, which is probably why it was
+ * so hard to get right.  This update will instead do a "look before you leap"
+ * approach, and if a group in CiviCRM does not have a counterpart in OG, it will
+ * be treated as "a feature", since there's a lot of use for groups beyond mirroring
+ * OG for most organizations.
+ */
+
+/**
+ * Implementation of hook_nodeapi
+ * http://api.drupal.org/api/function/hook_nodeapi/5
+ *
+ */
+function civicrm_og_sync_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  // early exit if op to avoid E-Notices on 'prepare', 'presave', 'load'
+  if ($op == 'prepare' || ($op == 'presave') || ($op == 'load')) {
+    return;
+  }
+  //hook_nodeapi handles events with groups, so we never want
+  //to service these when initiated from the CiviCRM side anyway.
+  if (!_civicrm_og_sync_set_context('drupal')) {
+    return;
+  }
+
+  // check if the node if of type og
+  if (!og_is_group_type($node->type)) {
+    return;
+  }
+
+  if (!civicrm_initialize()) {
+    return;
+  }
+
+  require_once 'CRM/Bridge/OG/Drupal.php';
+
+  $title = trim($node->title);
+  // length of 49 so that the admin group can fit ': administrator' afterwards within 64 char field
+  $params = array('name' => substr(trim($title), 0, 49),
+    'title' => $title,
+    'description' => trim($node->og_description),
+    'is_active' => 1,
+    'og_id' => $node->nid,
+  );
+
+  switch ($op) {
+    case 'insert':
+    case 'update':
+      CRM_Bridge_OG_Drupal::nodeapi($params, 'add');
+
+      // also call the user hook since OG does not for admin
+      civicrm_og_sync_og('user update', $node->nid, $node->uid, array('is_admin' => 1));
+      break;
+
+    case 'delete':
+      // OG has been deleted, but we dont really care about this in CiviCRM land
+      // We ignore this for now
+      // for delete we dont need to call the user hook since we blow away both the groups
+      // and anything connected to it including acl's
+      CRM_Bridge_OG_Drupal::nodeapi($params, 'delete');
+      break;
+
+    default:
+      break;
+  }
+
+  //We can release the context here
+  _civicrm_og_sync_clear_context();
+}
+
+function civicrm_og_sync_og($op, $nid, $uid, $args = array()) {
+
+  //User actions need to call hook_og, or hook_civicrm_post, but
+  //not both.  So this should be processed only if Drupal sees
+  //the user event first.
+  if (!_civicrm_og_sync_set_context('drupal')) {
+    return;
+  }
+
+  // check if civicrm is present
+  if (!function_exists('civicrm_initialize') ||
+    empty($nid) ||
+    empty($uid)
+  ) {
+    return;
+  }
+
+  if (!civicrm_initialize()) {
+    return;
+  }
+
+  // create the CiviCRM groups if they dont exist
+  _civicrm_og_sync_create_group($nid, $uid);
+
+  $params = array('og_id' => $nid,
+    'uf_id' => $uid,
+    'is_active' => isset($args['is_active']) ? $args['is_active'] : NULL,
+    'is_admin' => isset($args['is_admin']) ? $args['is_admin'] : NULL,
+  );
+
+  switch ($op) {
+    case 'user insert':
+    case 'user update':
+      CRM_Bridge_OG_Drupal::og($params, 'add');
+      break;
+
+    case 'user delete':
+      CRM_Bridge_OG_Drupal::og($params, 'delete');
+      break;
+  }
+
+  //We can release the context here
+  _civicrm_og_sync_clear_context();
+}
+
+/**
+ * Utility function to create a CRM group if needed.
+ *
+ * Should only be called from events on the Drupal side.  Note that
+ * updates of groups (titles, etc.)  happen elsewhere.
+ *
+ */
+function _civicrm_og_sync_create_group($nid, $uid) {
+
+  if (!civicrm_initialize()) {
+    return;
+  }
+
+  require_once 'CRM/Bridge/OG/Drupal.php';
+  require_once 'CRM/Bridge/OG/Utils.php';
+  $group_source = CRM_Bridge_OG_Utils::ogSyncName($nid);
+  $acl_source   = CRM_Bridge_OG_Utils::ogSyncACLName($nid);
+  $group_id     = CRM_Bridge_OG_Utils::groupID($group_source);
+  $acl_id       = CRM_Bridge_OG_Utils::groupID($acl_source);
+
+  if ($group_id and $acl_source) {
+    // we do not update groups from here.
+    return;
+  }
+
+  // create the CiviCRM groups if they dont exist
+  $node = node_load(array('nid' => $nid));
+  $title = trim($node->title);
+  // length of 49 so that the admin group can fit ': administrator' afterwards within 64 char field
+  $params = array('name' => substr(trim($title), 0, 49),
+    'title' => $title,
+    'description' => trim($node->og_description),
+    'is_active' => 1,
+    'og_id' => $node->nid,
+  );
+
+  // add the group
+  require_once 'CRM/Bridge/OG/Drupal.php';
+  CRM_Bridge_OG_Drupal::nodeapi($params, 'add');
+}
+
+function civicrm_og_sync_civicrm_post($op, $objectName, $objectID, $objectRef) {
+  //If this is called, we need to ignore hook_og.
+  if (!_civicrm_og_sync_set_context('civicrm')) {
+    return;
+  }
+
+  require_once 'CRM/Bridge/OG/Utils.php';
+  if (!CRM_Bridge_OG_Utils::syncFromCiviCRM()) {
+    return;
+  }
+
+  switch ($objectName) {
+    case 'Group':
+      require_once 'CRM/Bridge/OG/CiviCRM.php';
+      switch ($op) {
+        case 'create':
+        case 'edit':
+          //We have created a CiviCRM group, but if no OG exists,
+          //we *do not* create one.
+          //CRM_Bridge_OG_CiviCRM::group( $objectID, $objectRef, 'add' );
+          break;
+
+        case 'delete':
+          //This is a corner case.  Actually, we should
+          //try to make sure that the group delete *fails* on the
+          //CiviCRM side, but that will be done later, if hook_pre
+          //even makes this possible.
+
+          //TODO: block CRM group deletes if an OG exists for it.
+          //CRM_Bridge_OG_CiviCRM::group( $objectID, $objectRef, 'delete' );
+          break;
+
+        default:
+          break;
+      }
+      break;
+
+    case 'GroupContact':
+      require_once 'CRM/Bridge/OG/CiviCRM.php';
+      switch ($op) {
+        case 'create':
+        case 'edit':
+          CRM_Bridge_OG_CiviCRM::groupContact($objectID, $objectRef, 'add');
+          break;
+
+        case 'delete':
+          CRM_Bridge_OG_CiviCRM::groupContact($objectID, $objectRef, 'delete');
+          break;
+
+        default:
+          break;
+      }
+      break;
+
+    default:
+      break;
+  }
+
+  //We can release the context here
+  _civicrm_og_sync_clear_context();
+}
+
+/**
+ * Implemenation of hook_enable.  Use to synchronise with pre-existing groups
+ *
+ * @return
+ */
+function civicrm_og_sync_enable() {
+  if (!civicrm_initialize()) {
+    return;
+  }
+
+  //set the context, to prevent loops from the CiviCRM side.
+  _civicrm_og_sync_set_context('drupal');
+
+  require_once 'CRM/Bridge/OG/Drupal.php';
+
+  // get OG content types
+  $og_types_str = implode("', '", og_get_types('group'));
+  //build the query
+  $results = db_query("SELECT n.nid FROM {node} n WHERE n.type IN ('%s')", $og_types_str);
+
+  while ($result = db_fetch_array($results)) {
+    $node = node_load(array('nid' => $result['nid']));
+
+    $title = trim($node->title);
+    // length of 49 so that the admin group can fit ': administrator' afterwards within 64 char field
+    $params = array('name' => substr(trim($title), 0, 49),
+      'title' => $title,
+      'description' => trim($node->og_description),
+      'is_active' => 1,
+      'og_id' => $node->nid,
+    );
+
+    // add the group
+    CRM_Bridge_OG_Drupal::nodeapi($params, 'add');
+
+    // add the subscribers
+    $subscribers = db_query(og_list_users_sql(1), $node->nid);
+    while ($subscriber = db_fetch_array($subscribers)) {
+      $uid = $subscriber['uid'];
+      $is_admin = $subscriber['is_admin'];
+      civicrm_og_sync_og('user update', $node->nid, $uid, array('is_admin' => $is_admin, 'is_active' => 1));
+    }
+  }
+}
+
+/**
+ * Guard function to prevent infinite loops.  The "side" that starts an
+ * operation calls it with its keyword.
+ *
+ * @param string $currentContext
+ *   'drupal' or 'civicrm'.  Pass FALSE for a reset (needed for multiple actions
+ *       in one transaction.)
+ *
+ * @return boolean
+ *   TRUE if this is the first call to this function, or if $currentContext
+ *        matches the initial call
+ *   FALSE if this call does not match the initial call.
+ */
+function _civicrm_og_sync_set_context($currentContext) {
+  static $_context = NULL;
+  if ($currentContext === FALSE) {
+    //This is a reset
+    $_context = NULL;
+    return NULL;
+  }
+  if (!$_context) {
+    $_context = $currentContext;
+  }
+  return $_context == $currentContext;
+}
+
+/**
+ * Simple clear way to clear the context
+ */
+function _civicrm_og_sync_clear_context() {
+  _civicrm_og_sync_set_context(FALSE);
+}
+

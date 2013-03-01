@@ -1,0 +1,9 @@
+name = CiviCRM CCK Contact Reference
+description = Makes a CiviCRM Contact Reference CCK Field
+package = CiviCRM
+core = 6.x
+version = 3.4
+dependencies[] = content
+dependencies[] = civicrm
+dependencies[] = optionwidgets
+dependencies[] = text
