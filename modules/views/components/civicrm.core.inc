@@ -2138,8 +2138,9 @@ function _civicrm_core_data(&$data, $enabled) {
   $data['civicrm_group']['title'] = array(
     'title' => t('Title'),
     'help' => t('Group Title'),
+    'real field' => 'id',
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'allGroup',
@@ -2237,8 +2238,9 @@ function _civicrm_core_data(&$data, $enabled) {
   $data['civicrm_tag']['name'] = array(
     'title' => t('Name'),
     'help' => t('Name of Tag'),
+    'real field' => 'id',
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Member_PseudoConstant',
       'pseudo method' => 'tag',
