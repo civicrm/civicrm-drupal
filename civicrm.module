@@ -40,33 +40,12 @@ function civicrm_html_head() {
     return;
   }
 
-  $head = NULL;
   if (arg(0) == 'civicrm') {
-    require_once 'CRM/Core/Config.php';
-    $config = CRM_Core_Config::singleton();
-
-    $template = CRM_Core_Smarty::singleton();
-    $buffer   = $template->fetch('CRM/common/jquery.files.tpl');
-    $lines    = preg_split('/\s+/', $buffer);
-    foreach ($lines as $line) {
-      $line = trim($line);
-      if (empty($line)) {
-        continue;
-      }
-      if (strpos($line, '.css') !== FALSE) {
-        drupal_add_css(drupal_get_path('module', 'civicrm') . '/../' . $line);
-      }
-    }
+    // Add our standard css & js
+    CRM_Core_Resources::singleton()->addCoreResources();
+  } else {
+    CRM_Core_Resources::singleton()->addCoreStyles();
   }
-  if (isset($config->customCSSURL) && !empty($config->customCSSURL)) {
-    $head = "<style type=\"text/css\">@import url({$config->customCSSURL});</style>\n";
-  }
-  else {
-    drupal_add_css(drupal_get_path('module', 'civicrm') . '/../css/deprecate.css');
-    drupal_add_css(drupal_get_path('module', 'civicrm') . '/../css/civicrm.css');
-    drupal_add_css(drupal_get_path('module', 'civicrm') . '/../css/extras.css');
-  }
-  return $head;
 }
 
 /**
@@ -203,28 +182,22 @@ function civicrm_menu() {
   );
 }
 
+
 /**
  * Initialize CiviCRM. Call this function from other modules too if
  * they use the CiviCRM API.
- *
  */
 function civicrm_initialize() {
   // Check for php version and ensure its greater than 5.
-  // do a fatal exit if
-  if ((int ) substr(PHP_VERSION, 0, 1) < 5) {
+  // Do a fatal exit if not.
+  if ((int) substr(PHP_VERSION, 0, 1) < 5) {
     echo "CiviCRM requires PHP Version 5.2 or greater. You are running PHP Version " . PHP_VERSION . "<p>";
     exit();
   }
 
-  // autoload
-  if (FALSE && module_exists('xautoload')) {
-    _xautoload_finder()->registerPrefixDeep('CRM', 'CRM');
-  }
-  elseif (file_exists(dirname(__FILE__) . '/../CRM/Core/ClassLoader.php')) {
-    require_once dirname(__FILE__) . '/../CRM/Core/ClassLoader.php';
-    $classLoader = CRM_Core_ClassLoader::singleton();
-    $classLoader->register();
-  }
+  require_once dirname(__FILE__) . '/../CRM/Core/ClassLoader.php';
+  CRM_Core_ClassLoader::singleton()->register();
+
   static $initialized = FALSE;
   static $failure = FALSE;
 
@@ -250,7 +223,6 @@ function civicrm_initialize() {
     $errorMsgAdd = t("Please review the <a href='!1'>Drupal Installation Guide</a> and the <a href='!2'>Trouble-shooting page</a> for assistance. If you still need help installing, you can often find solutions to your issue by searching for the error message in the <a href='!3'>installation support section of the community forum</a>.</strong></p>",
       array('!1' => $docLinkInstall, '!2' => $docLinkTrouble, '!3' => $forumLink)
     );
-
 
     if ($error == FALSE) {
       $failure = TRUE;
@@ -283,31 +255,28 @@ function civicrm_initialize() {
     $config = CRM_Core_Config::singleton();
 
     // Add module-specific header elements
-    drupal_set_html_head(civicrm_html_head());
-    require_once 'CRM/Core/BAO/Preferences.php';
-    //fixme - after 3.4 is discontinued remove 3.4 support
-    //As this file may be shared between 3.4 & 4.1 releases use the BAO_Preferences::value legacy function if it exists
-    // in future only CRM_Core_BAO_Setting::getItem will be required
-    if ($config->isUpgradeMode()) {
-      // skip
-    } elseif (
-         (
-           method_exists('CRM_Core_BAO_Preferences','value')
-           &&
-           CRM_Core_BAO_Preferences::value( 'editor_id' ) == 4 //drupal wysiwyg 
-         )
-         ||
-         (
-           method_exists('CRM_Core_BAO_Setting','getItem') 
-           &&
-           CRM_Core_BAO_Setting::getItem( CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'editor_id' ) == 4  //drupal wysiwyg 
-         )
+    $header = civicrm_html_head();
+    if (!empty($header)) {
+      drupal_set_html_head($header);
+    }
+
+    $args = explode('/', $_GET['q']);
+    if (
+      (!isset($args[1]) || $args[1] != 'upgrade') &&
+      CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
+        // drupal wysiwyg
+        'editor_id'
+      ) == 4
     ) {
       //we have to ensure that wysiwyg is loaded since
+      //pages load only with ajax callbacks
       $formats = filter_formats();
       foreach ($formats as $id => $format) {
         wysiwyg_get_profile($id);
       }
+      $path = drupal_get_path('module', 'filter');
+      drupal_add_js($path . '/filter.js');
+      drupal_add_css($path . '/filter.css');
     }
   }
 
