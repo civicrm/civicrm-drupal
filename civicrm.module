@@ -921,45 +921,6 @@ function civicrm_preprocess_page(&$variables) {
       $variables['styles'] = drupal_get_css($variables['css']);
     }
   }
-
-  if (!civicrm_initialize()) {
-    return;
-  }
-  if (in_array(arg(0), array('civicrm', 'user'))) {
-    // Move the CiviCRM jquery and jQuery UI libraries above Drupal's core jQuery
-    // and relatively gracefully handle noConflict.
-    $path    = drupal_get_path('module', 'civicrm');
-    $scripts = array();
-    $val     = array('cache' => TRUE, 'defer' => FALSE, 'preprocess' => TRUE);
-
-    $template = CRM_Core_Smarty::singleton();
-    $buffer   = $template->fetch('CRM/common/jquery.files.tpl');
-    $lines    = preg_split('/\s+/', $buffer);
-    foreach ($lines as $line) {
-      $line = trim($line);
-      if (empty($line)) {
-        continue;
-      }
-      if (strpos($line, '.js') !== FALSE) {
-        $scripts[$path . '/../' . $line] = $val;
-      }
-    }
-
-    // add localized calendar js
-    $config           = CRM_Core_Config::singleton();
-    $localisation     = explode('_', $config->lcMessages);
-    $localizationFile = $path . '/../packages/jquery/jquery-ui-1.8.11/development-bundle/ui/i18n/jquery.ui.datepicker-' . $localisation[0] . '.js';
-
-    if (file_exists($localizationFile)) {
-      $scripts[$localizationFile] = $val;
-    }
-
-    // add Common.js
-    $scripts[$path . '/../js/Common.js'] = $val;
-    $scripts[$path . '/../js/noconflict.js'] = $val;
-
-    $variables['scripts'] = drupal_get_js('header', array('core' => $scripts)) . $variables['scripts'];
-  }
 }
 
 /**
