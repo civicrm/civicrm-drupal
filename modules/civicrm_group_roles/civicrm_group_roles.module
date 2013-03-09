@@ -194,7 +194,7 @@ function _civicrm_group_update ($form, $form_values) {
   $new_roles = array_filter($form_values['values']['roles']);
 
   // if there is a difference then something was removed
-v  $removed_roles = array_diff_key($roles, $new_roles);
+  $removed_roles = array_diff_key($roles, $new_roles);
 
   // now delete the corresponding group from the record in CiviCRM (if there is a corresponding group)
   if ($removed_roles) {
