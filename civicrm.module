@@ -843,8 +843,9 @@ function civicrm_views_api() {
 }
 
 function civicrm_add_jquery(&$html) {
-  require_once 'CRM/Utils/String.php';
-  return CRM_Utils_String::addJqueryFiles($html);
+  CRM_Core_Resources::singleton()->addCoreResources('html-header');
+  // JS/CSS markup will be rendered in theme('page') by preprocess function
+  return $html;
 }
 
 function civicrm_form_alter(&$form, $formValues, $formID) {
