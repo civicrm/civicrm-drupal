@@ -911,6 +911,9 @@ function civicrm_theme_registry_alter(&$theme_registry) {
 
 /**
  * Preprocess callback for theme('page')
+ *
+ * @see civicrm_theme_registry_alter
+ * @see CRM_Upgrade_Incremental_php_FourThree::setPreUpgradeMessage
  */
 function civicrm_preprocess_page_inject(&$variables) {
   // CRM-11823 - If Civi bootstrapped, then merge its HTML header with the CMS's header
