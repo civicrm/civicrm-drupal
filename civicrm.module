@@ -28,6 +28,8 @@
  */
 require_once 'civicrm_user.inc';
 
+define('CIVICRM_UF_HEAD', TRUE);
+
 /**
  * Utilities
  */
@@ -178,6 +180,20 @@ function civicrm_menu() {
       'file path' => drupal_get_path('module', 'system'),
     ),
   );
+}
+
+/**
+ * Implementation of hook_page_build
+ */
+function civicrm_page_build($page) {
+  // if Civi bootstrapped, then merge its HTML header with the CMS's header
+  global $civicrm_root;
+  if (empty($civicrm_root)) {
+    return;
+  }
+  if ($region = CRM_Core_Region::instance('html-header', FALSE)) {
+    CRM_Utils_System::addHTMLHead($region->render(''));
+  }
 }
 
 /**
