@@ -29,6 +29,9 @@
  *
  */
 
+define('CIVICRM_UF_HEAD', TRUE);
+
+
 /**
  * Provides a link to the CSS stylesheet associated with this module.
  * and the javascript files needed by this module
@@ -840,8 +843,9 @@ function civicrm_views_api() {
 }
 
 function civicrm_add_jquery(&$html) {
-  require_once 'CRM/Utils/String.php';
-  return CRM_Utils_String::addJqueryFiles($html);
+  CRM_Core_Resources::singleton()->addCoreResources('html-header');
+  // JS/CSS markup will be rendered in theme('page') by preprocess function
+  return $html;
 }
 
 function civicrm_form_alter(&$form, $formValues, $formID) {
@@ -881,12 +885,43 @@ function _civicrm_rebuild($form, &$form_state) {
  */
 function civicrm_theme_registry_alter(&$theme_registry) {
   if (isset($theme_registry['page'])) {
-    // See if our preprocess function is loaded, if so remove it.
-    if ($key = array_search('civicrm_preprocess_page', $theme_registry['page']['preprocess functions'])) {
-      unset($theme_registry['page']['preprocess functions'][$key]);
+    // D6 theme() supports two modes: function or template
+    if (isset($info['function'])) {
+      // If someone can find a theme which actually defines 'page' with a function, then we
+      // should implement & test a wrapper function to generate JS/CSS headers.
+      drupal_set_message(t('The page theme is currently unsupported by CiviCRM. Please report.'));
+    } else {
+      // Add callback to generate JS/CSS headers -- at the beginning
+      if ($key = array_search('civicrm_preprocess_page_inject', $theme_registry['page']['preprocess functions'])) {
+        // when is this necessary?
+        unset($theme_registry['page']['preprocess functions'][$key]);
+      }
+      array_unshift($theme_registry['page']['preprocess functions'], 'civicrm_preprocess_page_inject');
+
+      // Add callback to tweak JS/CSS headers -- at the end
+      if ($key = array_search('civicrm_preprocess_page', $theme_registry['page']['preprocess functions'])) {
+        // when is this necessary?
+        unset($theme_registry['page']['preprocess functions'][$key]);
+      }
+      // Now add it on at the end of the array so that it runs last.
+      $theme_registry['page']['preprocess functions'][] = 'civicrm_preprocess_page';
     }
-    // Now add it on at the end of the array so that it runs last.
-    $theme_registry['page']['preprocess functions'][] = 'civicrm_preprocess_page';
+  }
+}
+
+/**
+ * Preprocess callback for theme('page')
+ *
+ * @see civicrm_theme_registry_alter
+ * @see CRM_Upgrade_Incremental_php_FourThree::setPreUpgradeMessage
+ */
+function civicrm_preprocess_page_inject(&$variables) {
+  // CRM-11823 - If Civi bootstrapped, then merge its HTML header with the CMS's header
+  global $civicrm_root;
+  if (!empty($civicrm_root)) {
+    if ($region = CRM_Core_Region::instance('html-header', FALSE)) {
+      CRM_Utils_System::addHTMLHead($region->render(''));
+    }
   }
 }
 
