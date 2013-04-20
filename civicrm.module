@@ -201,10 +201,10 @@ function civicrm_page_build($page) {
  * they use the CiviCRM API.
  */
 function civicrm_initialize() {
-  // Check for php version and ensure its greater than 5.
-  // Do a fatal exit if not.
-  if ((int) substr(PHP_VERSION, 0, 1) < 5) {
-    echo "CiviCRM requires PHP Version 5.2 or greater. You are running PHP Version " . PHP_VERSION . "<p>";
+  // Check for php version and ensure its greater than minPhpVersion
+  $minPhpVersion = '5.3.3';
+  if (version_compare(PHP_VERSION, $minPhpVersion) < 0) {
+    echo "CiviCRM requires PHP Version $minPhpVersion or greater. You are running PHP Version " . PHP_VERSION . "<p>";
     exit();
   }
 
