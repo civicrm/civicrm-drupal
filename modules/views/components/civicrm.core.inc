@@ -1698,7 +1698,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'help' => t('Activity -> Campaign'),
       'relationship' => array(
         'base' => 'civicrm_campaign',
-        'field' => 'id',
+        'base field' => 'id',
         'handler' => 'views_handler_relationship',
         'label' => t('Activity -> Campaign'),
       ),
@@ -1761,7 +1761,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
-  ); 
+  );
 
   // CHILLING OUT AT THE civicrm_activity_assignment TABLE
 
