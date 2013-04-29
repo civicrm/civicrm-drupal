@@ -260,7 +260,7 @@ function _civicrm_mail_data(&$data, $enabled) {
       'help' => t('Mailing -> Campaign'),
       'relationship' => array(
         'base' => 'civicrm_campaign',
-        'field' => 'id',
+        'base field' => 'id',
         'handler' => 'views_handler_relationship',
         'label' => t('Mailing -> Campaign'),
       ),
