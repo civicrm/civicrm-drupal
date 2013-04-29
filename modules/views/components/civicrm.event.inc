@@ -324,7 +324,7 @@ function _civicrm_event_data(&$data, $enabled) {
       'help' => t('Event -> Campaign'),
       'relationship' => array(
         'base' => 'civicrm_campaign',
-        'field' => 'id',
+        'base field' => 'id',
         'handler' => 'views_handler_relationship',
         'label' => t('Event -> Campaign'),
       ),
@@ -621,7 +621,7 @@ function _civicrm_event_data(&$data, $enabled) {
       'help' => t('Participant -> Campaign'),
       'relationship' => array(
         'base' => 'civicrm_campaign',
-        'field' => 'id',
+        'base field' => 'id',
         'handler' => 'views_handler_relationship',
         'label' => t('Participant -> Campaign'),
       ),
