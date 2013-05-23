@@ -32,7 +32,6 @@
  * e.g. for participant object, contribution object
  */
 function civicrm_rules_events_argument_civicrm_contactID_load_user(&$entityobj) {
-  require_once 'api/api.php';
   $contact = civicrm_api('UFMatch', 'get', array('version' => 3, 'contact_id' => $entityobj->contact_id, 'sequential' => 1));
   if (is_numeric($contact['values'][0]['uf_id'])) {
     return user_load(array('uid' => $contact['values'][0]['uf_id']));
