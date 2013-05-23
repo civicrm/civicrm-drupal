@@ -40,7 +40,7 @@ class civicrm_handler_filter_prefix extends views_handler_filter_in_operator {
         return;
       }
       require_once 'CRM/Core/PseudoConstant.php';
-      self::$_individualPrefix = CRM_Core_PseudoConstant::individualPrefix();
+      self::$_individualPrefix = CRM_Core_PseudoConstant::get('CRM_Contact_DAO_Contact', 'prefix_id');
     }
   }
 
