@@ -121,7 +121,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
           array('title' => ts('Sex'),
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'type' => CRM_Report_Form::OP_STRING,
-            'options' => array('' => '') + CRM_Core_PseudoConstant::gender(),
+            'options' => array('' => '') + CRM_Core_PseudoConstant::get('CRM_Contact_DAO_Contact', 'gender_id'),
           ),
           'sort_name' =>
           array('title' => ts('Contact Name'),
@@ -314,7 +314,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
     }
     // custom code to alter rows
     //var_dump($rows);
-    $genderList = CRM_Core_PseudoConstant::gender();
+    $genderList = CRM_Core_PseudoConstant::get('CRM_Contact_DAO_Contact', 'gender_id');
     $entryFound = FALSE;
     foreach ($rows as $rowNum => $row) {
       // handle state province
@@ -424,7 +424,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
                  DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci";
     CRM_Core_DAO::executeQuery($sql);
 
-    $gender = CRM_Core_PseudoConstant::gender();
+    $gender = CRM_Core_PseudoConstant::get('CRM_Contact_DAO_Contact', 'gender_id');
 
     foreach ($rows as $key => $value) {
 
