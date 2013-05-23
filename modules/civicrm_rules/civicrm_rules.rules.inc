@@ -1,6 +1,4 @@
 <?php
-// $Id$
-
 /*
  +--------------------------------------------------------------------+
  | CiviCRM version 3.4                                                |
@@ -35,8 +33,8 @@
  *
  */
 
-require_once 'utils.inc';
-require_once 'civicrm_rules_entities.rules.inc';
+module_load_include('inc', 'civicrm_rules', 'utils');
+module_load_include('inc', 'civicrm_rules', 'civicrm_rules_entities.rules');
 
 /**
  * Implementation of hook_rules_event_info().
@@ -256,7 +254,6 @@ function civicrm_rules_action_info() {
 
 function rules_action_civicrm_mailing_send_email($mailing, $settings) {
   if ($mailing->id) {
-    require_once 'CRM/Utils/Token.php';
     $tokens['mailing'] = array('mailing.editUrl',
       'mailing.scheduleUrl',
       'mailing.html',
@@ -286,7 +283,6 @@ function rules_action_civicrm_mailing_send_email($mailing, $settings) {
 
     // get the default from email address if not set
     if (empty($settings['from'])) {
-      require_once 'CRM/Core/OptionGroup.php';
       $defaultAddress = CRM_Core_OptionGroup::values('from_email_address', NULL, NULL, NULL, ' AND is_default = 1');
       $settings['from'] = $defaultAddress[1];
     }
@@ -301,7 +297,6 @@ function rules_action_civicrm_mailing_send_email_form($settings = array(), &$for
 
   // get the default from email address if not set
   if (empty($settings['from'])) {
-    require_once 'CRM/Core/OptionGroup.php';
     $defaultAddress = CRM_Core_OptionGroup::values('from_email_address', NULL, NULL, NULL, ' AND is_default = 1');
     $settings['from'] = $defaultAddress[1];
   }
