@@ -1,6 +1,4 @@
 <?php
-// $Id$
-
 /*
  +--------------------------------------------------------------------+
  | CiviCRM version 3.4                                                |
@@ -77,7 +75,6 @@ function civicrm_rules_events_argument_civicrm_event(&$eventobj) {
   if (empty($result) || empty($contact)) {
     //todo BAO POST hook leaves created_id blank, the api call is a work-around for now
     if (empty($eventobj->created_by)) {
-      require_once 'api/api.php';
       $result = civicrm_api('Event', 'get', array('version' => 3, 'id' => $eventobj->id, 'sequential' => 1));
       $contact = civicrm_api('UFMatch', 'get', array('version' => 3, 'contact_id' => $result['values'][0]['created_id'], 'sequential' => 1));
     }

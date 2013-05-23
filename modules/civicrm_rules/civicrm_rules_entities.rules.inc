@@ -1,8 +1,5 @@
 <?php
-// $Id$
-
-//
-require_once 'civicrm_rules_entities_utils.inc';
+module_load_include('inc', 'civicrm_rules', 'civicrm_rules_entities_utils');
 module_load_include('inc', 'civicrm_rules', 'civicrm_rules_civicrm_event.eval');
 module_load_include('inc', 'civicrm_rules', 'civicrm_rules_civicrm_participant.eval');
 module_load_include('inc', 'civicrm_rules', 'civicrm_rules_civicrm_contact.eval');
