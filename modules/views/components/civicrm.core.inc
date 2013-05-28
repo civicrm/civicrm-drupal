@@ -323,6 +323,31 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
+  //PREFERRED LANGUAGE
+  $data['civicrm_contact']['preferred_language'] = array(
+    'title' => t('Preferred Language'),
+    'real field' => 'preferred_language',
+    'help' => t('Which language is preferred for selection'),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_pseudo_constant',
+      'click sortable' => TRUE,
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'preferredLanguage',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+    ),
+    'filter' => array(
+      'handler' => 'civicrm_handler_filter_pseudo_constant',
+      'allow empty' => TRUE,
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'preferredLanguage',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   //BOOLEAN : IS Deceased
   $data['civicrm_contact']['is_deceased'] = array(
     'title' => t('Is Deceased'),
