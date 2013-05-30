@@ -40,7 +40,7 @@ class civicrm_handler_filter_suffix extends views_handler_filter_in_operator {
         return;
       }
       require_once 'CRM/Core/PseudoConstant.php';
-      self::$_individualSuffix = CRM_Core_PseudoConstant::individualSuffix();
+      self::$_individualSuffix = CRM_Core_PseudoConstant::get('CRM_Contact_DAO_Contact', 'suffix_id');
     }
   }
 
