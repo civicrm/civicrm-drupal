@@ -174,7 +174,7 @@ class civicrm_handler_field_link_event extends views_handler_field {
   }
 
   function render($values) {
-    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+    return $this->render_link(NULL, $values);
   }
 }
 
