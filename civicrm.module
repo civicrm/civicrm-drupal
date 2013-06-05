@@ -722,6 +722,36 @@ function civicrm_views_api() {
   );
 }
 
+function civicrm_views_query_alter(&$view, &$query) {
+
+  if ( ! civicrm_initialize( ) ) {
+    return;
+  }
+
+  // check if we are in multilingual mode, otherwise return
+  // TODO: should be a simple call - is_multiligual ?
+  require_once 'CRM/Core/DAO/Domain.php';
+  $domain = new CRM_Core_DAO_Domain();
+  $domain->find(true);
+  
+  $multilingual = (bool) $domain->locales;
+  
+  if ($multilingual) {
+    require_once 'CRM/Core/I18n/SchemaStructure.php';
+    global $dbLocale;
+    $columns = CRM_Core_I18n_SchemaStructure::columns();
+    
+    // TODO: for better performance, loop on $query->fields instead
+    foreach ($columns as $table => $hash) {
+      foreach ($hash as $column => $type) {
+        if (array_key_exists("{$table}_{$column}", $query->fields)) {
+          $query->fields["{$table}_{$column}"]['field'] = "{$column}{$dbLocale}";
+        }
+      }
+    }
+  }
+}
+
 function civicrm_add_jquery(&$html) {
   CRM_Core_Resources::singleton()->addCoreResources('html-header');
   // JS/CSS markup will be rendered in theme('page') by preprocess function
