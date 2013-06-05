@@ -3,7 +3,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.4                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -84,7 +84,7 @@ function civicrm_group_roles_user($op, $edit, &$user, $category = NULL) {
       //find the contact record
       $contactid = civicrm_api('uf_match', 'getvalue',array('version' => 3, 'uf_id' => $user->uid, 'return' => 'contact_id'));
 
-      if (empty($contact)) {
+      if (empty($contactid)) {
         return;
       }
 
