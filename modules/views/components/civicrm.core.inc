@@ -2277,6 +2277,10 @@ function _civicrm_core_data(&$data, $enabled) {
     */
 
   $data['civicrm_uf_match']['table']['group'] = t("CiviCRM Drupal match table");
+  $data['civicrm_uf_match']['table']['join']['civicrm_contact'] = array(
+    'left_field' => 'id',
+    'field' => 'contact_id'
+  );
   $data['civicrm_uf_match']['uf_id'] = array(
     'title' => t('Drupal User ID'),
     'help' => t('The user id of the User matched to a CiviCRM Contact'),
