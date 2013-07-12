@@ -1948,3 +1948,10 @@ function civitest_civicrm_alterReportVar($varType, &$var, &$form) {
     }
   }
 }
+
+function civitest_civicrm_alterBarcode(&$data, $type, $context ) {
+  if ($type == 'barcode' && $context == 'name_badge') {
+    // change the encoding of barcode
+    $data['current_value'] = $data['event_id'] . '-' . $data['participant_id'] . '-' . $data['contact_id'];
+  }
+}
