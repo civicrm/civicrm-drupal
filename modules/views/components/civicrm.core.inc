@@ -92,6 +92,11 @@ function _civicrm_core_data(&$data, $enabled) {
       'left_field' => 'contact_id',
       'field' => 'id',
     ),
+    // Links to case contacts
+      'civicrm_case_contact' => array(
+      'left_field' => 'contact_id',
+      'field' => 'id',
+     ),
   );
 
   // For other base tables, explain how we join -
@@ -1488,6 +1493,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'activityType',
+      'pseudo args' => array(TRUE, TRUE), // Include cases (if CiviCase is enabled)
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -1497,6 +1503,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'activityType',
+      'pseudo args' => array(TRUE, TRUE),
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -1974,6 +1981,10 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'views_handler_relationship',
       'label' => t('CiviCRM Contact A'),
     ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+      'allow empty' => TRUE,
+    ),
   );
 
   $data['civicrm_relationship']['contact_id_b'] = array(
@@ -1992,6 +2003,10 @@ function _civicrm_core_data(&$data, $enabled) {
       'base field' => 'id',
       'handler' => 'views_handler_relationship',
       'label' => t('CiviCRM Contact B'),
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+      'allow empty' => TRUE,
     ),
   );
 
@@ -2084,6 +2099,32 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_field_link_relationship',
     ),
   );
+
+  // Case ID for CiviCase
+  if (isset($enabled['CiviCase'])) {
+	  $data['civicrm_relationship']['case_id'] = array(
+		'title' => t('Case ID'),
+		'real field' => 'case_id',
+		'help' => t('The case ID of this relationship'),
+		'field' => array(
+		  'handler' => 'views_handler_field',
+		  'click sortable' => FALSE,
+		),
+		'argument' => array(
+		  'handler' => 'views_handler_argument',
+		),
+		'filter' => array(
+		  'handler' => 'views_handler_filter_numeric',
+		  'allow empty' => TRUE,
+		),
+		'relationship' => array(
+		  'base' => 'civicrm_case',
+		  'field' => 'case_id',
+		  'handler' => 'views_handler_relationship',
+		  'label' => t('CiviCRM Case'),
+		),
+	  );
+  }
 
   /*
      * Add support for CivicRM groups table

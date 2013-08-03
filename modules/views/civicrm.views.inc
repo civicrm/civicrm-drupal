@@ -76,6 +76,7 @@ function civicrm_views_data_alter(&$data) {
   require_once 'CRM/Core/Error.php';
   require_once 'CRM/Contact/BAO/Contact.php';
   require_once 'CRM/Event/BAO/Query.php';
+  require_once 'CRM/Case/BAO/Case.php';
   require_once 'components/civicrm.core.inc';
 
   // Get list of enabled CiviCRM components
@@ -113,6 +114,10 @@ function civicrm_views_data_alter(&$data) {
   if (isset($enabled['CiviMember'])) {
     include_once 'components/civicrm.member.inc';
     _civicrm_member_data($data, $enabled);
+  }
+  if (isset($enabled['CiviCase'])) {
+    include_once 'components/civicrm.case.inc';
+    _civicrm_case_data($data, $enabled);
   }
 
   return $data;
@@ -348,6 +353,10 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $groupID, $subTyp
     case "Campaign":
     case "Survey":
       $jointable = 'civicrm_campaign';
+      break;
+
+    case "Case":
+      $jointable = 'civicrm_case';
       break;
   }
 
@@ -700,6 +709,8 @@ function civicrm_date_views_fields($field) {
     case 'civicrm_activity.activity_date_time':
     case 'civicrm_campaign.start_date':
     case 'civicrm_campaign.end_date':
+    case 'civicrm_case.start_date':
+    case 'civicrm_case.end_date':
       return $values;
   }
 }
@@ -711,6 +722,7 @@ function civicrm_date_views_tables() {
   return array(
     'civicrm_mailing_job',
     'civicrm_event',
+    'civicrm_case',
     'civicrm_activity',
     'civicrm_campaign',
   );
@@ -750,6 +762,18 @@ function civicrm_views_plugins() {
           'uses fields' => TRUE,
           'type' => 'normal',
           'dao class' => 'CRM_Activity_DAO_Activity',
+          'title field' => 'subject',
+        ),
+	'civicrm_case_calendar' => array(
+          'title' => t('Case Items'),
+          'help' => t('Displays each selected case as a Calendar item.'),
+          'handler' => 'calendar_plugin_row_civicrm',
+          'path' => "$civicrm_module_path/modules/views/plugins",
+          'base' => array('civicrm_case'),
+          'uses options' => TRUE,
+          'uses fields' => TRUE,
+          'type' => 'normal',
+          'dao class' => 'CRM_Case_DAO_Case',
           'title field' => 'subject',
         ),
         'civicrm_mail_calendar' => array(
