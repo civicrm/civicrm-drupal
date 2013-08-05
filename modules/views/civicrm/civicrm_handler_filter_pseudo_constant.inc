@@ -44,7 +44,7 @@ class civicrm_handler_filter_pseudo_constant extends views_handler_filter_in_ope
 
     // Load pseudo arguments if passed as array from hook_views_data
     if (isset($this->definition['pseudo args']) && is_array($this->definition['pseudo args'])) {
-      $this->definition['pseudo args'];
+      $pseudo_args = $this->definition['pseudo args'];
     }
     else {
       $pseudo_args = array();
