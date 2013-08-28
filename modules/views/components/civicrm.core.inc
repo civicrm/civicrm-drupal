@@ -194,7 +194,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -214,7 +214,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -301,7 +301,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -321,7 +321,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -341,7 +341,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -752,7 +752,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -772,7 +772,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -792,7 +792,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -812,7 +812,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -855,7 +855,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -875,7 +875,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -895,7 +895,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -965,7 +965,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -1106,7 +1106,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -1246,7 +1246,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -1395,7 +1395,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -1589,7 +1589,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -1651,7 +1651,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -1671,7 +1671,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
@@ -2018,7 +2018,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument',
+      'handler' => 'views_handler_argument_string',
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_string',
