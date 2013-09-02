@@ -785,7 +785,7 @@ function civicrm_views_plugins() {
           'uses options' => TRUE,
           'uses fields' => TRUE,
           'type' => 'normal',
-          'dao class' => 'CRM_Mailing_DAO_Job',
+          'dao class' => 'CRM_Mailing_DAO_MailingJob',
           // @TODO come up with a better title field
           'title field' => 'mailing_id',
         ),
