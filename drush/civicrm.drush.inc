@@ -364,7 +364,7 @@ function _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $mo
   $siteRoot   = drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE);
   $crmPath    = "$modPath/civicrm";
 
-  $settingsTplFile = "$crmPath/templates/CRM/common/civicrm.settings.php.tpl";
+  $settingsTplFile = "$crmPath/templates/CRM/common/civicrm.settings.php.template";
   if (!file_exists($settingsTplFile)) {
     drush_die(dt("Could not find CiviCRM settings template and therefore could not create settings file."));
   }
