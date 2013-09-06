@@ -1573,7 +1573,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'get',
-      'CRM_Activity_DAO_Activity',
+      'dao class' => 'CRM_Activity_DAO_Activity',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
