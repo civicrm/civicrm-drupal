@@ -47,7 +47,7 @@ class civicrm_handler_filter_pseudo_constant extends views_handler_filter_in_ope
       $pseudo_args = $this->definition['pseudo args'];
     }
     else {
-      $pseudo_args = array();
+      $pseudo_args = array($this->definition['dao class'], $this->definition['real field']);
     }
     require_once str_replace('_', DIRECTORY_SEPARATOR, $this->definition['pseudo class']) . '.php';
     // Include and call the Pseudo Class method
