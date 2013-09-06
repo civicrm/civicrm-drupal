@@ -234,7 +234,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'gender',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Contact_DAO_Contact',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -243,7 +244,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_filter_pseudo_constant',
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'gender',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Contact_DAO_Contact',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -259,7 +261,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'individualPrefix',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Contact_DAO_Contact',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -267,7 +270,8 @@ function _civicrm_core_data(&$data, $enabled) {
     'filter' => array(
       'handler' => 'civicrm_handler_filter_pseudo_constant',
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'individualPrefix',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Contact_DAO_Contact',
     ),
   );
   // Suffix
@@ -280,7 +284,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'individualSuffix',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Contact_DAO_Contact',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -288,7 +293,8 @@ function _civicrm_core_data(&$data, $enabled) {
     'filter' => array(
       'handler' => 'civicrm_handler_filter_pseudo_constant',
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'individualSuffix',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Contact_DAO_Contact',
     ),
   );
 
@@ -361,7 +367,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'preferredLanguage',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Contact_DAO_Contact',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -370,7 +377,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_filter_pseudo_constant',
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'preferredLanguage',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Contact_DAO_Contact',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -728,7 +736,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'locationType',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Core_DAO_Address',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -736,7 +745,8 @@ function _civicrm_core_data(&$data, $enabled) {
     'filter' => array(
       'handler' => 'civicrm_handler_filter_pseudo_constant',
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'locationType',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Core_DAO_Address',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -1081,7 +1091,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'locationType',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Core_DAO_Email',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -1090,7 +1101,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_filter_pseudo_constant',
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'locationType',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Core_DAO_Email',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -1221,7 +1233,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'locationType',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Core_DAO_Phone',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -1230,7 +1243,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_filter_pseudo_constant',
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'locationType',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Core_DAO_Phone',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -1294,7 +1308,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'phoneType',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Core_DAO_Phone',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -1303,7 +1318,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_filter_pseudo_constant',
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'phoneType',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Core_DAO_Phone',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -1370,7 +1386,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'websiteType',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Core_DAO_Website',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -1379,7 +1396,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_filter_pseudo_constant',
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'websiteType',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Core_DAO_Website',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -1544,7 +1562,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'priority',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Activity_DAO_Activity',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -1553,7 +1572,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_filter_pseudo_constant',
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
-      'pseudo method' => 'priority',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Activity_DAO_Activity',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
