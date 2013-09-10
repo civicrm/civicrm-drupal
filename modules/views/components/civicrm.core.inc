@@ -760,6 +760,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_address',
       'click sortable' => TRUE,
+      'dao class' => 'CRM_Core_DAO_Address',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
@@ -780,6 +781,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_address',
       'click sortable' => TRUE,
+      'dao class' => 'CRM_Core_DAO_Address',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
@@ -800,6 +802,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_address',
       'click sortable' => TRUE,
+      'dao class' => 'CRM_Core_DAO_Address',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
@@ -820,6 +823,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_address',
       'click sortable' => TRUE,
+      'dao class' => 'CRM_Core_DAO_Address',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
@@ -863,6 +867,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_address',
       'click sortable' => TRUE,
+      'dao class' => 'CRM_Core_DAO_Address',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
@@ -883,6 +888,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_address',
       'click sortable' => TRUE,
+      'dao class' => 'CRM_Core_DAO_Address',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
@@ -903,6 +909,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_address',
       'click sortable' => TRUE,
+      'dao class' => 'CRM_Core_DAO_Address',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
@@ -973,6 +980,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_address',
       'click sortable' => TRUE,
+      'dao class' => 'CRM_Core_DAO_Address',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
@@ -1116,6 +1124,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_email',
       'click sortable' => TRUE,
+      'dao class' => 'CRM_Core_DAO_Email',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
@@ -1258,6 +1267,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_phone',
       'click sortable' => TRUE,
+      'dao class' => 'CRM_Core_DAO_Phone',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
