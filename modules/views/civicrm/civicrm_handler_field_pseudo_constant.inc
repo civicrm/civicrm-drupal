@@ -47,9 +47,13 @@ class civicrm_handler_field_pseudo_constant extends views_handler_field {
     if (isset($this->definition['pseudo args']) && is_array($this->definition['pseudo args'])) {
       $pseudo_args = $this->definition['pseudo args'];
     }
-    else {
+    elseif (isset($this->definition['dao class']) && isset($this->definition['real field'])) {
       $pseudo_args = array($this->definition['dao class'], $this->definition['real field']);
     }
+    else {
+      $pseudo_args = array();
+    }
+      
 
     // Include and call the Pseudo Class method
     $this->_pseudo_constant = call_user_func_array($this->definition['pseudo class'] . "::" . $this->definition['pseudo method'], $pseudo_args);
