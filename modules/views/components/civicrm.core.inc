@@ -624,6 +624,9 @@ function _civicrm_core_data(&$data, $enabled) {
   $skipFields = array(
     'contact_is_deleted' => 1,
     'current_employer_id' => 1,
+    'group' => 1,
+    'note' => 1,
+    'tag' => 1,
   );
   civicrm_views_add_fields($fields, $data['civicrm_contact'], 'civicrm_contact', $skipFields);
 
