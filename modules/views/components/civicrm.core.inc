@@ -1284,6 +1284,26 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
+  $data['civicrm_phone']['phone_ext'] = array(
+    'title' => t('Phone Number Extension'),
+    'help' => t('Extension for Phone Number'),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_phone',
+      'click sortable' => TRUE,
+      'dao class' => 'CRM_Core_DAO_Phone',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+      'allow empty' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+  
   //CONTACT ID contact this number belongs to
   $data['civicrm_phone']['contact_id'] = array(
     'title' => t('Contact ID'),
