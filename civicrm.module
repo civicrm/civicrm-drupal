@@ -287,10 +287,36 @@ function civicrm_initialize() {
       drupal_add_css($path . '/filter.css');
     }
   }
-
+  setMySQLTimeZone();
   return TRUE;
 }
 
+function setMySQLTimeZone(){
+ // get UFTImeZone should go on UFClasses -@ todo = move it
+ $timeZoneOffset = getUFTimeZone();
+ if($timeZoneOffset){
+  $sql = "SET time_zone = '$timeZoneOffset'";
+  CRM_Core_DAO::executequery($sql);
+ }
+}
+
+function getUFTimeZone(){
+ global $user;
+ if (variable_get('configurable_timezones', 1) && $user->uid && strlen($user->timezone)) {
+  $timezone = $user->timezone;
+ } else {
+  $timezone = variable_get('date_default_timezone', null);
+ }
+ if(empty($timezone)){
+  return false;
+ }
+ $hour = $user->timezone / 3600;
+ $timeZoneOffset = sprintf("%02d:%02d", $timezone / 3600, ($timezone/60)%60 );
+ if($timeZoneOffset > 0){
+  $timeZoneOffset = '+' . $timeZoneOffset;
+ }
+ return $timeZoneOffset;
+}
 /**
  * Function to get the contact type
  *
@@ -505,7 +531,7 @@ function civicrm_categories(&$user) {
   require_once 'CRM/Core/BAO/UFGroup.php';
   require_once 'CRM/Core/BAO/UFField.php';
 
-  $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account');
+  $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active'));
   $ufGroups = array();
 
   $weight = 100;
@@ -881,12 +907,12 @@ function _civicrm_rebuild($form, &$form_state) {
 }
 
 /*
- * 
- * Implementation of hook_theme_registry_alter(). 
- * Based on the jquery_update module. 
- * 
+ *
+ * Implementation of hook_theme_registry_alter().
+ * Based on the jquery_update module.
+ *
  * Make sure this page preprocess function runs last
- * so that a theme can't call drupal_get_js(). 
+ * so that a theme can't call drupal_get_js().
  */
 function civicrm_theme_registry_alter(&$theme_registry) {
   if (isset($theme_registry['page'])) {
