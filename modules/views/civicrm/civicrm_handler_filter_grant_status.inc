@@ -42,8 +42,7 @@ class civicrm_handler_filter_grant_status extends views_handler_filter_in_operat
       if (!civicrm_initialize()) {
         return;
       }
-      require_once 'CRM/Grant/PseudoConstant.php';
-      self::$_grantStatus = CRM_Grant_PseudoConstant::grantStatus();
+      self::$_grantStatus = CRM_Core_PseudoConstant::get('CRM_Grant_DAO_Grant', 'status_id');;
     }
   }
 
