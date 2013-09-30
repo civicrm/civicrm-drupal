@@ -1213,28 +1213,3 @@ function civicrm_modules_uninstalled($modules) {
   CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
 }
 
-/**
- * Implementation of hook_flush_caches().
- */
-function civicrm_clear_all_caches_flush_caches() {
-
-  if (!civicrm_initialize()) {
-    return;
-  }
-
-  require_once 'CRM/Core/Config.php';
-  $config = CRM_Core_Config::singleton();
-
-  // clear db caching
-  CRM_Core_Config::clearDBCache();
-
-  // also cleanup the templates_c directory
-  $config->cleanup(1, FALSE);
-
-  // also cleanup the session object
-  $session = CRM_Core_Session::singleton();
-  $session->reset(1);
-  
-  return;
-}
-
