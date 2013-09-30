@@ -44,7 +44,7 @@ function civicrmtheme_enable() {
  * Implementation of hook_install().
  */
 function civicrmtheme_install() {
-  $link = array('!link' => l(t('Administer > Appearance > Administration theme'), 'admin/appearance'));
+  $link = l(t('Administer > Appearance > Administration theme'), 'admin/appearance');
   drupal_set_message(t("CiviCRM theme configuration setting is available under !link", array('!link' => $link)));
 }
 
