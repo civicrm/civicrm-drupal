@@ -1303,7 +1303,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'views_handler_sort',
     ),
   );
-  
+
   //CONTACT ID contact this number belongs to
   $data['civicrm_phone']['contact_id'] = array(
     'title' => t('Contact ID'),
