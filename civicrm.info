@@ -81,6 +81,7 @@ files[] = modules/views/civicrm/views_handler_argument_civicrm_year_month.inc
 
 ; relationship handlers
 files[] = modules/views/civicrm/civicrm_handler_relationship.inc
+files[] = modules/views/civicrm/civicrm_handler_relationship_relationship.inc
 files[] = modules/views/civicrm/civicrm_handler_relationship_contact2users.inc
 
 ; views plugins

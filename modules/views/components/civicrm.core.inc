@@ -143,25 +143,25 @@ function _civicrm_core_data(&$data, $enabled) {
 
   $data['civicrm_contact']['relationship_id_a'] = array(
     'real field' => 'id',
-    'title' => t('CiviCRM Relationship (via Contact A)'),
-    'help' => t('Connects a contact (as contact a) to a relationship'),
+    'title' => t('CiviCRM Relationship (starting from contact A)'),
+    'help' => t('Connects a contact (as contact A) to a relationship.'),
     'relationship' => array(
       'base' => 'civicrm_relationship',
       'base field' => 'contact_id_a',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Relationship (via Contact A)'),
+      'handler' => 'civicrm_handler_relationship_relationship',
+      'label' => t('CiviCRM Relationship (starting from contact A)'),
     ),
   );
 
   $data['civicrm_contact']['relationship_id_b'] = array(
     'real field' => 'id',
-    'title' => t('CiviCRM Relationship (via Contact B)'),
-    'help' => t('Connects a contact (as contact b) to a relationship'),
+    'title' => t('CiviCRM Relationship (starting from Contact B)'),
+    'help' => t('Connects a contact (as contact B) to a relationship.'),
     'relationship' => array(
       'base' => 'civicrm_relationship',
       'base field' => 'contact_id_b',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Relationship (via Contact B)'),
+      'handler' => 'civicrm_handler_relationship_relationship',
+      'label' => t('CiviCRM Relationship (starting from contact B)'),
     ),
   );
 
