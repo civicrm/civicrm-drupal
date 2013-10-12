@@ -79,7 +79,7 @@ class civicrm_handler_field_activity extends civicrm_handler_field {
     }
 
     $def = $this->definition;
-dsm($def);
+
     $leftField         = $this->definition['base'] == 'civicrm_activity_contact' ? $this->field : $this->definition['other_field'];
     $def['table']      = $this->definition['base'];
     $def['field']      = $this->definition['base field'];
@@ -99,7 +99,7 @@ dsm($def);
     $join->definition = $def;
     $join->construct();
     $join->adjusted = TRUE;
-dsm($join);
+
     // Add a join condition to the on clause to narrow down the relationship type shown
     if (isset($this->options['record_type']) && $this->options['record_type']) {
       $this->query->table_queue[$this->table_alias]['join']->extra[] = array(
