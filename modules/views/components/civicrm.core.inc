@@ -165,18 +165,6 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
-  $data['civicrm_contact']['activity_contact'] = array(
-    'real field' => 'id',
-    'title' => t('CiviCRM Activity Contact'),
-    'help' => t('Activity Contact.'),
-    'relationship' => array(
-      'base' => 'civicrm_activity_contact',
-      'base field' => 'contact_id',
-      'handler' => 'civicrm_handler_field_activity_record_type',
-      'label' => t('CiviCRM Activity Contact'),
-    ),
-  );
-
   // Drupal ID of the contact (from uf_match.uf_id)
   $data['civicrm_contact']['drupal_id'] = array(
     'real field' => 'id',
