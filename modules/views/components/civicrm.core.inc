@@ -165,6 +165,18 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
+  $data['civicrm_contact']['activity_contact'] = array(
+    'real field' => 'id',
+    'title' => t('CiviCRM Activity Contact'),
+    'help' => t('Activity Contact.'),
+    'relationship' => array(
+      'base' => 'civicrm_activity_contact',
+      'base field' => 'contact_id',
+      'handler' => 'civicrm_handler_field_activity_record_type',
+      'label' => t('CiviCRM Activity Contact'),
+    ),
+  );
+
   // Drupal ID of the contact (from uf_match.uf_id)
   $data['civicrm_contact']['drupal_id'] = array(
     'real field' => 'id',
@@ -1878,6 +1890,12 @@ function _civicrm_core_data(&$data, $enabled) {
   // let's add activity contact table
   $data['civicrm_activity_contact']['table']['group'] = t('CiviCRM Activity Contacts');
 
+  $data['civicrm_activity_contact']['table']['base'] = array(
+    'field' => 'id',
+    'title' => t('CiviCRM Activity Contacts'),
+    'help' => t("View displays CiviCRM Activity, with connection to contacts."),
+  );
+
   // Explain how this table joins to others.
   $data['civicrm_activity_contact']['table']['join'] = array(
     // Directly links to activity table
@@ -1891,13 +1909,26 @@ function _civicrm_core_data(&$data, $enabled) {
     'title' => t('Activity Contact ID'),
     'real field' => 'contact_id',
     'help' => t('The contact related to the activity.'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => FALSE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+    ),
     'relationship' => array(
       'base' => 'civicrm_contact',
-      'left_field' => 'id',
-      'field' => 'contact_id',
-      'handler' => 'views_handler_relationship',
+      'base field' => 'id',
+      'handler' => 'civicrm_handler_field_activity',
       'label' => t('CiviCRM Activity Contact ID'),
-    )
+      'relationship table' => 'civicrm_activity',
+      'relationship field' => 'activity_id',
+      'other_field' => 'contact_id',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+      'allow empty' => TRUE,
+    ),
   );
 
   $data['civicrm_activity_contact']['record_type'] = array(
@@ -2171,7 +2202,7 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
-  civicrm_views_add_date_arguments($data['civicrm_replationship'], array(
+  civicrm_views_add_date_arguments($data['civicrm_relationship'], array(
     'title' => 'End Date',
       'name' => 'end_date',
     ));
