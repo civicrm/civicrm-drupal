@@ -67,8 +67,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'field' => 'id',
     ),
     // Directly links to activity.
-    'civicrm_activity' => array(
-      'left_field' => 'source_contact_id',
+    'civicrm_activity_contact' => array(
+      'left_field' => 'contact_id',
       'field' => 'id',
     ),
     // Directly links to membership.
@@ -1498,15 +1498,10 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
-  $data['civicrm_activity']['source_contact_id'] = array(
-    'title' => t('Source Contact'),
-    'help' => t('The contact who scheduled this activity'),
-    'relationship' => array(
-      'base' => 'civicrm_contact',
-      'field' => 'source_contact_id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Source Contact'),
-    ),
+  $data['civicrm_activity']['source_record_id'] = array(
+    'title' => t('Record Source'),
+    'real field' => 'source_record_id',
+    'help' => t('Source record activity'),
   );
 
   /*
@@ -1880,12 +1875,17 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
-  // CHILLING OUT AT THE civicrm_activity_assignment TABLE
+  // let's add activity contact table
+  $data['civicrm_activity_contact']['table']['group'] = t('CiviCRM Activity Contacts');
 
-  $data['civicrm_activity_assignment']['table']['group'] = t('CiviCRM Activity Assignments');
+  $data['civicrm_activity_contact']['table']['base'] = array(
+    'field' => 'id',
+    'title' => t('CiviCRM Activity Contacts'),
+    'help' => t("View displays CiviCRM Activity, with connection to contacts."),
+  );
 
   // Explain how this table joins to others.
-  $data['civicrm_activity_assignment']['table']['join'] = array(
+  $data['civicrm_activity_contact']['table']['join'] = array(
     // Directly links to activity table
     'civicrm_activity' => array(
       'left_field' => 'id',
@@ -1893,42 +1893,57 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
-  $data['civicrm_activity_assignment']['assignee_contact_id'] = array(
-    'title' => t('Assignee Contact ID'),
-    'help' => t('The contact who is assigned the activity.'),
+  $data['civicrm_activity_contact']['contact_id'] = array(
+    'title' => t('Activity Contact ID'),
+    'real field' => 'contact_id',
+    'help' => t('The contact related to the activity.'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => FALSE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+    ),
     'relationship' => array(
       'base' => 'civicrm_contact',
-      'left_field' => 'id',
-      'field' => 'assignee_contact_id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Assignee Contact ID'),
+      'base field' => 'id',
+      'handler' => 'civicrm_handler_field_activity',
+      'label' => t('CiviCRM Activity Contact ID'),
+      'relationship table' => 'civicrm_activity',
+      'relationship field' => 'activity_id',
+      'other_field' => 'contact_id',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+      'allow empty' => TRUE,
     ),
   );
 
-  // CHILLING OUT AT THE civicrm_activity_target TABLE
-
-  $data['civicrm_activity_target']['table']['group'] = t('CiviCRM Activity Targets');
-
-  // Explain how this table joins to others.
-  $data['civicrm_activity_target']['table']['join'] = array(
-    // Directly links to activity table
-    'civicrm_activity' => array(
-      'left_field' => 'id',
-      'field' => 'activity_id',
+  $data['civicrm_activity_contact']['record_type'] = array(
+    'title' => t('Record Type'),
+    'real field' => 'record_type_id',
+    'help' => t('Record type'),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_pseudo_constant',
+      'click sortable' => TRUE,
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Activity_DAO_ActivityContact',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+    ),
+    'filter' => array(
+      'handler' => 'civicrm_handler_filter_pseudo_constant',
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Activity_DAO_ActivityContact',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
     ),
   );
 
-  $data['civicrm_activity_target']['target_contact_id'] = array(
-    'title' => t('Target Contact ID'),
-    'help' => t('The contact who is the activity\'s target.'),
-    'relationship' => array(
-      'base' => 'civicrm_contact',
-      'left_field' => 'id',
-      'field' => 'target_contact_id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Target Contact ID'),
-    ),
-  );
   //Activity Text Link
   $data['civicrm_activity']['text_link'] = array(
     'field' => array(
@@ -2175,7 +2190,7 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
-  civicrm_views_add_date_arguments($data['civicrm_replationship'], array(
+  civicrm_views_add_date_arguments($data['civicrm_relationship'], array(
     'title' => 'End Date',
       'name' => 'end_date',
     ));
