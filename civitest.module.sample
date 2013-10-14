@@ -1928,3 +1928,21 @@ function civitest_civicrm_alterBarcode(&$data, $type, $context ) {
     $data['current_value'] = $data['event_id'] . '-' . $data['participant_id'] . '-' . $data['contact_id'];
   }
 }
+
+function civitest_civicrm_unsubscribeGroups( $op, $mailingId, $contactId, &$groups, &$baseGroups ) {
+  // do the below for even mailing ids only
+  // in a real implementation, you will have some logic to restrict what mailings
+  // you want to handle the unsub via a different patch
+  // this hook basically redirects you to a custom unsubscribe page
+  // thanx to parvez @ veda consulting for this example
+  if ($op == 'unsubscribe' && $mailingId % 2 == 0) {
+    $oConfig                 = CRM_Core_Config::singleton();
+    $sUnsubscribeRedirectUrl = $oConfig->unsubscribe_redirect_url;
+    if ( !empty( $sUnsubscribeRedirectUrl ) ) {
+      CRM_Utils_System::redirect( $sUnsubscribeRedirectUrl );
+    } else {
+      CRM_Core_Error::statusBounce( 'Unsubscribe URL has not been set.' );
+    }
+    CRM_Utils_System::civiExit();
+  }
+}
