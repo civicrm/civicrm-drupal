@@ -57,7 +57,14 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'left_field' => 'id',
     'field' => 'contribution_recur_id',
   );
+  
   //TABLE JOINS FOR CIVICRM CONTRIBUTIONS GO HERE!
+  
+  $data['civicrm_contribution']['table']['join']['civicrm_contact'] = array(
+    'left_table' => 'civicrm_contact',
+    'left_field' => 'id',
+    'field' => 'contact_id',
+  );
 
   $data['civicrm_contribution']['table']['join']['civicrm_participant'] = array(
     'left_table' => 'civicrm_participant_payment',
