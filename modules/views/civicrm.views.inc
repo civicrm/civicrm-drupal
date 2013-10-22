@@ -317,9 +317,12 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $groupID, $subTyp
     case "Individual":
     case "Household":
     case "Organization":
-    case "Address":
     case "Group":
       $jointable = 'civicrm_contact';
+      break;
+
+    case "Address":
+      $jointable = 'civicrm_address';
       break;
 
     case "Event":

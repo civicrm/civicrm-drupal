@@ -256,6 +256,7 @@ function _civicrm_core_data(&$data, $enabled) {
     // The item it appears as on the UI,
     'title' => t('Prefix'),
     // The help that appears on the UI,
+    'real field' => 'prefix_id',
     'help' => t('Prefix'),
     'field' => array(
       'handler' => 'civicrm_handler_field_pseudo_constant',
@@ -279,6 +280,7 @@ function _civicrm_core_data(&$data, $enabled) {
     // The item it appears as on the UI,
     'title' => t('Suffix'),
     // The help that appears on the UI,
+    'real field' => 'suffix_id',
     'help' => t('Suffix'),
     'field' => array(
       'handler' => 'civicrm_handler_field_pseudo_constant',
