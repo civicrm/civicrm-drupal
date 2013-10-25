@@ -305,8 +305,9 @@ function civicrm_initialize() {
         drupal_add_css($path . '/filter.css');
       }
     }
+    CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
   }
-  $config->userSystem->setMySQLTimeZone();
+
   return TRUE;
 }
 
