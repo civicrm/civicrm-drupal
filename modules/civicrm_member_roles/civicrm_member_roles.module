@@ -471,7 +471,9 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL) {
     $sql = "SELECT DISTINCT uf.contact_id FROM civicrm_uf_match uf
       LEFT JOIN civicrm_membership m ON uf.contact_id = m.contact_id
       WHERE m.id IS NOT NULL AND m.membership_type_id IN (" . implode(',', array_keys($memberroles)) . ")
-      ORDER BY m.id DESC";// let's prioritise most recent
+      ORDER BY m.end_date DESC";
+    //let's prioritise those ending last as then we are more likely to get relevant ones if it doesn't complete
+    //obviously a better fix would be for it to chunk & save where it is up to
     $params = CRM_Core_DAO::$_nullArray;
     $errorMsg = 'unknown error';
     $errorParams = array();
