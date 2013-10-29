@@ -227,7 +227,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'get',
-      'dao class' => 'CRM_Contact_DAO_Contact',
+      'dao class' => 'CRM_Contact_BAO_Contact',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -237,7 +237,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'get',
-      'dao class' => 'CRM_Contact_DAO_Contact',
+      'dao class' => 'CRM_Contact_BAO_Contact',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -255,7 +255,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'get',
-      'dao class' => 'CRM_Contact_DAO_Contact',
+      'dao class' => 'CRM_Contact_BAO_Contact',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -264,7 +264,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_filter_pseudo_constant',
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'get',
-      'dao class' => 'CRM_Contact_DAO_Contact',
+      'dao class' => 'CRM_Contact_BAO_Contact',
     ),
   );
   // Suffix
@@ -279,7 +279,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'get',
-      'dao class' => 'CRM_Contact_DAO_Contact',
+      'dao class' => 'CRM_Contact_BAO_Contact',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -288,7 +288,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_filter_pseudo_constant',
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'get',
-      'dao class' => 'CRM_Contact_DAO_Contact',
+      'dao class' => 'CRM_Contact_BAO_Contact',
     ),
   );
 
@@ -362,7 +362,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'get',
-      'dao class' => 'CRM_Contact_DAO_Contact',
+      'dao class' => 'CRM_Contact_BAO_Contact',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -372,7 +372,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'get',
-      'dao class' => 'CRM_Contact_DAO_Contact',
+      'dao class' => 'CRM_Contact_BAO_Contact',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
