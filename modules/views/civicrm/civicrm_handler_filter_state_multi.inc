@@ -60,10 +60,15 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
          && count((array) $this->view->exposed_input[$country_field])) {
           $selected_countries = (array) $this->view->exposed_input[$country_field];
         }
+        $allowedCountries = array_keys($handler->value_options);
+        if(empty($allowedCountries)) {
+          $allowedCountries = array_keys(CRM_Core_PseudoConstant::country());
+        }
 
         $result = db_query('SELECT id, name, country_id FROM {civicrm_state_province} WHERE country_id IN (:countries)',
-          array(':countries' => array_keys($handler->value_options)))
+          array(':countries' => $allowedCountries))
         ->fetchAllAssoc('id');
+
         foreach ($result as $state_id => $state) {
           $state_html[$state->country_id] .= '<option value="' . $state_id . '">' . $state->name . '</option>';
           if(in_array($state->country_id, $selected_countries)) {
@@ -83,13 +88,19 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
       $js = '(function ($) {
                Drupal.behaviors.civicrm_views_' . $fid . ' = {
                  attach: function (context, settings) {
-                   $("select[name=' . $country_field . ']").change( function() {
-                     var selectedCountry = $(this).val();
+                   $("#edit-' . $country_field . '").change( function() {
+                     var stateList = \'<option value="All">&lt;Any&gt;</option>\';
+                     var selectedCountries = $(this).val();
                      // get the string of options
-                     var stateList = \'<option value="All">&lt;Any&gt;</option>\' + ((Drupal.settings.civicrm_views.states[selectedCountry])? Drupal.settings.civicrm_views.states[selectedCountry] : \'\');
+                     if(jQuery.type(selectedCountries) === "string") {
+                       selectedCountries = [selectedCountries];
+                     }
+                     $.each(selectedCountries, function(index, selectedCountry) {
+                       stateList = stateList + ((Drupal.settings.civicrm_views.states[selectedCountry])? Drupal.settings.civicrm_views.states[selectedCountry] : \'\');
+                     });
                      $("select[name=' . $this->field . ']").empty();
                      $("select[name=' . $this->field . ']").html(stateList);
-                   })
+                   });
                  }
                }
              })(jQuery); ';
