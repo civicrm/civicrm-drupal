@@ -21,7 +21,7 @@
    | GNU Affero General Public License or the licensing of CiviCRM,     |
    | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
    +--------------------------------------------------------------------+
-   
+
    **
    * @file Provides Views integration for CiviCRM Multi-Select Country custom fields
    *
@@ -38,7 +38,6 @@ class civicrm_handler_filter_country_multi extends views_handler_filter_in_opera
 
   function get_value_options() {
     if (!isset($this->value_options)) {
-      require_once 'CRM/Core/PseudoConstant.php';
       $countries = CRM_Core_PseudoConstant::country();
       $options = array();
       if (is_array($countries)) {
@@ -60,7 +59,7 @@ class civicrm_handler_filter_country_multi extends views_handler_filter_in_opera
         'values' => 1,
         ),
       );
-    
+
     return $operators;
   }
 
