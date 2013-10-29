@@ -131,14 +131,6 @@ function _civicrm_core_data(&$data, $enabled) {
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
-    'relationship' => array(
-      'base' => 'civicrm_contribution',
-      'title' => 'Contribution Records',
-      'left_field' => 'contact_id',
-      'field' => 'id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Contributions'),
-    ),
   );
 
   $data['civicrm_contact']['relationship_id_a'] = array(
