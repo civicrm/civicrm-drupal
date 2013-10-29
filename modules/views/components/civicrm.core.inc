@@ -847,7 +847,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'views_handler_argument',
     ),
     'filter' => array(
-      'handler' => 'civicrm_handler_filter_pseudo_constant',
+      'handler' => 'civicrm_handler_filter_state_multi',
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'stateProvince',
@@ -935,7 +935,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'views_handler_argument',
     ),
     'filter' => array(
-      'handler' => 'civicrm_handler_filter_pseudo_constant',
+      'handler' => 'civicrm_handler_filter_country_multi',
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'country',
