@@ -129,15 +129,29 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
 
     $this->ensure_my_table();
 
-    $sep = CRM_Core_DAO::VALUE_SEPARATOR;
-
     // negated operator uses AND, positive uses OR
-    $op = ($this->operator == 'in' || $this->operator == 'all') ? 'LIKE' : 'NOT LIKE';
-    $glue = ($this->operator == 'in') ? 'OR ' : 'AND ';
-    foreach ($this->value as $value) {
-      $clauses[] = "$this->table_alias.$this->real_field " . $op . " '%" . $sep . $value . $sep . "%' ";
+    $op = $glue = null;
+    switch ($this->operator) {
+      case 'in':
+        $op = ' = ';
+        $glue = ' OR ';
+        break;
+      case 'not in':
+        $op = ' != ';
+        $glue = ' AND ';
+        break;
+      case 'all' :
+        $clause = "$this->table_alias.$this->real_field IN (" . implode(',', $this->value) . ")";
+        break;
     }
-    $clause = implode($glue, $clauses);
+
+    if ($op) {
+      foreach ($this->value as $value) {
+        $clauses[] = "$this->table_alias.$this->real_field " . $op . $value;
+      }
+      $clause = implode($glue, $clauses);
+    }
+
     $this->query->add_where_expression($this->options['group'], $clause);
   }
 }
