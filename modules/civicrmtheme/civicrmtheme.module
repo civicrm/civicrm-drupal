@@ -118,8 +118,10 @@ function civicrmtheme_custom_theme() {
   $args = explode('?', $_GET['q']);
   $path = $args[0];
 
+  $menuPath = explode('?', $path);
+
   // Get the menu for above URL.
-  $item = CRM_Core_Menu::get($path);
+  $item = CRM_Core_Menu::get($menuPath[0]);
 
   // Check for public pages
   // If public page and civicrm public theme is set, apply civicrm public theme
