@@ -225,7 +225,9 @@ function civicrm_initialize() {
     else {
       $settingsFile = conf_init() . '/civicrm.settings.php';
     }
-    define('CIVICRM_SETTINGS_PATH', $settingsFile);
+    if (!defined('CIVICRM_SETTINGS_PATH')) {
+      define('CIVICRM_SETTINGS_PATH', $settingsFile);
+    }
     $error = include_once ($settingsFile);
 
     // get ready for problems
