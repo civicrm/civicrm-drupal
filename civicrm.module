@@ -78,7 +78,6 @@ function civicrm_help($section) {
         return;
       }
 
-      require_once 'CRM/Utils/System.php';
       $docLinkAdmin  = CRM_Utils_System::docURL2("Administrator's Guide", TRUE);
       $docLinkAccess = CRM_Utils_System::docURL2("Access Control", TRUE);
       $output        = '<p>' . t('The CiviCRM module stores information on the universe of people associated with a community and on their interactions such as emails, donations, petitions, events, etc. It can act as a stand alone contact management system or it can be integrated with mass mailer, volunteer management, petition, and event finding. CiviCRM enables organizations to maintain all these activities in a single database, creating efficiencies and new opportunities for communities to better communicate and benefit from relationships with their community members.') . '</p>';
@@ -124,7 +123,6 @@ function civicrm_perm() {
 
   $config = CRM_Core_Config::singleton();
 
-  require_once 'CRM/Core/Permission.php';
   $permissions = CRM_Core_Permission::basicPermissions();
   return array_keys($permissions);
 }
@@ -145,7 +143,6 @@ function civicrm_block($op = 'list', $delta = '0') {
   }
 
   // The $op parameter determines what piece of information is being requested.
-  require_once 'CRM/Core/Block.php';
 
   // CRM_Core_Error::backtrace( "$op, $delta" );
 
@@ -361,8 +358,6 @@ function civicrm_invoke() {
 
   civicrm_cache_disable();
 
-  require_once 'CRM/Core/Error.php';
-
   $args = explode('/', $_GET['q']);
 
   // synchronize the drupal uid with the contacts db
@@ -375,13 +370,11 @@ function civicrm_invoke() {
 
 
   if (!isset($args[1]) or $args[1] != 'upgrade') {
-    require_once 'CRM/Core/BAO/UFMatch.php';
     CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal',
       civicrm_get_ctype('Individual')
     );
   }
 
-  require_once 'CRM/Core/Invoke.php';
   return CRM_Core_Invoke::invoke($args);
 }
 
@@ -411,7 +404,6 @@ function civicrm_user($type, &$edit, &$user, $category = NULL) {
 
   switch ($type) {
     case 'login':
-      require_once 'CRM/Core/BAO/UFMatch.php';
       return CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal',
         civicrm_get_ctype('Individual'), TRUE
       );
@@ -441,7 +433,6 @@ function civicrm_user($type, &$edit, &$user, $category = NULL) {
         return civicrm_register_data($edit, $user, $category, FALSE);
       }
       else {
-        require_once 'CRM/Core/BAO/UFMatch.php';
         CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal',
           civicrm_get_ctype('Individual')
         );
@@ -456,7 +447,6 @@ function civicrm_user($type, &$edit, &$user, $category = NULL) {
       if (isset($edit['mail']) &&
         trim($edit['mail']) != trim($user->mail)
       ) {
-        require_once 'CRM/Core/BAO/UFMatch.php';
         $contactID = CRM_Core_BAO_UFMatch::getContactId($user->uid);
 
         // cant find the contactID, so lets skip
@@ -472,7 +462,6 @@ function civicrm_user($type, &$edit, &$user, $category = NULL) {
     case 'after_update':
       // ensure preferences navigation is cleared so new role perms are reflected
       // CRM-7450
-      require_once 'CRM/Core/BAO/Navigation.php';
       CRM_Core_BAO_Navigation::resetNavigation();
       break;
 
@@ -506,7 +495,6 @@ function civicrm_user($type, &$edit, &$user, $category = NULL) {
       return civicrm_categories($user);
 
     case 'delete':
-      require_once 'CRM/Core/BAO/UFMatch.php';
       return CRM_Core_BAO_UFMatch::deleteUser($user->uid);
 
     case 'logout':
@@ -527,9 +515,6 @@ function civicrm_categories(&$user) {
   if (!civicrm_initialize()) {
     return;
   }
-
-  require_once 'CRM/Core/BAO/UFGroup.php';
-  require_once 'CRM/Core/BAO/UFField.php';
 
   $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active'));
   $ufGroups = array();
@@ -555,19 +540,14 @@ function _civicrm_categories_access($profile_id) {
     return FALSE;
   }
 
-  require_once 'CRM/Core/BAO/UFGroup.php';
   $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, FALSE);
 
-  require_once 'CRM/Utils/Array.php';
   if (is_array(CRM_Utils_Array::value($profile_id, $allUFGroups))) {
     return TRUE;
   }
 }
 
 function civicrm_register_data($edit, &$user, $category, $reset, $doNotProcess = FALSE) {
-  require_once 'CRM/Core/BAO/UFMatch.php';
-  require_once 'CRM/Core/BAO/UFGroup.php';
-  require_once 'CRM/Core/Action.php';
 
   // lets suppress key generation for all registration forms
   civicrm_key_disable();
@@ -610,8 +590,6 @@ function civicrm_register_data($edit, &$user, $category, $reset, $doNotProcess =
 }
 
 function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FALSE) {
-  require_once 'CRM/Core/BAO/UFMatch.php';
-  require_once 'CRM/Core/BAO/UFGroup.php';
 
   // lets suppress key generation for all CMS forms
   civicrm_key_disable();
@@ -636,10 +614,8 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
   $session = CRM_Core_Session::singleton();
   $sessionUserID = $session->get('userID');
 
-  require_once 'CRM/Contact/BAO/Contact/Utils.php';
   if ($sessionUserID != $userID) {
     // do not allow edit for anon users in joomla frontend, CRM-4668, unless u have checksum CRM-5228
-    require_once 'CRM/Contact/BAO/Contact/Permission.php';
     $config = CRM_Core_Config::singleton();
     if ($config->userFrameworkFrontend) {
       CRM_Contact_BAO_Contact_Permission::validateOnlyChecksum($userID, $this);
@@ -653,7 +629,6 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
 
   //to allow Edit any profile if user have permission
   $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'title');
-  require_once 'CRM/Core/Permission.php';
   $ufGroupIDs = CRM_Core_Permission::ufGroupClause(CRM_Core_Permission::EDIT, NULL, TRUE);
 
   if (in_array($profileID, $ufGroupIDs)) {
@@ -679,12 +654,9 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
 }
 
 function civicrm_view_data(&$user) {
-  require_once 'CRM/Core/BAO/UFMatch.php';
   $userID = CRM_Core_BAO_UFMatch::getContactId($user->uid);
   if ($userID) {
     // make sure user has permission to view the record
-    require_once 'CRM/Contact/BAO/Contact.php';
-    require_once 'CRM/Contact/BAO/Contact/Permission.php';
     $contactURL = NULL;
     if (CRM_Core_Permission::check('access CiviCRM') &&
       CRM_Contact_BAO_Contact_Permission::allow($userID)
@@ -703,9 +675,6 @@ function civicrm_view_data(&$user) {
       $contactURL .= '<a href="' . $url . '">&raquo; ' . t("View Contact Dashboard") . '</a>';
     }
 
-    require_once 'CRM/Profile/Page/Dynamic.php';
-    require_once 'CRM/Core/BAO/UFGroup.php';
-    require_once 'CRM/Core/BAO/UFField.php';
 
     $ctype = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $userID, 'contact_type');
 
@@ -764,11 +733,6 @@ function civicrm_validate_data($edit, &$user, $title) {
 
   $validated = TRUE;
 
-  require_once 'CRM/Utils/Array.php';
-
-  require_once 'CRM/Core/BAO/UFMatch.php';
-  require_once 'CRM/Core/BAO/UFGroup.php';
-
   // check for either user/register or admin/user/user/create
   $register = (arg(1) == 'register' || arg(3) == 'create') ? TRUE : FALSE;
   $userID   = CRM_Core_BAO_UFMatch::getContactId($user->uid);
@@ -826,7 +790,6 @@ function civicrm_enable() {
   }
 
   // also invoke civicrm menu rebuild
-  require_once 'CRM/Core/Menu.php';
   CRM_Core_Menu::store();
 
   //Update the 'blocks' DB table with the blocks
@@ -885,7 +848,6 @@ function civicrm_form_alter(&$form, $formValues, $formID) {
     if (!civicrm_initialize()) {
       return;
     }
-    require_once 'CRM/Core/BAO/Navigation.php';
     CRM_Core_BAO_Navigation::resetNavigation();
   }
   elseif ($formID == 'user_register') {
@@ -1090,7 +1052,6 @@ function civicrm_filter($op, $delta = 0, $format = -1, $text = "") {
       civicrm_initialize();
       $config = CRM_Core_Config::singleton();
       $smarty = CRM_Core_Smarty::singleton();
-      require_once 'CRM/Core/Smarty/resources/String.php';
       civicrm_smarty_register_string_resource();
       $was_secure       = $smarty->security;
       $smarty->security = TRUE;
