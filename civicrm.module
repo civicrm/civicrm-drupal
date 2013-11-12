@@ -991,6 +991,8 @@ function _civicrm_filter_process($text, $filter, $format, $langcode, $cache, $ca
   civicrm_initialize();
   $config = CRM_Core_Config::singleton();
   $smarty = CRM_Core_Smarty::singleton();
+  // as this file is not a class (not sure why) we need the require once
+  require_once 'CRM/Core/Smarty/resources/String.php';
   civicrm_smarty_register_string_resource();
 
   $was_secure       = $smarty->security;
