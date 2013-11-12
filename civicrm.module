@@ -203,16 +203,7 @@ function civicrm_initialize() {
     echo "CiviCRM requires PHP Version $minPhpVersion or greater. You are running PHP Version " . PHP_VERSION . "<p>";
     exit();
   }
-  if(file_exists(dirname(__FILE__) . '/../CRM/Core/ClassLoader.php')) {
-    require_once dirname(__FILE__) . '/../CRM/Core/ClassLoader.php';
-    CRM_Core_ClassLoader::singleton()->register();
-  }
-  else{
-    // if new directory structure is in use
-    require_once dirname(__FILE__) . '/../civicrm-core/CRM/Core/ClassLoader.php';
-    CRM_Core_ClassLoader::singleton()->register();
-  }
-
+  _civicrm_registerClassLoader();
 
   static $initialized = FALSE;
   static $failure = FALSE;
@@ -316,6 +307,33 @@ function civicrm_initialize() {
   return TRUE;
 }
 
+/**
+ * Find & register classloader and store location in Drupal variable.
+ * Per CRM-13737 this allows for drupal code to be outside the core directory
+ * which makes it easier for sites managing their own installation methods that
+ * may need to cover different drupal versions
+ */
+function _civicrm_registerClassLoader() {
+  $path = variable_get('civicrm_class_loader');
+  if (empty($path) || !file_exists($path)) {
+    $candidates = array(
+        dirname(__FILE__) . '/../CRM/Core/ClassLoader.php',
+        dirname(__FILE__) . '/../civicrm-core/CRM/Core/ClassLoader.php',
+        dirname(__FILE__) . '/../core/CRM/Core/ClassLoader.php',
+        // ... ad nauseum ...
+    );
+    foreach ($candidates as $candidate) {
+      if (file_exists($candidate)) {
+        $path = $candidate;
+        variable_set('civicrm_class_loader', $candidate);
+        break;
+      }
+    }
+  }
+
+  require_once $path;
+  CRM_Core_ClassLoader::singleton()->register();
+}
 /**
  * Function to get the contact type
  *
