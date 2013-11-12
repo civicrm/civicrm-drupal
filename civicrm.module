@@ -1079,6 +1079,7 @@ function civicrm_filter($op, $delta = 0, $format = -1, $text = "") {
       civicrm_initialize();
       $config = CRM_Core_Config::singleton();
       $smarty = CRM_Core_Smarty::singleton();
+      require_once 'CRM/Core/Smarty/resources/String.php';
       civicrm_smarty_register_string_resource();
       $was_secure       = $smarty->security;
       $smarty->security = TRUE;
