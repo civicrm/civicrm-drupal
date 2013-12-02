@@ -31,7 +31,7 @@ class civicrm_handler_filter_phone_type extends views_handler_filter_in_operator
       if (!civicrm_initialize()) {
         return;
       }
-      self::$_phoneTypes = CRM_Core_PseudoConstant::get('CRM_Core_DAO_Phone', 'phone_type_id');
+      self::$_phoneTypes = CRM_Core_PseudoConstant::get('CRM_Core_BAO_Phone', 'phone_type_id');
     }
   }
 

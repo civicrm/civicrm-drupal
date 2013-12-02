@@ -8,7 +8,7 @@ class civicrm_handler_field_phone extends views_handler_field {
       if (!civicrm_initialize()) {
         return;
       }
-      self::$_phoneType = CRM_Core_PseudoConstant::get('CRM_Core_DAO_Phone', 'phone_type_id');
+      self::$_phoneType = CRM_Core_PseudoConstant::get('CRM_Core_BAO_Phone', 'phone_type_id');
     }
   }
 
