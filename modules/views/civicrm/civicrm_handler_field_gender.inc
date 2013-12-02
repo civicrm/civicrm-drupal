@@ -39,8 +39,7 @@ class civicrm_handler_field_gender extends views_handler_field {
       if (!civicrm_initialize()) {
         return;
       }
-      require_once 'CRM/Core/PseudoConstant.php';
-      self::$_gender = CRM_Core_PseudoConstant::gender();
+      self::$_gender = CRM_Core_PseudoConstant::get('CRM_Contact_DAO_Contact', 'gender_id');
     }
   }
 
