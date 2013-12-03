@@ -340,7 +340,7 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
         );
       }
     }
-    $current_groupfields = $current_group['fields'];
+
     $customHTMLTypes = array(
       'Select', 'Multi-Select', 'AdvMulti-Select', 'Radio', 'CheckBox',
       'Select State/Province', 'Select Country', 'Multi-Select Country',
@@ -351,7 +351,7 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
       'Multi-Select State/Province',
     );
 
-    foreach ($current_groupfields as $key => $current_field) {
+    foreach ($current_group['fields'] as $key => $current_field) {
       if (empty($current_field['help_post'])) {
         $current_field['help_post'] = t('Custom Data Field');
       }
