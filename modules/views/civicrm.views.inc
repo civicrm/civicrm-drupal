@@ -51,7 +51,7 @@
    *
    *  function civicrm_views_get_field ($type)
    *  function civicrm_get_argument_handler ($type)
-   *  function civicrm_get_filter_handler ($type)
+   *  function civicrm_views_get_filter ($type)
    *  function civicrm_get_sort_handler ($type)
    *     Assign handlers to custom fields based on the data type (from the database records)
    *
@@ -194,7 +194,7 @@ function civicrm_views_add_fields(&$fields, &$data, $tableName, &$skipFields = N
     }
     $type = CRM_Utils_Array::value('type', $value, 'String');
     $field_handler = civicrm_views_get_field($type);
-    $filter_handler = civicrm_get_filter_handler($type);
+    $filter_handler = civicrm_views_get_filter($type);
     $data[$value['name']] = array(
       'title' => $value['title'],
       'help' => $value['title'],
@@ -343,32 +343,7 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
       }
     }
 
-    $customMultiValueHTMLTypes = array(
-      'Multi-Select', 'AdvMulti-Select', 'CheckBox', 'Multi-Select Country',
-      'Multi-Select State/Province',
-    );
-
     foreach ($current_group['fields'] as $key => $current_field) {
-
-
-      if ($current_field['html_type'] == 'Multi-Select Country') {
-        $filter_handler = array('handler' => 'civicrm_handler_filter_country_multi');
-      }
-      elseif ($current_field['html_type'] == 'Multi-Select State/Province') {
-        $filter_handler = array('handler' => 'civicrm_handler_filter_state_multi');
-      }
-      elseif (!empty($current_field['option_group_id']) &&
-        in_array($current_field['html_type'], $customMultiValueHTMLTypes)
-      ) {
-        $filter_handler = array('handler' => 'civicrm_handler_filter_custom_option');
-      }
-      elseif (!empty($current_field['option_group_id'])) {
-        $filter_handler = array('handler' => 'civicrm_handler_filter_custom_single_option');
-      }
-      else {
-        $filter_handler = civicrm_get_filter_handler($current_field['data_type']);
-      }
-
       //Create the Views Field
       $data[$current_group['table_name']][$current_field['column_name']] = array(
         'title' => empty($current_field['help_post']) ? t('Custom Data Field') : $current_field['help_post'],
@@ -377,7 +352,7 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
         'argument' => array(
           'handler' => civicrm_get_argument_handler($current_field['data_type']),
         ),
-        'filter' => $filter_handler,
+        'filter' => civicrm_views_get_filter($current_field['data_type'], $current_field['html_type'], $current_field['option_group_id']),
         'sort' => array(
           'handler' => civicrm_get_sort_handler($current_field['data_type']),
         ),
@@ -556,13 +531,42 @@ function civicrm_get_argument_handler($type) {
 /**
  * Acquire the proper filter handler by checking against the field's data_type as defined by CRM_Utils_Type.
  *
- * @param $type
- *   A String containing the field type
+ * @param $data_type
+ *   A String containing the field data type
+ * @param $html_type
+ *   A string containing the field html type
  *
  * @return
  *   An array containing the handler name and any extra settings
  */
-function civicrm_get_filter_handler($type) {
+function civicrm_views_get_filter($data_type, $html_type = NULL, $option_group_id = NULL) {
+  // Relying on html types as opposed to data types seems like a code smell.
+  // Would love to be able to remove this logic.
+  $customMultiValueHTMLTypes = array(
+    'Multi-Select', 'AdvMulti-Select', 'CheckBox', 'Multi-Select Country',
+    'Multi-Select State/Province',
+  );
+  if ($html_type == 'Multi-Select Country') {
+    return  array(
+      'handler' => 'civicrm_handler_filter_country_multi',
+    );
+  }
+  elseif ($html_type == 'Multi-Select State/Province') {
+    return array(
+      'handler' => 'civicrm_handler_filter_state_multi',
+    );
+  }
+  elseif (!empty($option_group_id) && in_array($html_type, $customMultiValueHTMLTypes)) {
+    return array(
+      'handler' => 'civicrm_handler_filter_custom_option',
+    );
+  }
+  elseif (!empty($option_group_id)) {
+    return array(
+      'handler' => 'civicrm_handler_filter_custom_single_option',
+    );
+  }
+
   switch ($type) {
     case "String":
     case "Memo":
