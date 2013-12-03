@@ -2249,6 +2249,11 @@ function _civicrm_core_data(&$data, $enabled) {
 
   $data['civicrm_group']['table']['group'] = t('CiviCRM Groups');
 
+  $data['civicrm_group']['table']['base'] = array(
+    'field' => 'id',
+    'title' => t('CiviCRM Groups'),
+    'help' => t("View displays CiviCRM Groups."),
+  );
 
   $data['civicrm_group']['table']['join']['civicrm_contact'] = array(
     'left_table' => 'civicrm_group_contact',
