@@ -49,7 +49,7 @@
    *  function civicrm_views_custom_data_cache($data, $entity_type, $groupID, $subType, $style)
    *     Collects the data from Custom Data Groups and assigns them to base tables.
    *
-   *  function civicrm_get_field_handler ($type)
+   *  function civicrm_views_get_field ($type)
    *  function civicrm_get_argument_handler ($type)
    *  function civicrm_get_filter_handler ($type)
    *  function civicrm_get_sort_handler ($type)
@@ -193,7 +193,7 @@ function civicrm_views_add_fields(&$fields, &$data, $tableName, &$skipFields = N
       }
     }
     $type = CRM_Utils_Array::value('type', $value, 'String');
-    $field_handler = civicrm_get_field_handler($type);
+    $field_handler = civicrm_views_get_field($type);
     $filter_handler = civicrm_get_filter_handler($type);
     $data[$value['name']] = array(
       'title' => $value['title'],
@@ -343,27 +343,13 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
       }
     }
 
-    $customHTMLTypes = array(
-      'Select', 'Multi-Select', 'AdvMulti-Select', 'Radio', 'CheckBox',
-      'Select State/Province', 'Select Country', 'Multi-Select Country',
-      'Multi-Select State/Province', 'Autocomplete-Select',
-    );
     $customMultiValueHTMLTypes = array(
       'Multi-Select', 'AdvMulti-Select', 'CheckBox', 'Multi-Select Country',
       'Multi-Select State/Province',
     );
 
     foreach ($current_group['fields'] as $key => $current_field) {
-      if (in_array($current_field['html_type'],
-          $customHTMLTypes ) ) {
-        $handler = array('handler' => 'civicrm_handler_field_custom',
-                   'click sortable' => TRUE,);
-      } else if ( $current_field['html_type'] == 'File' ) {
-        $handler = array('handler' => 'civicrm_handler_field_custom_file',
-                   'click sortable' => TRUE,);
-      } else {
-        $handler = civicrm_get_field_handler($current_field['data_type']);
-      }
+
 
       if ($current_field['html_type'] == 'Multi-Select Country') {
         $filter_handler = array('handler' => 'civicrm_handler_filter_country_multi');
@@ -387,7 +373,7 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
       $data[$current_group['table_name']][$current_field['column_name']] = array(
         'title' => empty($current_field['help_post']) ? t('Custom Data Field') : $current_field['help_post'],
         'help' => $current_field['help_post'],
-        'field' => $handler,
+        'field' => civicrm_views_get_field($current_field['data_type'], $current_field['html_type']),
         'argument' => array(
           'handler' => civicrm_get_argument_handler($current_field['data_type']),
         ),
@@ -451,52 +437,68 @@ function civicrm_views_get_join_table($entity_type) {
 /**
  * Acquire the proper field handler by checking against the field's data_type as defined by CRM_Utils_Type.
  *
- * @param $type
- *   A String containing the field type
+ * @param $data_type
+ *   A String containing the field data type
+ * @param $html_type
+ *   A String containing the field html type
  *
  * @return
  *   An array containing the handler name and any extra settings
  */
-function civicrm_get_field_handler($type) {
-  switch ($type) {
+function civicrm_views_get_field($data_type, $html_type = NULL) {
+  // Relying on html types as opposed to data types seems like a code smell.
+  // Would love to be able to remove this logic.
+  $customHTMLTypes = array(
+    'Select', 'Multi-Select', 'AdvMulti-Select', 'Radio', 'CheckBox',
+    'Select State/Province', 'Select Country', 'Multi-Select Country',
+    'Multi-Select State/Province', 'Autocomplete-Select',
+  );
+  if (in_array($html_type, $customHTMLTypes)) {
+    return array(
+      'handler' => 'civicrm_handler_field_custom',
+      'click sortable' => TRUE,
+    );
+  }
+  if ($html_type == 'File') {
+    return array(
+      'handler' => 'civicrm_handler_field_custom_file',
+      'click sortable' => TRUE,
+    );
+  }
+
+  switch ($data_type) {
     case "String":
     case "Memo":
       return array(
         'handler' => 'civicrm_handler_field_markup',
         'click sortable' => TRUE,
       );
-
     case "Float":
     case "Int":
       return array(
         'handler' => 'views_handler_field_numeric',
         'click sortable' => TRUE,
       );
-
     case "Date":
       return array(
         'handler' => 'civicrm_handler_field_datetime',
         'click sortable' => TRUE,
       );
-
     case "Boolean":
       return array(
         'handler' => 'views_handler_field_boolean',
         'click sortable' => TRUE,
       );
-
     case "StateProvince":
       return array(
         'handler' => 'civicrm_handler_field_state',
         'click sortable' => TRUE,
       );
-
     case "Country":
       return array(
         'handler' => 'civicrm_handler_field_country',
         'click sortable' => TRUE,
       );
-
     case "County":
       return array(
         'handler' => 'civicrm_handler_field_pseudo_constant',
@@ -504,7 +506,6 @@ function civicrm_get_field_handler($type) {
         'pseudo class' => 'CRM_Core_PseudoConstant',
         'pseudo method' => 'county',
       );
-
     default:
       return array(
         'views_handler_field',
