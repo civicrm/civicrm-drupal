@@ -340,12 +340,13 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
 
     foreach ($current_group['fields'] as $key => $current_field) {
       //Create the Views Field
+      $option_group_id = isset($current_field['option_group_id']) ? $current_field['option_group_id'] : NULL;
       $data[$current_group['table_name']][$current_field['column_name']] = array(
         'title'        => $current_field['label'],
         'help'         => empty($current_field['help_post']) ? t('Custom Data Field') : $current_field['help_post'],
         'field'        => civicrm_views_get_field($current_field['data_type'], $current_field['html_type']),
         'argument'     => civicrm_views_get_argument($current_field['data_type']),
-        'filter'       => civicrm_views_get_filter($current_field['data_type'], $current_field['html_type'], $current_field['option_group_id']),
+        'filter'       => civicrm_views_get_filter($current_field['data_type'], $current_field['html_type'], $option_group_id),
         'sort'         => civicrm_views_get_sort($current_field['data_type']),
         'relationship' => civicrm_views_get_relationship($current_field['data_type']),
       );
