@@ -567,7 +567,7 @@ function civicrm_views_get_filter($data_type, $html_type = NULL, $option_group_i
     );
   }
 
-  switch ($type) {
+  switch ($data_type) {
     case "String":
     case "Memo":
       return array(
