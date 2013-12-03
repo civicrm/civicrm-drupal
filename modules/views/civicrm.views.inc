@@ -354,12 +354,6 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
     );
 
     foreach ($current_group['fields'] as $key => $current_field) {
-      if (empty($current_field['help_post'])) {
-        $current_field['help_post'] = t('Custom Data Field');
-      }
-      // Populates help text so there aren't     miles of error: Missing Help
-
-
       if (in_array($current_field['html_type'],
           $customHTMLTypes ) ) {
         $handler = array('handler' => 'civicrm_handler_field_custom',
@@ -391,7 +385,7 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
 
       //Create the Views Field
       $data[$current_group['table_name']][$current_field['column_name']] = array(
-        'title' => $current_field['label'],
+        'title' => empty($current_field['help_post']) ? t('Custom Data Field') : $current_field['help_post'],
         'help' => $current_field['help_post'],
         'field' => $handler,
         'argument' => array(
