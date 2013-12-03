@@ -195,11 +195,11 @@ function civicrm_views_add_fields(&$fields, &$data, $tableName, &$skipFields = N
 
     $type = CRM_Utils_Array::value('type', $value, 'String');
     $data[$value['name']] = array(
-      'title' => $value['title'],
-      'help' => $value['title'],
-      'field' => civicrm_views_get_field($type),
-      'sort' => civicrm_views_get_sort($type),
-      'filter' => civicrm_views_get_filter($type),
+      'title'    => $value['title'],
+      'help'     => $value['title'],
+      'field'    => civicrm_views_get_field($type),
+      'sort'     => civicrm_views_get_sort($type),
+      'filter'   => civicrm_views_get_filter($type),
       'argument' => civicrm_views_get_argument($type),
     );
 
@@ -310,10 +310,10 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
     // Provide custom table data, including group title and implicit table join.
     $data[$current_group['table_name']]['table'] = array(
       'group' => t('CiviCRM Custom: !title', array('!title' => $current_group['title'])),
-      'join' = array(
+      'join'  => array(
         $join_table => array(
           'left_field' => 'id',
-          'field' => 'entity_id',
+          'field'      => 'entity_id',
         ),
       ),
     );
@@ -325,7 +325,7 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
       $data[$current_group['table_name']]['table']['join']['users'] = array(
         'left_table' => $join_table,
         'left_field' => 'id',
-        'field' => 'entity_id',
+        'field'      => 'entity_id',
       );
 
       // Expose custom data to contact view.
@@ -333,7 +333,7 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
         $data[$current_group['table_name']]['table']['join']['civicrm_contact'] = array(
           'left_table' => $join_table,
           'left_field' => 'id',
-          'field' => 'entity_id',
+          'field'      => 'entity_id',
         );
       }
     }
@@ -341,12 +341,12 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
     foreach ($current_group['fields'] as $key => $current_field) {
       //Create the Views Field
       $data[$current_group['table_name']][$current_field['column_name']] = array(
-        'title' => empty($current_field['help_post']) ? t('Custom Data Field') : $current_field['help_post'],
-        'help' => $current_field['help_post'],
-        'field' => civicrm_views_get_field($current_field['data_type'], $current_field['html_type']),
-        'argument' => civicrm_views_get_argument($current_field['data_type']),
-        'filter' => civicrm_views_get_filter($current_field['data_type'], $current_field['html_type'], $current_field['option_group_id']),
-        'sort' => civicrm_views_get_sort($current_field['data_type']),
+        'title'        => $current_field['label'],
+        'help'         => empty($current_field['help_post']) ? t('Custom Data Field') : $current_field['help_post'],
+        'field'        => civicrm_views_get_field($current_field['data_type'], $current_field['html_type']),
+        'argument'     => civicrm_views_get_argument($current_field['data_type']),
+        'filter'       => civicrm_views_get_filter($current_field['data_type'], $current_field['html_type'], $current_field['option_group_id']),
+        'sort'         => civicrm_views_get_sort($current_field['data_type']),
         'relationship' => civicrm_views_get_relationship($current_field['data_type']),
       );
 
