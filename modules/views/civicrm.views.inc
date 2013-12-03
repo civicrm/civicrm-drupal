@@ -292,31 +292,31 @@ function civicrm_views_add_date_arguments(&$data, $value) {
  * @param $entity_type
  *   String CivicRM entity Type ie "Contact"
  *
- * @param $groupID
+ * @param $group_id
  *   Integer Id of the Custom Field Group
  *
- * @param $subType
+ * @param $sub_type
  *   (optional) Integer Id of the Sub-Type, ie Contact Sub Type
  *
  * @return $data
  *   Array with the new custom field appended
  */
-function civicrm_views_custom_data_cache(&$data, $entity_type, $groupID, $subType) {
+function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_type) {
   // From http://forum.civicrm.org/index.php/topic,17658.msg73901.html#msg73901, CRM-7860.
-  $tree = CRM_Core_BAO_CustomGroup::getTree($entity_type, CRM_Core_DAO::$_nullObject, NULL, $groupID, $subType, NULL);
+  $tree = CRM_Core_BAO_CustomGroup::getTree($entity_type, CRM_Core_DAO::$_nullObject, NULL, $group_id, $sub_type, NULL);
 
-  $jointable = civicrm_views_get_join_table($entity_type);
-  foreach ($tree as $groupkey => $currentgroup) {
+  $join_table = civicrm_views_get_join_table($entity_type);
+  foreach ($tree as $groupkey => $current_group) {
     // Ignore 'info' key as it is not a real field.
     if ($groupkey == 'info') {
       continue;
     }
-    $data[$currentgroup['table_name']]['table']['group'] = t('CiviCRM Custom: ') . $currentgroup['title'];
+    $data[$current_group['table_name']]['table']['group'] = t('CiviCRM Custom: ') . $current_group['title'];
 
     // Join this table to Contacts.
-    $data[$currentgroup['table_name']]['table']['join'] = array(
+    $data[$current_group['table_name']]['table']['join'] = array(
       // Directly links to join table.
-      $jointable => array(
+      $join_table => array(
         'left_field' => 'id',
         'field' => 'entity_id',
       ),
@@ -324,23 +324,23 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $groupID, $subTyp
     // expose custom data to users view - note I tested with contact & membership fields which worked
     // event won't work due to missing relationship in chain.
     // 'contribution' & 'activity' not currently related to users so excluded
-    if ($jointable != 'civicrm_event' && $jointable != 'civicrm_activity' && $jointable != 'civicrm_contribution') {
-      $data[$currentgroup['table_name']]['table']['join']['users'] = array(
-        'left_table' => $jointable,
+    if ($join_table != 'civicrm_event' && $join_table != 'civicrm_activity' && $join_table != 'civicrm_contribution') {
+      $data[$current_group['table_name']]['table']['join']['users'] = array(
+        'left_table' => $join_table,
         'left_field' => 'id',
         'field' => 'entity_id',
       );
 
       // expose custom data to contact view, too
-      if ($jointable != 'civicrm_contact') {
-        $data[$currentgroup['table_name']]['table']['join']['civicrm_contact'] = array(
-          'left_table' => $jointable,
+      if ($join_table != 'civicrm_contact') {
+        $data[$current_group['table_name']]['table']['join']['civicrm_contact'] = array(
+          'left_table' => $join_table,
           'left_field' => 'id',
           'field' => 'entity_id',
         );
       }
     }
-    $currentgroupfields = $currentgroup['fields'];
+    $current_groupfields = $current_group['fields'];
     $customHTMLTypes = array(
       'Select', 'Multi-Select', 'AdvMulti-Select', 'Radio', 'CheckBox',
       'Select State/Province', 'Select Country', 'Multi-Select Country',
@@ -351,64 +351,64 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $groupID, $subTyp
       'Multi-Select State/Province',
     );
 
-    foreach ($currentgroupfields as $key => $currentfield) {
-      if (empty($currentfield['help_post'])) {
-        $currentfield['help_post'] = t('Custom Data Field');
+    foreach ($current_groupfields as $key => $current_field) {
+      if (empty($current_field['help_post'])) {
+        $current_field['help_post'] = t('Custom Data Field');
       }
       // Populates help text so there aren't     miles of error: Missing Help
 
 
-      if (in_array($currentfield['html_type'],
+      if (in_array($current_field['html_type'],
           $customHTMLTypes ) ) {
         $handler = array('handler' => 'civicrm_handler_field_custom',
                    'click sortable' => TRUE,);
-      } else if ( $currentfield['html_type'] == 'File' ) {
+      } else if ( $current_field['html_type'] == 'File' ) {
         $handler = array('handler' => 'civicrm_handler_field_custom_file',
                    'click sortable' => TRUE,);
       } else {
-        $handler = civicrm_get_field_handler($currentfield['data_type']);
+        $handler = civicrm_get_field_handler($current_field['data_type']);
       }
 
-      if ($currentfield['html_type'] == 'Multi-Select Country') {
+      if ($current_field['html_type'] == 'Multi-Select Country') {
         $filter_handler = array('handler' => 'civicrm_handler_filter_country_multi');
       }
-      elseif ($currentfield['html_type'] == 'Multi-Select State/Province') {
+      elseif ($current_field['html_type'] == 'Multi-Select State/Province') {
         $filter_handler = array('handler' => 'civicrm_handler_filter_state_multi');
       }
-      elseif (!empty($currentfield['option_group_id']) &&
-        in_array($currentfield['html_type'], $customMultiValueHTMLTypes)
+      elseif (!empty($current_field['option_group_id']) &&
+        in_array($current_field['html_type'], $customMultiValueHTMLTypes)
       ) {
         $filter_handler = array('handler' => 'civicrm_handler_filter_custom_option');
       }
-      elseif (!empty($currentfield['option_group_id'])) {
+      elseif (!empty($current_field['option_group_id'])) {
         $filter_handler = array('handler' => 'civicrm_handler_filter_custom_single_option');
       }
       else {
-        $filter_handler = civicrm_get_filter_handler($currentfield['data_type']);
+        $filter_handler = civicrm_get_filter_handler($current_field['data_type']);
       }
 
       //Create the Views Field
-      $data[$currentgroup['table_name']][$currentfield['column_name']] = array(
-        'title' => $currentfield['label'],
-        'help' => $currentfield['help_post'],
+      $data[$current_group['table_name']][$current_field['column_name']] = array(
+        'title' => $current_field['label'],
+        'help' => $current_field['help_post'],
         'field' => $handler,
         'argument' => array(
-          'handler' => civicrm_get_argument_handler($currentfield['data_type']),
+          'handler' => civicrm_get_argument_handler($current_field['data_type']),
         ),
         'filter' => $filter_handler,
         'sort' => array(
-          'handler' => civicrm_get_sort_handler($currentfield['data_type']),
+          'handler' => civicrm_get_sort_handler($current_field['data_type']),
         ),
-        'relationship' => civicrm_views_get_relationship($currentfield['data_type']),
+        'relationship' => civicrm_views_get_relationship($current_field['data_type']),
       );
 
       //For date fields add in 6 arguments
-      if ($currentfield['data_type'] == 'Date') {
+      if ($current_field['data_type'] == 'Date') {
         //@TODO  Still need to get the field under it's respecitve group, I may e able to set the civicrm_views_add_date_arguments() function with a group variable and default it to null
         $value          = array();
-        $value['title'] = $currentfield['label'];
-        $value['name']  = $currentfield['column_name'];
-        civicrm_views_add_date_arguments($data[$currentgroup['table_name']], $value);
+        $value['title'] = $current_field['label'];
+        $value['name']  = $current_field['column_name'];
+        civicrm_views_add_date_arguments($data[$current_group['table_name']], $value);
       }
     }
   }
