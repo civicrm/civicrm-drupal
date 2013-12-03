@@ -192,17 +192,16 @@ function civicrm_views_add_fields(&$fields, &$data, $tableName, &$skipFields = N
         continue 2;
       }
     }
+
     $type = CRM_Utils_Array::value('type', $value, 'String');
-    $field_handler = civicrm_views_get_field($type);
-    $filter_handler = civicrm_views_get_filter($type);
     $data[$value['name']] = array(
       'title' => $value['title'],
       'help' => $value['title'],
-      'field' => $field_handler,
+      'field' => civicrm_views_get_field($type),
       'sort' => array(
         'handler' => civicrm_get_sort_handler($type),
       ),
-      'filter' => $filter_handler,
+      'filter' => civicrm_views_get_filter($type),
       'argument' => array(
         'handler' => civicrm_get_argument_handler($type),
       ),
