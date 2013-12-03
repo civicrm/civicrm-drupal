@@ -2533,7 +2533,7 @@ function _civicrm_core_data(&$data, $enabled) {
   while ($dao->fetch()) {
     // call getTree using $dao->id as groupID and $dao->extends as entityType
 
-    $data = civicrm_views_custom_data_cache($data, $dao->extends, $dao->id, $dao->extends_entity_column_value, $dao->style);
+    $data = civicrm_views_custom_data_cache($data, $dao->extends, $dao->id, $dao->extends_entity_column_value);
   }
 }
 
