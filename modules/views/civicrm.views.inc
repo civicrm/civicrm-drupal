@@ -311,7 +311,7 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
     if ($groupkey == 'info') {
       continue;
     }
-    $data[$current_group['table_name']]['table']['group'] = t('CiviCRM Custom: ') . $current_group['title'];
+    $data[$current_group['table_name']]['table']['group'] = t('CiviCRM Custom: !title', array('!title' => $current_group['title']));
 
     // Join this table to Contacts.
     $data[$current_group['table_name']]['table']['join'] = array(
