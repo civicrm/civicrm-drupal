@@ -298,15 +298,10 @@ function civicrm_views_add_date_arguments(&$data, $value) {
  * @param $subType
  *   (optional) Integer Id of the Sub-Type, ie Contact Sub Type
  *
- * @param  $style
- *  unknown
- *
  * @return $data
  *   Array with the new custom field appended
  */
-function civicrm_views_custom_data_cache(&$data, $entity_type, $groupID, $subType, $style) {
-  // Feels a bit hacky this next 10 lines but it was the only way I could get getTree to play nice with the data.
-  $config = CRM_Core_Config::singleton();
+function civicrm_views_custom_data_cache(&$data, $entity_type, $groupID, $subType) {
 
   // From http://forum.civicrm.org/index.php/topic,17658.msg73901.html#msg73901, CRM-7860.
   $tree = CRM_Core_BAO_CustomGroup::getTree($entity_type, CRM_Core_DAO::$_nullObject, NULL, $groupID, $subType, NULL);
