@@ -52,7 +52,7 @@
    *  function civicrm_views_get_field ($type)
    *  function civicrm_views_get_argument ($type)
    *  function civicrm_views_get_filter ($type)
-   *  function civicrm_get_sort_handler ($type)
+   *  function civicrm_views_get_sort ($type)
    *     Assign handlers to custom fields based on the data type (from the database records)
    *
    *  function civicrm_date_api_tables()
@@ -198,9 +198,7 @@ function civicrm_views_add_fields(&$fields, &$data, $tableName, &$skipFields = N
       'title' => $value['title'],
       'help' => $value['title'],
       'field' => civicrm_views_get_field($type),
-      'sort' => array(
-        'handler' => civicrm_get_sort_handler($type),
-      ),
+      'sort' => civicrm_views_get_sort($type),
       'filter' => civicrm_views_get_filter($type),
       'argument' => civicrm_views_get_argument($type),
     );
@@ -348,9 +346,7 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
         'field' => civicrm_views_get_field($current_field['data_type'], $current_field['html_type']),
         'argument' => civicrm_views_get_argument($current_field['data_type']),
         'filter' => civicrm_views_get_filter($current_field['data_type'], $current_field['html_type'], $current_field['option_group_id']),
-        'sort' => array(
-          'handler' => civicrm_get_sort_handler($current_field['data_type']),
-        ),
+        'sort' => civicrm_views_get_sort($current_field['data_type']),
         'relationship' => civicrm_views_get_relationship($current_field['data_type']),
       );
 
@@ -633,31 +629,39 @@ function civicrm_views_get_filter($data_type, $html_type = NULL, $option_group_i
  * @return
  *   An array containing the handler name and any extra settings
  */
-function civicrm_get_sort_handler($type) {
+function civicrm_views_get_sort($type) {
   switch ($type) {
     case "String":
     case "Memo":
     case "Float":
     case "Int":
-      return 'views_handler_sort';
-
+      return array(
+        'handler' => 'views_handler_sort',
+      );
     case "Date":
-      return 'views_handler_sort_date';
-
+      return array(
+        'handler' => 'views_handler_sort_date',
+      );
     case "Boolean":
-      return 'views_handler_sort';
-
+      return array(
+        'handler' => 'views_handler_sort',
+      );
     case "StateProvince":
-      return 'views_handler_sort';
-
+      return array(
+        'handler' => 'views_handler_sort',
+      );
     case "Country":
-      return 'views_handler_sort';
-
+      return array(
+        'handler' => 'views_handler_sort',
+      );
     case "County":
-      return 'views_handler_sort';
-
+      return array(
+        'handler' => 'views_handler_sort',
+      );
     default:
-      return 'views_handler_sort';
+      return array(
+        'handler' => 'views_handler_sort',
+      );
   }
 }
 
