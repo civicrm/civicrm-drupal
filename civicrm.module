@@ -294,7 +294,7 @@ function civicrm_initialize() {
  * may need to cover different drupal versions
  */
 function _civicrm_registerClassLoader() {
-  $path = variable_get('civicrm_class_loader');
+  $path = variable_get('civicrm_class_loader', NULL);
   if (empty($path) || !file_exists($path)) {
     $candidates = array(
         dirname(__FILE__) . '/../CRM/Core/ClassLoader.php',
