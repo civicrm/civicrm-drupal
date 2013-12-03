@@ -323,17 +323,17 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
       ),
     );
 
-    // expose custom data to users view - note I tested with contact & membership fields which worked
-    // event won't work due to missing relationship in chain.
-    // 'contribution' & 'activity' not currently related to users so excluded
+    // Provide implicit joins in the other direction.
+    // Skip 'contribution', activity' and 'event' as these are not directly related to users.
     if ($join_table != 'civicrm_event' && $join_table != 'civicrm_activity' && $join_table != 'civicrm_contribution') {
+      // Expose custom data to users view.
       $data[$current_group['table_name']]['table']['join']['users'] = array(
         'left_table' => $join_table,
         'left_field' => 'id',
         'field' => 'entity_id',
       );
 
-      // expose custom data to contact view, too
+      // Expose custom data to contact view.
       if ($join_table != 'civicrm_contact') {
         $data[$current_group['table_name']]['table']['join']['civicrm_contact'] = array(
           'left_table' => $join_table,
