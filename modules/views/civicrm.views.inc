@@ -305,58 +305,7 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $groupID, $subTyp
   // From http://forum.civicrm.org/index.php/topic,17658.msg73901.html#msg73901, CRM-7860.
   $tree = CRM_Core_BAO_CustomGroup::getTree($entity_type, CRM_Core_DAO::$_nullObject, NULL, $groupID, $subType, NULL);
 
-  $jointable = NULL;
-  switch ($entity_type) {
-    case "Contact":
-    case "Individual":
-    case "Household":
-    case "Organization":
-    case "Group":
-      $jointable = 'civicrm_contact';
-      break;
-
-    case "Address":
-      $jointable = 'civicrm_address';
-      break;
-
-    case "Event":
-      $jointable = 'civicrm_event';
-      break;
-
-    case "Participant":
-      $jointable = 'civicrm_participant';
-      break;
-
-    case "Contribution":
-      $jointable = 'civicrm_contribution';
-      break;
-
-    case "Activity":
-      $jointable = 'civicrm_activity';
-      break;
-
-    case "Relationship":
-      $jointable = 'civicrm_relationship';
-      break;
-
-    case "Membership":
-      $jointable = 'civicrm_membership';
-      break;
-
-    case "Grant":
-      $jointable = 'civicrm_grant';
-      break;
-
-    case "Campaign":
-    case "Survey":
-      $jointable = 'civicrm_campaign';
-      break;
-
-    case "Case":
-      $jointable = 'civicrm_case';
-      break;
-  }
-
+  $jointable = civicrm_views_get_join_table($entity_type);
   foreach ($tree as $groupkey => $currentgroup) {
     // Ignore 'info' key as it is not a real field.
     if ($groupkey == 'info') {
@@ -464,6 +413,43 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $groupID, $subTyp
     }
   }
   return $data;
+}
+
+/**
+ * Return the implicit join table for a custom group table based on its entity type.
+ */
+function civicrm_views_get_join_table($entity_type) {
+  switch ($entity_type) {
+    case "Contact":
+    case "Individual":
+    case "Household":
+    case "Organization":
+    case "Group":
+      return 'civicrm_contact';
+    case "Address":
+      return 'civicrm_address';
+    case "Event":
+      return 'civicrm_event';
+    case "Participant":
+      return 'civicrm_participant';
+    case "Contribution":
+      return 'civicrm_contribution';
+    case "Activity":
+      return 'civicrm_activity';
+    case "Relationship":
+      return 'civicrm_relationship';
+    case "Membership":
+      return 'civicrm_membership';
+    case "Grant":
+      return 'civicrm_grant';
+    case "Campaign":
+    case "Survey":
+      return 'civicrm_campaign';
+    case "Case":
+      return 'civicrm_case';
+    default:
+      return NULL;
+  }
 }
 
 /**
