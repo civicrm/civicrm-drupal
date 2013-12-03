@@ -311,16 +311,18 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
     if ($groupkey == 'info') {
       continue;
     }
-    $data[$current_group['table_name']]['table']['group'] = t('CiviCRM Custom: !title', array('!title' => $current_group['title']));
 
-    // Join this table to Contacts.
-    $data[$current_group['table_name']]['table']['join'] = array(
-      // Directly links to join table.
-      $join_table => array(
-        'left_field' => 'id',
-        'field' => 'entity_id',
+    // Provide custom table data, including group title and implicit table join.
+    $data[$current_group['table_name']]['table'] = array(
+      'group' => t('CiviCRM Custom: !title', array('!title' => $current_group['title'])),
+      'join' = array(
+        $join_table => array(
+          'left_field' => 'id',
+          'field' => 'entity_id',
+        ),
       ),
     );
+
     // expose custom data to users view - note I tested with contact & membership fields which worked
     // event won't work due to missing relationship in chain.
     // 'contribution' & 'activity' not currently related to users so excluded
