@@ -39,7 +39,7 @@ class civicrm_handler_field_gender extends views_handler_field {
       if (!civicrm_initialize()) {
         return;
       }
-      self::$_gender = CRM_Core_PseudoConstant::get('CRM_Contact_BAO_Contact', 'gender_id');
+      self::$_gender = CRM_Core_PseudoConstant::get('CRM_Contact_DAO_Contact', 'gender_id');
     }
   }
 

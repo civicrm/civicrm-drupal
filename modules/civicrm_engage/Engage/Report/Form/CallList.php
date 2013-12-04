@@ -273,7 +273,7 @@ class Engage_Report_Form_CallList extends Engage_Report_Form_List {
 
   function alterDisplay(&$rows) {
     // custom code to alter rows
-    $genderList = CRM_Core_PseudoConstant::get('CRM_Contact_DAO_Contact', 'gender_id');
+    $genderList = CRM_Core_PseudoConstant::get('CRM_Contact_BAO_Contact', 'gender_id');
     $entryFound = FALSE;
     foreach ($rows as $rowNum => $row) {
       // handle state province

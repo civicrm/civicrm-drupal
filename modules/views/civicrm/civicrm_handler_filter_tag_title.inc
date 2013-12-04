@@ -42,8 +42,7 @@ class civicrm_handler_filter_tag_title extends views_handler_filter_in_operator 
       if (!civicrm_initialize()) {
         return;
       }
-      require_once 'CRM/Member/PseudoConstant.php';
-      self::$_tagName = CRM_Member_PseudoConstant::tag();
+      self::$_tagName = CRM_Core_PseudoConstant::get('CRM_Core_DAO_EntityTag', 'tag_id');
     }
   }
 
