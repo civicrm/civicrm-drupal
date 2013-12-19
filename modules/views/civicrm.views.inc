@@ -5773,9 +5773,17 @@ function civicrm_views_data() {
   return $data;
 }
 
-
-
-// RETURNS A LINK TO A CIVICRM PATH
+/**
+ * Return link to CiviCRM path
+ *
+ * @param $text
+ *
+ * @param $path
+ *
+ * @param $query
+ *
+ * @return String path to CiviCRM
+ */
 function civicrm_views_href($text, $path, $query) {
   civicrm_initialize();
   require_once 'CRM/Utils/System.php';
@@ -5821,8 +5829,14 @@ function civicrm_views_add_fields(&$fields, &$data, &$skipFields, $tableName) {
   }
 }
 
-/*
+/**
  * Function adds 6 date arguments to a date field
+ *
+ * @param $data
+ *   Array passed back to hook_views_data()
+ *
+ * @param $value
+ *   Array contains meta data about field from DAO fields function
  *
  */
 function civicrm_views_add_date_arguments(&$data, $value) {
@@ -5877,6 +5891,24 @@ function civicrm_views_add_date_arguments(&$data, $value) {
   );
 }
 
+/**
+ * Add Custom Fields to $data array
+ *
+ * @param $data
+ *   Array of fields passed to hook_views_data()
+ *
+ * @param $entity_type
+ *   String CivicRM entity Type ie "Contact"
+ *
+ * @param $group_id
+ *   Integer Id of the Custom Field Group
+ *
+ * @param $sub_type
+ *   (optional) Integer Id of the Sub-Type, ie Contact Sub Type
+ *
+ * @return $data
+ *   Array with the new custom field appended
+ */
 function civicrm_views_custom_data_cache($data, $entity_type, $groupID, $subType, $style) {
 
   //Feels a bit hacky this next 10 lines but it was the only way I could get getTree to play nice with the data
@@ -6180,7 +6212,7 @@ function civicrm_date_api_fields($field) {
 }
 
 /**
- * Implement hook_date_api_tables().
+ * Implements hook_date_api_tables().
  */
 function civicrm_date_api_tables() {
   return array('civicrm_mailing_job',
