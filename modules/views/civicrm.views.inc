@@ -1,6 +1,4 @@
 <?php
-// $Id$
-
 /*
  +--------------------------------------------------------------------+
  | CiviCRM version 4.4                                                |
@@ -41,9 +39,6 @@
    // Defines tables, joins and relationships
    *  function civicrm_views_data() {
    *     CiviCRM Contacts Base Table
-   *     CiviCRM Events Base Table
-   *     CiviCRM Participants Base Table
-   *     CiviCRM Contributions Base Table
    *     CiviCRM Activities Base Table
    *     CiviCRM Relationships Base Table
    *     CiviCRM Memberships Base Table
@@ -75,21 +70,24 @@
    */
 
 /**
- * Implementation of hook_views_data()
+ * Implements of hook_views_data().
+ * Run hook_views_data for active CiviCRM components
  */
-function civicrm_views_data() {
+function civicrm_views_data_alter(&$data) {
 
   if (!civicrm_initialize()) {
     return;
   }
 
-  require_once 'CRM/Core/Config.php';
-  require_once 'CRM/Core/BAO/CustomGroup.php';
-  require_once 'CRM/Core/DAO.php';
-  require_once 'CRM/Core/Error.php';
-  require_once 'CRM/Contact/BAO/Contact.php';
-  require_once 'CRM/Event/BAO/Query.php';
-  //------------------------------------------------------
+  require_once 'components/civicrm.core.inc';
+  // Get list of enabled CiviCRM components
+  $enabled = CRM_Core_Component::getEnabledComponents();
+
+  // $data = array();
+  // Load Core CiviCRM data
+  _civicrm_core_data($data, $enabled);
+
+    //------------------------------------------------------
   // CiviCRM Contacts Views Table
   //------------------------------------------------------
 
