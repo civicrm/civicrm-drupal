@@ -1,6 +1,4 @@
 <?php
-// $Id$
-
 /*
  +--------------------------------------------------------------------+
  | CiviCRM version 4.4                                                |
@@ -41,9 +39,6 @@
    // Defines tables, joins and relationships
    *  function civicrm_views_data() {
    *     CiviCRM Contacts Base Table
-   *     CiviCRM Events Base Table
-   *     CiviCRM Participants Base Table
-   *     CiviCRM Contributions Base Table
    *     CiviCRM Activities Base Table
    *     CiviCRM Relationships Base Table
    *     CiviCRM Memberships Base Table
@@ -75,472 +70,22 @@
    */
 
 /**
- * Implementation of hook_views_data()
+ * Implements of hook_views_data().
+ * Run hook_views_data for active CiviCRM components
  */
-function civicrm_views_data() {
+function civicrm_views_data_alter(&$data) {
 
   if (!civicrm_initialize()) {
     return;
   }
 
-  require_once 'CRM/Core/Config.php';
-  require_once 'CRM/Core/BAO/CustomGroup.php';
-  require_once 'CRM/Core/DAO.php';
-  require_once 'CRM/Core/Error.php';
-  require_once 'CRM/Contact/BAO/Contact.php';
-  require_once 'CRM/Event/BAO/Query.php';
-  //------------------------------------------------------
-  // CiviCRM Contacts Views Table
-  //------------------------------------------------------
+  require_once 'components/civicrm.core.inc';
+  // Get list of enabled CiviCRM components
+  $enabled = CRM_Core_Component::getEnabledComponents();
 
-  $data['civicrm_contact']['table']['group'] = t('CiviCRM Contacts');
-
-  $data['civicrm_contact']['table']['base'] = array(
-    // Governs the whole mozilla
-    'field' => 'id',
-    'title' => t('CiviCRM Contacts'),
-    'help' => t("View displays CiviCRM Contacts, of people, organizations, etc."),
-  );
-
-  //TABLE JOINS FOR CIVICRM CONTACTS GO HERE!
-
-  $data['civicrm_contact']['table']['join'] = array(
-    // Directly links to participants.
-    'civicrm_participant' => array(
-      'left_field' => 'contact_id',
-      'field' => 'id',
-    ),
-    // Directly links to contribution
-    'civicrm_contribution' => array(
-      'left_field' => 'contact_id',
-      'field' => 'id',
-    ),
-    // Directly links to activity.
-    'civicrm_activity' => array(
-      'left_field' => 'source_contact_id',
-      'field' => 'id',
-    ),
-    // Directly links to membership.
-    'civicrm_membership' => array(
-      'left_field' => 'contact_id',
-      'field' => 'id',
-    ),
-    // Link to mailing.
-    'civicrm_mailing' => array(
-      'left_table' => 'civicrm_mailing_event_queue',
-      'left_field' => 'contact_id',
-      'field' => 'id',
-    ),
-    // Link to grant.
-    'civicrm_grant' => array(
-      'left_field' => 'contact_id',
-      'field' => 'id',
-    ),
-    // makes contact fields available to PCP views.
-    'civicrm_pcp' => array(
-      'left_field' => 'contact_id',
-      'field' => 'id',
-    ),
-  );
-
-  // For other base tables, explain how we join -
-
-  $data['civicrm_contact']['table']['join']['users'] = array(
-    'left_table' => 'civicrm_uf_match',
-    'left_field' => 'contact_id',
-    'field' => 'id',
-  );
-  $data['civicrm_uf_match']['table']['join']['users'] = array(
-    'left_field' => 'uid',
-    'field' => 'uf_id',
-  );
-
-  //CiviCRM Contacts - FIELDS
-
-
-  //Numeric Contact ID
-  $data['civicrm_contact']['id'] = array(
-    'title' => t('Contact ID'),
-    'help' => t('The numeric ID of the Contact'),
-    'field' => array(
-      'handler' => 'views_handler_field_numeric',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_numeric',
-      'numeric' => TRUE,
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  // Drupal ID of the contact (from uf_match.uf_id)
-  $data['civicrm_contact']['drupal_id'] = array(
-    'real field' => 'id',
-    'title' => t('Drupal ID'),
-    'help' => t('Relates a CiviCRM Contact to the Druapl User Record'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field_drupalid',
-      'click sortable' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-    'relationship' => array(
-      'base' => 'users',
-      'field' => 'uid',
-      'handler' => 'civicrm_handler_relationship_contact2users',
-      'label' => t('Drupal User'),
-    ),
-  );
-
-  //SORT Name for the Contact (Last Name followed by First)
-  $data['civicrm_contact']['sort_name'] = array(
-    'title' => t('Sort Name'),
-    'help' => t('The Contact Name for sorting purposes, Last Name then First'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field_contact_link',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //DISPLAY Name for the Contact (Full Name with Prefixes and Suffixes)
-  $data['civicrm_contact']['display_name'] = array(
-    'title' => t('Display Name'),
-    'help' => t('Full Name of the Contact with prefixes and suffixes'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field_contact_link',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //Gender
-  $data['civicrm_contact']['gender'] = array(
-    'title' => t('Gender'),
-    'real field' => 'gender_id',
-    'help' => t('Contact\'s Gender'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field_gender',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'civicrm_handler_filter_gender',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //FIRST NAME
-  $data['civicrm_contact']['first_name'] = array(
-    'title' => t('First Name'),
-    'help' => t('First Name'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field_contact_link',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //MIDDLE NAME
-  $data['civicrm_contact']['middle_name'] = array(
-    'title' => t('Middle Name'),
-    'help' => t('Middle Name'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field_contact_link',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //LAST NAME
-  $data['civicrm_contact']['last_name'] = array(
-    'title' => t('Last Name'),
-    'help' => t('Last Name'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field_contact_link',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //BOOLEAN : IS Deceased
-  $data['civicrm_contact']['is_deceased'] = array(
-    'title' => t('Is Deceased'),
-    'help' => t('Is the contact deceased?'),
-    'field' => array(
-      'handler' => 'views_handler_field_boolean',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //THUMBSUP: Contact Permissions ie Do not email, do not this, do not that.
-
-  //BOOLEAN : DO NOT EMAIL
-  $data['civicrm_contact']['do_not_email'] = array(
-    'title' => t('Do Not E-mail'),
-    'help' => t('Does this contact not want to be emailed?'),
-    'field' => array(
-      'handler' => 'views_handler_field_boolean',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //BOOLEAN : DO NOT PHONE
-  $data['civicrm_contact']['do_not_phone'] = array(
-    'title' => t('Do Not Phone'),
-    'help' => t('Does this contact not want to be phoned?'),
-    'field' => array(
-      'handler' => 'views_handler_field_boolean',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //BOOLEAN : DO NOT MAIL
-  $data['civicrm_contact']['do_not_mail'] = array(
-    'title' => t('Do Not Mail'),
-    'help' => t('Does this contact not want to be mailed?'),
-    'field' => array(
-      'handler' => 'views_handler_field_boolean',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //BOOLEAN : DO NOT SMS
-  $data['civicrm_contact']['do_not_sms'] = array(
-    'title' => t('Do Not Sms'),
-    'help' => t('Does this contact not want to receive messages?'),
-    'field' => array(
-      'handler' => 'views_handler_field_boolean',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //BOOLEAN : DO NOT TRADE
-  $data['civicrm_contact']['do_not_trade'] = array(
-    'title' => t('Do Not Trade'),
-    'help' => t('Does this contact not want trade?'),
-    'field' => array(
-      'handler' => 'views_handler_field_boolean',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //BOOLEAN : Opted out of Bulk Mailing
-  $data['civicrm_contact']['is_opt_out'] = array(
-    'title' => t('Opted Out of Bulk Mail'),
-    'help' => t('Has this contact opted out of bulk mail?'),
-    'field' => array(
-      'handler' => 'views_handler_field_boolean',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //BOOLEAN : Is Deleted
-  $data['civicrm_contact']['is_deleted'] = array(
-    'title' => t('Is Deleted'),
-    'help' => t('Has this contact been deleted?'),
-    'field' => array(
-      'handler' => 'views_handler_field_boolean',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  // Organization Name
-  $data['civicrm_contact']['current_employer'] = array(
-    // The item it appears as on the UI,
-    'title' => t('Organization Name'),
-    'real field' => 'organization_name',
-    // The help that appears on the UI,
-    'help' => t('The display name of the contact\'s organizations.'),
-    'field' => array(
-      'handler' => 'views_handler_field',
-      'click sortable' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_string',
-    ),
-  );
-
-  // contact_type
-  $data['civicrm_contact']['contact_type'] = array(
-    // The item it appears as on the UI,
-    'title' => t('Contact Type'),
-    // The help that appears on the UI,
-    'help' => t('Contact Type'),
-    'field' => array(
-      'handler' => 'views_handler_field',
-      'click sortable' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-    'filter' => array(
-      'handler' => 'civicrm_handler_filter_contact_type',
-    ),
-  );
-  //Contact Sub Type
-  $data['civicrm_contact']['contact_sub_type'] = array(
-    'title' => t('Contact Sub Type'),
-    'help' => t('The Sub-type for the Contact'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field',
-      'click sortable' => TRUE,
-    ),
-    'filter' => array(
-      'handler' => 'civicrm_handler_filter_contact_type',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //Birth Date
-  $data['civicrm_contact']['birth_date'] = array(
-    'title' => t('Birth Date'),
-    'help' => t('The contact\'s birth date.'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field_datetime',
-      'click sortable' => TRUE,
-    ),
-    'filter' => array(
-      'handler' => 'civicrm_handler_filter_datetime',
-      'is date' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'civicrm_handler_sort_date',
-    ),
-  );
+  // $data = array();
+  // Load Core CiviCRM data
+  _civicrm_core_data($data, $enabled);
 
   // add the other generic fields
   $objType = 'Individual';
@@ -2984,384 +2529,6 @@ function civicrm_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
-  //----------------------------------------------------------------------------------------
-  // CIVICRM Activities are here with all the activeness they can muster, base tabling it up.
-  //----------------------------------------------------------------------------------------
-
-  $data['civicrm_activity']['table']['group'] = t('CiviCRM Activities');
-
-  $data['civicrm_activity']['table']['base'] = array(
-    // Governs the whole mozilla
-    'field' => 'id',
-    'title' => t('CiviCRM Activities'),
-    'help' => t("View displays CiviCRM Activities"),
-  );
-
-  //TABLE JOINS FOR CIVICRM ACTIVITIES GO HERE!
-
-  //CiviCRM Activities - FIELDS
-
-  //Numeric Activity ID
-  $data['civicrm_activity']['id'] = array(
-    'title' => t('Activity ID'),
-    'help' => t('The numeric ID of the Activity Instance'),
-    'field' => array(
-      'handler' => 'views_handler_field_numeric',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_numeric',
-      'numeric' => TRUE,
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  $data['civicrm_activity']['source_contact_id'] = array(
-    'title' => t('Source Contact'),
-    'help' => t('The contact who scheduled this activity'),
-    'relationship' => array(
-      'base' => 'civicrm_contact',
-      'field' => 'id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Source Contact'),
-    ),
-  );
-
-  $data['civicrm_activity']['source_record_id'] = array(
-    'title' => t('Source Record ID'),
-    'help' => t('The contact who made this activity'),
-    'relationship' => array(
-      'base' => 'civicrm_contact',
-      'field' => 'id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Source Record Contact'),
-    ),
-  );
-
-  //Activity Type
-  $data['civicrm_activity']['activity_type'] = array(
-    'title' => t('Activity Type'),
-    'real field' => 'activity_type_id',
-    'help' => t('The Type of Activity'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field_activity_type',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'civicrm_handler_filter_activity_type',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //Activity Status
-  $data['civicrm_activity']['status'] = array(
-    'title' => t('Activity Status'),
-    'real field' => 'status_id',
-    'help' => t('The Status of this Activity'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field_activity_status',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'civicrm_handler_filter_activity_status',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //Activity Priority
-  $data['civicrm_activity']['priority'] = array(
-    'title' => t('Priority'),
-    'real field' => 'priority_id',
-    'help' => t('The Priority of this Activity'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field_priority',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'civicrm_handler_filter_priority',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-  //Parent ID
-  $data['civicrm_activity']['parent_id'] = array(
-    'title' => t('Parent Activity ID'),
-    'help' => t('The numeric ID of the Parent Activity '),
-    'field' => array(
-      'handler' => 'views_handler_field_numeric',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_numeric',
-      'numeric' => TRUE,
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //Activity Subject
-  $data['civicrm_activity']['subject'] = array(
-    'title' => t('Subject'),
-    'help' => t('A short description of the activity..'),
-    'field' => array(
-      'handler' => 'views_handler_field',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //Scheduled Activity Date
-  $data['civicrm_activity']['activity_date_time'] = array(
-    'title' => t('Scheduled Activity Date'),
-    'help' => t('The Date and Time the activity is scheduled to happen.'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field_datetime',
-      'click sortable' => TRUE,
-    ),
-    'filter' => array(
-      'handler' => 'civicrm_handler_filter_datetime',
-    ),
-    'sort' => array(
-      'handler' => 'civicrm_handler_sort_date',
-    ),
-  );
-  civicrm_views_add_date_arguments($data['civicrm_activity'], array('title' => 'Scheduled Activity Date',
-      'name' => 'activity_date_time',
-    ));
-
-  //Activity Duration
-  $data['civicrm_activity']['duration'] = array(
-    'title' => t('Duration (min)'),
-    'help' => t('The Activity\'s Duration in Minutes'),
-    'field' => array(
-      'handler' => 'views_handler_field_numeric',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_numeric',
-      'numeric' => TRUE,
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //Activity Location
-  $data['civicrm_activity']['location'] = array(
-    'title' => t('Location'),
-    'help' => t('Activity\'s Location in a text string.'),
-    'field' => array(
-      'handler' => 'views_handler_field',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-  //Activity Details / Notes
-  $data['civicrm_activity']['details'] = array(
-    'title' => t('Details'),
-    'help' => t('Details and Notes regarding the activity.'),
-    'field' => array(
-      'handler' => 'views_handler_field',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-
-  //BOOLEAN : IS A TEST ACTIVITY
-  $data['civicrm_activity']['is_test'] = array(
-    'title' => t('Is Test'),
-    'help' => t('Is the activity a test entry?'),
-    'field' => array(
-      'handler' => 'views_handler_field_boolean',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-  //Activity Medium (ie Phone, e-mail etc...)
-  $data['civicrm_activity']['medium'] = array(
-    'title' => t('Medium'),
-    'real field' => 'medium_id',
-    'help' => t('The Medium of this Activity (ie phone, e-mail, etc...'),
-    'field' => array(
-      'handler' => 'civicrm_handler_field_encounter_medium',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'civicrm_handler_filter_encounter_medium',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-  //BOOLEAN : IS A TEST ACTIVITY
-  $data['civicrm_activity']['is_auto'] = array(
-    'title' => t('Is Automaticaly created'),
-    'help' => t('Is the activity created by the system?'),
-    'field' => array(
-      'handler' => 'views_handler_field_boolean',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-  // Link to Campaign Table
-  $data['civicrm_activity']['campaign_id'] = array(
-    'title' => t('Campaign'),
-    'help' => t('Activity -> Campaign'),
-    'relationship' => array(
-      'base' => 'civicrm_campaign',
-      'field' => 'id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('Activity -> Campaign'),
-    ),
-  );
-  $data['civicrm_activity']['engagement_level'] = array(
-    'title' => t('Engagement level'),
-    'help' => t('The Engagement Level of this Activity for this contact'),
-    'field' => array(
-      'handler' => 'views_handler_field_numeric',
-      'click sortable' => TRUE,
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
-      'allow empty' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-  );
-
-
-
-  // CHILLING OUT AT THE CIVICRM_ACTIVTY_ASSIGNMENT TABLE
-
-  $data['civicrm_activity_assignment']['table']['group'] = t('CiviCRM Activity Assignments');
-
-  // Explain how this table joins to others.
-  $data['civicrm_activity_assignment']['table']['join'] = array(
-    // Directly links to event table
-    'civicrm_activity' => array(
-      'left_field' => 'id',
-      'field' => 'activity_id',
-    ),
-  );
-
-  $data['civicrm_activity_assignment']['assignee_contact_id'] = array(
-    'title' => t('Assignee Contact ID'),
-    'help' => t('The contact who is assigned the activity.'),
-    'relationship' => array(
-      'base' => 'civicrm_contact',
-      'field' => 'id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Assignee Contact ID'),
-    ),
-  );
-
-  // CHILLING OUT AT THE CIVICRM_ACTIVTY_ASSIGNMENT TABLE
-
-  $data['civicrm_activity_target']['table']['group'] = t('CiviCRM Activity Targets');
-
-  // Explain how this table joins to others.
-  $data['civicrm_activity_target']['table']['join'] = array(
-    // Directly links to event table
-    'civicrm_activity' => array(
-      'left_field' => 'id',
-      'field' => 'activity_id',
-    ),
-  );
-
-  $data['civicrm_activity_target']['target_contact_id'] = array(
-    'title' => t('Target Contact ID'),
-    'help' => t('The contact who is the activity\'s target.'),
-    'relationship' => array(
-      'base' => 'civicrm_contact',
-      'field' => 'id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Target Contact ID'),
-    ),
-  );
 
   //TEXT LINKS THAT AREN'T PART OF THE TABLE
   //Contact Text Link
@@ -5773,9 +4940,17 @@ function civicrm_views_data() {
   return $data;
 }
 
-
-
-// RETURNS A LINK TO A CIVICRM PATH
+/**
+ * Return link to CiviCRM path
+ *
+ * @param $text
+ *
+ * @param $path
+ *
+ * @param $query
+ *
+ * @return String path to CiviCRM
+ */
 function civicrm_views_href($text, $path, $query) {
   civicrm_initialize();
   require_once 'CRM/Utils/System.php';
@@ -5821,8 +4996,14 @@ function civicrm_views_add_fields(&$fields, &$data, &$skipFields, $tableName) {
   }
 }
 
-/*
+/**
  * Function adds 6 date arguments to a date field
+ *
+ * @param $data
+ *   Array passed back to hook_views_data()
+ *
+ * @param $value
+ *   Array contains meta data about field from DAO fields function
  *
  */
 function civicrm_views_add_date_arguments(&$data, $value) {
@@ -5877,6 +5058,24 @@ function civicrm_views_add_date_arguments(&$data, $value) {
   );
 }
 
+/**
+ * Add Custom Fields to $data array
+ *
+ * @param $data
+ *   Array of fields passed to hook_views_data()
+ *
+ * @param $entity_type
+ *   String CivicRM entity Type ie "Contact"
+ *
+ * @param $group_id
+ *   Integer Id of the Custom Field Group
+ *
+ * @param $sub_type
+ *   (optional) Integer Id of the Sub-Type, ie Contact Sub Type
+ *
+ * @return $data
+ *   Array with the new custom field appended
+ */
 function civicrm_views_custom_data_cache($data, $entity_type, $groupID, $subType, $style) {
 
   //Feels a bit hacky this next 10 lines but it was the only way I could get getTree to play nice with the data
@@ -6180,7 +5379,7 @@ function civicrm_date_api_fields($field) {
 }
 
 /**
- * Implement hook_date_api_tables().
+ * Implements hook_date_api_tables().
  */
 function civicrm_date_api_tables() {
   return array('civicrm_mailing_job',

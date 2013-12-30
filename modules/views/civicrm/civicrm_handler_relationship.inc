@@ -50,7 +50,7 @@ class civicrm_handler_relationship extends views_handler_relationship {
     if (!civicrm_initialize()) {
       return;
     }
-    require_once 'CRM/Core/PseudoConstant.php';
+
     $relationshipType_array = CRM_Core_PseudoConstant::relationshipType('name');
 
     // relationshipType() returns information about relations as array with fields

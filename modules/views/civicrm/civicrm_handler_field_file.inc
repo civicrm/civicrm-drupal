@@ -37,9 +37,6 @@ class civicrm_handler_field_file extends views_handler_field {
     if (!civicrm_initialize()) {
       return;
     }
-
-    require_once 'CRM/Core/DAO/EntityFile.php';
-    require_once 'api/v2/File.php';
   }
 
   function query() {
