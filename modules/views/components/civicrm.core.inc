@@ -67,8 +67,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'field' => 'id',
     ),
     // Directly links to activity.
-    'civicrm_activity' => array(
-      'left_field' => 'source_contact_id',
+    'civicrm_activity_contact' => array(
+      'left_field' => 'contact_id',
       'field' => 'id',
     ),
     // Directly links to membership.
@@ -529,27 +529,36 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
-  $data['civicrm_activity']['source_contact_id'] = array(
-    'title' => t('Source Contact'),
-    'help' => t('The contact who scheduled this activity'),
-    'relationship' => array(
-      'base' => 'civicrm_contact',
-      'field' => 'id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Source Contact'),
-    ),
+  $data['civicrm_activity']['source_record_id'] = array(
+    'title' => t('Record Source'),
+    'real field' => 'source_record_id',
+    'help' => t('Source record activity'),
   );
 
-  $data['civicrm_activity']['source_record_id'] = array(
-    'title' => t('Source Record ID'),
-    'help' => t('The contact who made this activity'),
-    'relationship' => array(
-      'base' => 'civicrm_contact',
-      'field' => 'id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Source Record Contact'),
-    ),
-  );
+  /*
+   * This block is commented out for two reasons:
+   *  1) The help text is misleading to users; source_record_id is NOT
+   *     "the contact who made this activity."
+   *  2) It doesn't work; the code attempts to join on the wrong table.
+   *
+   * TODO: Figure out how to tell Views to join to a table whose identity
+   *       isn't known yet. Because the details of the "parent" activity
+   *       reside in different tables depending on the value of
+   *       activity_type_id, Views needs to be told which table to
+   *       join to on the fly.
+   *
+   *  $data['civicrm_activity']['source_record_id'] = array(
+   *    'title' => t('Source Record ID'),
+   *    // 'help' => t('The contact who made this activity'),
+   *    'help' => t('The parent transaction (e.g. Contribution, Event Registration) if it is not an Activity.'),
+   *    'relationship' => array(
+   *      'base' => 'civicrm_contact',
+   *      'field' => 'id',
+   *      'handler' => 'views_handler_relationship',
+   *      'label' => t('CiviCRM Source Record Contact'),
+   *    ),
+   *  );
+   */
 
   //Activity Type
   $data['civicrm_activity']['activity_type'] = array(
@@ -557,15 +566,21 @@ function _civicrm_core_data(&$data, $enabled) {
     'real field' => 'activity_type_id',
     'help' => t('The Type of Activity'),
     'field' => array(
-      'handler' => 'civicrm_handler_field_activity_type',
+      'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'activityType',
+      'pseudo args' => array(TRUE, TRUE), // Include cases (if CiviCase is enabled)
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
     ),
     'filter' => array(
-      'handler' => 'civicrm_handler_filter_activity_type',
+      'handler' => 'civicrm_handler_filter_pseudo_constant',
       'allow empty' => TRUE,
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'activityType',
+      'pseudo args' => array(TRUE, TRUE),
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -578,15 +593,19 @@ function _civicrm_core_data(&$data, $enabled) {
     'real field' => 'status_id',
     'help' => t('The Status of this Activity'),
     'field' => array(
-      'handler' => 'civicrm_handler_field_activity_status',
+      'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'activityStatus',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
     ),
     'filter' => array(
-      'handler' => 'civicrm_handler_filter_activity_status',
+      'handler' => 'civicrm_handler_filter_pseudo_constant',
       'allow empty' => TRUE,
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'activityStatus',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -599,15 +618,21 @@ function _civicrm_core_data(&$data, $enabled) {
     'real field' => 'priority_id',
     'help' => t('The Priority of this Activity'),
     'field' => array(
-      'handler' => 'civicrm_handler_field_priority',
+      'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Activity_DAO_Activity',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
     ),
     'filter' => array(
-      'handler' => 'civicrm_handler_filter_priority',
+      'handler' => 'civicrm_handler_filter_pseudo_constant',
       'allow empty' => TRUE,
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Activity_DAO_Activity',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -773,7 +798,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'views_handler_sort',
     ),
   );
-  //BOOLEAN : IS A TEST ACTIVITY
+  //BOOLEAN : IS AUTO ACTIVITY
   $data['civicrm_activity']['is_auto'] = array(
     'title' => t('Is Automaticaly created'),
     'help' => t('Is the activity created by the system?'),
@@ -806,68 +831,127 @@ function _civicrm_core_data(&$data, $enabled) {
     'title' => t('Engagement level'),
     'help' => t('The Engagement Level of this Activity for this contact'),
     'field' => array(
-      'handler' => 'views_handler_field_numeric',
+      'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
+      'pseudo class' => 'CRM_Campaign_PseudoConstant',
+      'pseudo method' => 'engagementLevel',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
+      'handler' => 'civicrm_handler_filter_pseudo_constant',
       'allow empty' => TRUE,
+      'pseudo class' => 'CRM_Campaign_PseudoConstant',
+      'pseudo method' => 'engagementLevel',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
   );
 
+  // CRM-11488
+  $data['civicrm_activity']['is_current_revision'] = array(
+    'title' => t('Current Revision'),
+    'help' => t('Use to dedupe Civicase revisions'),
+    'field' => array(
+      'handler' => 'views_handler_field_boolean',
+      'click sortable' => TRUE,
+   ),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_boolean_operator',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+  $data['civicrm_activity']['is_deleted'] = array(
+    'title' => t('Is Deleted'),
+    'help' => t('If the current Activity is deleted. Also used to dedupe Civicase revisions'),
+    'field' => array(
+      'handler' => 'views_handler_field_boolean',
+      'click sortable' => TRUE,
+   ),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_boolean_operator',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
 
+  // let's add activity contact table
+  $data['civicrm_activity_contact']['table']['group'] = t('CiviCRM Activity Contacts');
 
-  // CHILLING OUT AT THE CIVICRM_ACTIVTY_ASSIGNMENT TABLE
-
-  $data['civicrm_activity_assignment']['table']['group'] = t('CiviCRM Activity Assignments');
+  $data['civicrm_activity_contact']['table']['base'] = array(
+    'field' => 'id',
+    'title' => t('CiviCRM Activity Contacts'),
+    'help' => t("View displays CiviCRM Activity, with connection to contacts."),
+  );
 
   // Explain how this table joins to others.
-  $data['civicrm_activity_assignment']['table']['join'] = array(
-    // Directly links to event table
+  $data['civicrm_activity_contact']['table']['join'] = array(
+    // Directly links to activity table
     'civicrm_activity' => array(
       'left_field' => 'id',
       'field' => 'activity_id',
     ),
   );
 
-  $data['civicrm_activity_assignment']['assignee_contact_id'] = array(
-    'title' => t('Assignee Contact ID'),
-    'help' => t('The contact who is assigned the activity.'),
+  $data['civicrm_activity_contact']['contact_id'] = array(
+    'title' => t('Activity Contact ID'),
+    'real field' => 'contact_id',
+    'help' => t('The contact related to the activity.'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => FALSE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+    ),
     'relationship' => array(
       'base' => 'civicrm_contact',
-      'field' => 'id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Assignee Contact ID'),
+      'base field' => 'id',
+      'handler' => 'civicrm_handler_field_activity',
+      'label' => t('CiviCRM Activity Contact ID'),
+      'relationship table' => 'civicrm_activity',
+      'relationship field' => 'activity_id',
+      'other_field' => 'contact_id',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+      'allow empty' => TRUE,
     ),
   );
 
-  // CHILLING OUT AT THE CIVICRM_ACTIVTY_ASSIGNMENT TABLE
-
-  $data['civicrm_activity_target']['table']['group'] = t('CiviCRM Activity Targets');
-
-  // Explain how this table joins to others.
-  $data['civicrm_activity_target']['table']['join'] = array(
-    // Directly links to event table
-    'civicrm_activity' => array(
-      'left_field' => 'id',
-      'field' => 'activity_id',
+  $data['civicrm_activity_contact']['record_type'] = array(
+    'title' => t('Record Type'),
+    'real field' => 'record_type_id',
+    'help' => t('Record type'),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_pseudo_constant',
+      'click sortable' => TRUE,
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Activity_DAO_ActivityContact',
     ),
-  );
-
-  $data['civicrm_activity_target']['target_contact_id'] = array(
-    'title' => t('Target Contact ID'),
-    'help' => t('The contact who is the activity\'s target.'),
-    'relationship' => array(
-      'base' => 'civicrm_contact',
-      'field' => 'id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('CiviCRM Target Contact ID'),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+    ),
+    'filter' => array(
+      'handler' => 'civicrm_handler_filter_pseudo_constant',
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Activity_DAO_ActivityContact',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
     ),
   );
 
