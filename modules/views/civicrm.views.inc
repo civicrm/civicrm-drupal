@@ -5398,7 +5398,6 @@ function civicrm_views_handlers() {
     'handlers' =>
     //FIELD HANDLAAARRRRS! Field Handlers!
     array(
-      // LINK FIELDS GO HERE
       'civicrm_handler_field_link_contact' => array(
         'parent' => 'views_handler_field',
       ),
@@ -5423,6 +5422,9 @@ function civicrm_views_handlers() {
       'civicrm_handler_field_link_pcp' => array(
         'parent' => 'views_handler_field',
       ),
+      'civicrm_handler_field_pseudo_constant' => array(
+        'parent' => 'views_handler_field',
+      ),
       'civicrm_handler_field_gender' => array(
         'parent' => 'views_handler_field',
       ),
@@ -5441,6 +5443,7 @@ function civicrm_views_handlers() {
       'civicrm_handler_field_country' => array(
         'parent' => 'views_handler_field',
       ),
+
       'civicrm_handler_field_county' => array(
         'parent' => 'views_handler_field',
       ),
@@ -5476,6 +5479,12 @@ function civicrm_views_handlers() {
       ),
       'civicrm_handler_field_contribution_status' => array(
         'parent' => 'views_handler_field',
+      ),
+      'civicrm_handler_field' => array(
+        'parent' => 'views_handler_field',
+      ),
+      'civicrm_handler_field_activity' => array(
+        'parent' => 'civicrm_handler_field',
       ),
       'civicrm_handler_field_activity_status' => array(
         'parent' => 'views_handler_field',
@@ -5533,6 +5542,9 @@ function civicrm_views_handlers() {
       ),
       'civicrm_handler_field_file' => array(
         'parent' => 'views_handler_field',
+      ),
+      'civicrm_handler_filter_pseudo_constant' => array(
+        'parent' => 'views_handler_filter_in_operator',
       ),
       //FILTER HANDDLEAARRRS! Filter Handlers!
       'civicrm_handler_filter_datetime' => array(
