@@ -307,7 +307,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
           }
           //var_dump($clause);
           if (!empty($clause)) {
-            if (CRM_Utils_Array::value('group', $field)) {
+            if (!empty($field['group'])) {
               $clauses[] = $this->engageWhereGroupClause($clause);
             }
             else {
@@ -457,7 +457,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
 
       $dob  = $value['civicrm_contact_birth_date'];
       $age  = empty($dob) ? 0 : $this->dob2age($dob);
-      if(CRM_Utils_Array::value('civicrm_contact_gender_id', $value)){
+      if (!empty($value['civicrm_contact_gender_id'])){
         $sex  = $gender[CRM_Utils_Array::value('civicrm_contact_gender_id', $value)];
       }
       $sex  = is_null($sex) ? '' : $sex;

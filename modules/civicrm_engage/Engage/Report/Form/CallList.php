@@ -247,7 +247,7 @@ class Engage_Report_Form_CallList extends Engage_Report_Form_List {
           //echo "&nbsp;&nbsp;&nbsp;clause=";
           //var_dump($clause);
           if (!empty($clause)) {
-            if (CRM_Utils_Array::value('group', $field)) {
+            if (!empty($field['group'])) {
               $clauses[] = $this->engageWhereGroupClause($clause);
             }
             else {
