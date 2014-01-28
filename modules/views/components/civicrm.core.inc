@@ -611,6 +611,23 @@ function _civicrm_core_data(&$data, $enabled) {
      ),
   );
 
+  // Last modified date
+  $data['civicrm_contact']['modified_date'] = array(
+    'title' => t('Modified date'),
+    'help' => t('The date the contact\'s record was last modified.'),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_datetime',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'civicrm_handler_filter_datetime',
+      'is date' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'civicrm_handler_sort_date',
+     ),
+  );
+  
   // add the other generic fields
   $objType = 'Individual';
   $fields = CRM_Contact_BAO_Contact::exportableFields($objType);
