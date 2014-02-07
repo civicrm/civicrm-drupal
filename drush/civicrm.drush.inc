@@ -97,43 +97,43 @@ function civicrm_drush_command() {
     ),
     'aliases' => array('cvi'),
   );
-  $items['civicrm-extension-list'] = array(
+  $items['civicrm-ext-list'] = array(
     'description' => "List of CiviCRM extensions enabled.",
     'examples' => array(
-      'Standard example' => 'drush civicrm-extension-list',
+      'Standard example' => 'drush civicrm-ext-list',
     ),
     'aliases' => array('cel'),
   );
-  $items['civicrm-extension-install'] = array(
+  $items['civicrm-ext-install'] = array(
     'description' => "Install a CiviCRM extension.",
     'arguments' => array(
       'ename' => 'Extension name.',
     ),
     'required-arguments' => TRUE,
     'examples' => array(
-      'Standard example' => 'drush civicrm-extension-install civimobile',
+      'Standard example' => 'drush civicrm-ext-install civimobile',
     ),
     'aliases' => array('cei'),
   );
-  $items['civicrm-extension-disable'] = array(
+  $items['civicrm-ext-disable'] = array(
     'description' => "Disable a CiviCRM extension.",
     'arguments' => array(
       'ename' => 'Extension name.',
     ),
     'required-arguments' => TRUE,
     'examples' => array(
-      'Standard example' => 'drush civicrm-extension-disable civimobile',
+      'Standard example' => 'drush civicrm-ext-disable civimobile',
     ),
     'aliases' => array('ced'),
   );
-  $items['civicrm-extension-uninstall'] = array(
+  $items['civicrm-ext-uninstall'] = array(
     'description' => "Uninstall a CiviCRM extension.",
     'arguments' => array(
       'ename' => 'Extension name.',
     ),
     'required-arguments' => TRUE,
     'examples' => array(
-      'Standard example' => 'drush civicrm-extension-uninstall civimobile',
+      'Standard example' => 'drush civicrm-ext-uninstall civimobile',
     ),
     'aliases' => array('ceui'),
   );
@@ -533,9 +533,9 @@ function civicrm_drush_help($section) {
 }
 
 /**
- * Implementation of command 'civicrm-extension-list'
+ * Implementation of command 'civicrm-ext-list'
  */
-function drush_civicrm_extension_list() {
+function drush_civicrm_ext_list() {
   civicrm_initialize();
   try{
     $result = civicrm_api('extension', 'get', array('version' => 3));
@@ -559,9 +559,9 @@ function drush_civicrm_extension_list() {
 }
 
 /**
- * Implementation of command 'civicrm-extension-install'
+ * Implementation of command 'civicrm-ext-install'
  */
-function drush_civicrm_extension_install($extension_name) {
+function drush_civicrm_ext_install($extension_name) {
   civicrm_initialize();
   try{
     $result = civicrm_api('extension', 'install', array('key' => $extension_name, 'version' => 3));
@@ -581,9 +581,9 @@ function drush_civicrm_extension_install($extension_name) {
 }
 
 /**
- * Implementation of command 'civicrm-extension-disable'
+ * Implementation of command 'civicrm-ext-disable'
  */
-function drush_civicrm_extension_disable($extension_name) {
+function drush_civicrm_ext_disable($extension_name) {
   civicrm_initialize();
   try{
     $result = civicrm_api('extension', 'disable', array('key' => $extension_name, 'version' => 3));
@@ -603,9 +603,9 @@ function drush_civicrm_extension_disable($extension_name) {
 }
 
 /**
- * Implementation of command 'civicrm-extension-uninstall'
+ * Implementation of command 'civicrm-ext-uninstall'
  */
-function drush_civicrm_extension_uninstall($extension_name) {
+function drush_civicrm_ext_uninstall($extension_name) {
   civicrm_initialize();
   try{
     $result = civicrm_api('extension', 'uninstall', array('key' => $extension_name, 'version' => 3));
