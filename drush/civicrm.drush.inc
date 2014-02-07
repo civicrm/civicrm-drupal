@@ -97,6 +97,47 @@ function civicrm_drush_command() {
     ),
     'aliases' => array('cvi'),
   );
+  $items['civicrm-extension-list'] = array(
+    'description' => "List of CiviCRM extensions enabled.",
+    'examples' => array(
+      'Standard example' => 'drush civicrm-extension-list',
+    ),
+    'aliases' => array('cel'),
+  );
+  $items['civicrm-extension-install'] = array(
+    'description' => "Install a CiviCRM extension.",
+    'arguments' => array(
+      'ename' => 'Extension name.',
+    ),
+    'required-arguments' => TRUE,
+    'examples' => array(
+      'Standard example' => 'drush civicrm-extension-install civimobile',
+    ),
+    'aliases' => array('cei'),
+  );
+  $items['civicrm-extension-disable'] = array(
+    'description' => "Disable a CiviCRM extension.",
+    'arguments' => array(
+      'ename' => 'Extension name.',
+    ),
+    'required-arguments' => TRUE,
+    'examples' => array(
+      'Standard example' => 'drush civicrm-extension-disable civimobile',
+    ),
+    'aliases' => array('ced'),
+  );
+  $items['civicrm-extension-uninstall'] = array(
+    'description' => "Uninstall a CiviCRM extension.",
+    'arguments' => array(
+      'ename' => 'Extension name.',
+    ),
+    'required-arguments' => TRUE,
+    'examples' => array(
+      'Standard example' => 'drush civicrm-extension-uninstall civimobile',
+    ),
+    'aliases' => array('ceui'),
+  );
+
   $items['civicrm-upgrade-db'] = array(
     'description' => "Execute the civicrm/upgrade?reset=1 process from the command line.",
     'aliases' => array('cvupdb'),
@@ -488,6 +529,98 @@ function civicrm_drush_help($section) {
 
     case 'drush:civicrm-sql-query':
       return dt("Usage: drush [options] civicrm-sql-query <query>...\n<query> is a SQL statement, which can alternatively be passed via STDIN. Any additional arguments are passed to the mysql command directly.");
+  }
+}
+
+/**
+ * Implementation of command 'civicrm-extension-list'
+ */
+function drush_civicrm_extension_list() {
+  civicrm_initialize();
+  try{
+    $result = civicrm_api('extension', 'get', array('version' => 3));
+    $rows = array(array(dt('App name'), dt('Status')));
+    foreach ($result['values'] as $k => $extension_data) {
+      $rows[] = array(
+        $extension_data['key'],
+        $extension_data['status'],
+      );
+    }
+    unset($result);
+    drush_print_table($rows, TRUE);
+  }
+  catch (CiviCRM_API3_Exception $e) {
+    // handle error here
+    $errorMessage = $e->getMessage();
+    $errorCode = $e->getErrorCode();
+    $errorData = $e->getExtraParams();
+    drush_log(dt("!error", array('!error' => $errorData), 'error'));
+  }
+}
+
+/**
+ * Implementation of command 'civicrm-extension-install'
+ */
+function drush_civicrm_extension_install($extension_name) {
+  civicrm_initialize();
+  try{
+    $result = civicrm_api('extension', 'install', array('key' => $extension_name, 'version' => 3));
+    if($result['values'] && $result['values'] == 1) {
+      drush_print(dt("Extension !ename installed.", array('!ename' => $extension_name)));
+    } else {
+      drush_log(t('Extension !ename could not be installed.', array('!ename' => $extension_name)), 'error');    
+    }
+  }
+  catch (CiviCRM_API3_Exception $e) {
+    // handle error here
+    $errorMessage = $e->getMessage();
+    $errorCode = $e->getErrorCode();
+    $errorData = $e->getExtraParams();
+    drush_log(dt("!error", array('!error' => $errorData), 'error'));
+  }
+}
+
+/**
+ * Implementation of command 'civicrm-extension-disable'
+ */
+function drush_civicrm_extension_disable($extension_name) {
+  civicrm_initialize();
+  try{
+    $result = civicrm_api('extension', 'disable', array('key' => $extension_name, 'version' => 3));
+    if($result['values'] && $result['values'] == 1) {
+      drush_print(dt("Extension !ename disabled.", array('!ename' => $extension_name)));
+    } else {
+      drush_log(t('Extension !ename could not be disabled.', array('!ename' => $extension_name)), 'error');
+    }
+  }
+  catch (CiviCRM_API3_Exception $e) {
+    // handle error here
+    $errorMessage = $e->getMessage();
+    $errorCode = $e->getErrorCode();
+    $errorData = $e->getExtraParams();
+    drush_log(dt("!error", array('!error' => $errorData), 'error'));
+  }
+}
+
+/**
+ * Implementation of command 'civicrm-extension-uninstall'
+ */
+function drush_civicrm_extension_uninstall($extension_name) {
+  civicrm_initialize();
+  try{
+    $result = civicrm_api('extension', 'uninstall', array('key' => $extension_name, 'version' => 3));
+    if($result['values'] && $result['values'] == 1) {
+      drush_print(dt("Extension !ename uninstalled.", array('!ename' => $extension_name)));
+    } else {
+      drush_log(t('Extension !ename could not be uninstalled.', array('!ename' => $extension_name)), 'error');    
+    }
+  }
+  catch (CiviCRM_API3_Exception $e) {
+    // handle error here
+    $errorMessage = $e->getMessage();
+    $errorCode = $e->getErrorCode();
+    $errorData = $e->getExtraParams();
+    drush_log(dt("!error", array('!error' => $errorData), 'error'));
   }
 }
 
