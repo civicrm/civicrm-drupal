@@ -611,6 +611,23 @@ function _civicrm_core_data(&$data, $enabled) {
      ),
   );
 
+  // Last modified date
+  $data['civicrm_contact']['modified_date'] = array(
+    'title' => t('Modified date'),
+    'help' => t('The date the contact\'s record was last modified.'),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_datetime',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'civicrm_handler_filter_datetime',
+      'is date' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'civicrm_handler_sort_date',
+     ),
+  );
+  
   // add the other generic fields
   $objType = 'Individual';
   $fields = CRM_Contact_BAO_Contact::exportableFields($objType);
@@ -2249,6 +2266,11 @@ function _civicrm_core_data(&$data, $enabled) {
 
   $data['civicrm_group']['table']['group'] = t('CiviCRM Groups');
 
+  $data['civicrm_group']['table']['base'] = array(
+    'field' => 'id',
+    'title' => t('CiviCRM Groups'),
+    'help' => t("View displays CiviCRM Groups."),
+  );
 
   $data['civicrm_group']['table']['join']['civicrm_contact'] = array(
     'left_table' => 'civicrm_group_contact',
@@ -2444,16 +2466,18 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
-      'pseudo class' => 'CRM_Member_PseudoConstant',
-      'pseudo method' => 'tag',
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'get',
+      'pseudo args' => array('CRM_Core_BAO_EntityTag', 'tag_id'),
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
     ),
     'filter' => array(
       'handler' => 'civicrm_handler_filter_pseudo_constant',
-      'pseudo class' => 'CRM_Member_PseudoConstant',
-      'pseudo method' => 'tag',
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'get',
+      'pseudo args' => array('CRM_Core_BAO_EntityTag', 'tag_id'),
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -2526,7 +2550,7 @@ function _civicrm_core_data(&$data, $enabled) {
   while ($dao->fetch()) {
     // call getTree using $dao->id as groupID and $dao->extends as entityType
 
-    $data = civicrm_views_custom_data_cache($data, $dao->extends, $dao->id, $dao->extends_entity_column_value, $dao->style);
+    $data = civicrm_views_custom_data_cache($data, $dao->extends, $dao->id, $dao->extends_entity_column_value);
   }
 }
 
