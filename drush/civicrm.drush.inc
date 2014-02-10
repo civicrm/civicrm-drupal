@@ -637,7 +637,7 @@ function drush_civicrm_cacheclear() {
     $params['session'] = 1;
   }
 
-  $result = civicrm_api3('System', 'flush', $params);
+  $result = civicrm_api('System', 'flush', $params);
 
   if ($result['is_error']) {
     drush_log(dt('An error occured: !message', array('!message' => $result['error_message'])), 'error');
