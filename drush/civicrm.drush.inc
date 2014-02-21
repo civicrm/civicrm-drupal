@@ -97,6 +97,47 @@ function civicrm_drush_command() {
     ),
     'aliases' => array('cvi'),
   );
+  $items['civicrm-extension-list'] = array(
+    'description' => "List of CiviCRM extensions enabled.",
+    'examples' => array(
+      'Standard example' => 'drush civicrm-extension-list',
+    ),
+    'aliases' => array('cel'),
+  );
+  $items['civicrm-extension-install'] = array(
+    'description' => "Install a CiviCRM extension.",
+    'arguments' => array(
+      'ename' => 'Extension name.',
+    ),
+    'required-arguments' => TRUE,
+    'examples' => array(
+      'Standard example' => 'drush civicrm-extension-install civimobile',
+    ),
+    'aliases' => array('cei'),
+  );
+  $items['civicrm-extension-disable'] = array(
+    'description' => "Disable a CiviCRM extension.",
+    'arguments' => array(
+      'ename' => 'Extension name.',
+    ),
+    'required-arguments' => TRUE,
+    'examples' => array(
+      'Standard example' => 'drush civicrm-extension-disable civimobile',
+    ),
+    'aliases' => array('ced'),
+  );
+  $items['civicrm-extension-uninstall'] = array(
+    'description' => "Uninstall a CiviCRM extension.",
+    'arguments' => array(
+      'ename' => 'Extension name.',
+    ),
+    'required-arguments' => TRUE,
+    'examples' => array(
+      'Standard example' => 'drush civicrm-extension-uninstall civimobile',
+    ),
+    'aliases' => array('ceui'),
+  );
+
   $items['civicrm-upgrade-db'] = array(
     'description' => "Execute the civicrm/upgrade?reset=1 process from the command line.",
     'aliases' => array('cvupdb'),
@@ -214,20 +255,35 @@ function civicrm_drush_command() {
  */
 function drush_civicrm_install_validate() {
   // TODO: Replace these with required options (Drush 5).
-  // TODO: Consider reusing the db-url parsing in site-install.
+  // Get the drupal credentials in case civi specific db info is not passed.
+  if (drush_get_option('db-url', FALSE)) {
+    $db_spec['db-url'] = $GLOBALS['db_url'];
+  }
+  elseif (drush_get_option('all', FALSE)) {
+    $db_spec = _drush_sql_get_all_db_specs();
+  }
+  if (!isset($db_spec)) {
+    $db_spec = _drush_sql_get_db_spec();
+  }
+
   if (!drush_get_option('dbuser', FALSE)) {
-    return drush_set_error('CIVICRM_INSTALL_DB_USER_NOT_SPECIFIED', dt('CiviCRM database username not specified.'));
+    drush_set_option('dbuser', $db_spec['username']);
   }
   if (!drush_get_option('dbpass', FALSE)) {
-    return drush_set_error('CIVICRM_INSTALL_DB_PASS_NOT_SPECIFIED', dt('CiviCRM database password not specified.'));
+    drush_set_option('dbpass', $db_spec['password']);
   }
   if (!drush_get_option('dbhost', FALSE)) {
-    return drush_set_error('CIVICRM_INSTALL_DB_HOST_NOT_SPECIFIED', dt('CiviCRM database host not specified.'));
+    drush_set_option('dbhost', $db_spec['host']);
   }
   if (!drush_get_option('dbname', FALSE)) {
-    return drush_set_error('CIVICRM_INSTALL_DB_NAME_NOT_SPECIFIED', dt('CiviCRM database name not specified.'));
+    drush_set_option('dbname', $db_spec['database']);
   }
-  if (!drush_get_option('tarfile', FALSE)) {
+
+  $crmpath    = _civicrm_get_crmpath();
+  $drupalRoot = drush_get_context('DRUSH_DRUPAL_ROOT');
+  $modPath    = "$drupalRoot/$crmpath";
+
+  if (!is_dir("$modPath/civicrm") && !drush_get_option('tarfile', FALSE)) {
     return drush_set_error('CIVICRM_INSTALL_TARFILE_NOT_SPECIFIED', dt('CiviCRM tarfile not specified.'));
   }
   if (drush_get_option('lang', FALSE) && !drush_get_option('langtarfile', FALSE)) {
@@ -255,36 +311,33 @@ function drush_civicrm_install() {
   if (!is_dir("$modPath/civicrm")) {
     // extract tarfile at right place
     _civicrm_extract_tarfile($modPath);
-
-    // include civicrm installer helper file
-    $civicrmInstallerHelper = "$modPath/civicrm/install/civicrm.php";
-    if (!file_exists($civicrmInstallerHelper)) {
-      return drush_set_error('CIVICRM_INSTALL_TARFILE_UNPACK_FAIL', dt("Tarfile could not be unpacked OR CiviCRM installer helper file is missing."));
-    }
     drush_log(dt("Tarfile unpacked."), 'ok');
-
-    if ($lang != '') {
-      _civicrm_extract_tarfile($modPath, "langtarfile");
-    }
-
-    // setup all required files/civicrm/* directories
-    if (!_civicrm_create_files_dirs($civicrmInstallerHelper, $modPath)) {
-      return FALSE;
-    }
-
-    // install database
-    _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname, $modPath, $lang);
-
-    // generate civicrm.settings.php file
-    _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $modPath);
-
-    module_enable(array('CiviCRM'));
-
-    drush_log(dt("CiviCRM installed."), 'ok');
   }
-  else {
-    drush_log(dt("Existing CiviCRM found. No action taken."), 'ok');
+
+  // include civicrm installer helper file
+  $civicrmInstallerHelper = "$modPath/civicrm/install/civicrm.php";
+  if (!file_exists($civicrmInstallerHelper)) {
+    return drush_set_error('CIVICRM_NOT_PRESENT', dt("CiviCRM installer helper file is missing."));
   }
+
+  if ($lang != '') {
+    _civicrm_extract_tarfile($modPath, "langtarfile");
+  }
+
+  // setup all required files/civicrm/* directories
+  if (!_civicrm_create_files_dirs($civicrmInstallerHelper, $modPath)) {
+    return FALSE;
+  }
+
+  // install database
+  _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname, $modPath, $lang);
+
+  // generate civicrm.settings.php file
+  _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $modPath);
+
+  module_enable(array('civicrm'));
+
+  drush_log(dt("CiviCRM installed."), 'ok');
 }
 
 function _civicrm_extract_tarfile($destinationPath, $option = 'tarfile') {
@@ -466,6 +519,98 @@ function civicrm_drush_help($section) {
 }
 
 /**
+ * Implementation of command 'civicrm-extension-list'
+ */
+function drush_civicrm_extension_list() {
+  civicrm_initialize();
+  try{
+    $result = civicrm_api('extension', 'get', array('version' => 3));
+    $rows = array(array(dt('App name'), dt('Status')));
+    foreach ($result['values'] as $k => $extension_data) {
+      $rows[] = array(
+        $extension_data['key'],
+        $extension_data['status'],
+      );
+    }
+    unset($result);
+    drush_print_table($rows, TRUE);
+  }
+  catch (CiviCRM_API3_Exception $e) {
+    // handle error here
+    $errorMessage = $e->getMessage();
+    $errorCode = $e->getErrorCode();
+    $errorData = $e->getExtraParams();
+    drush_log(dt("!error", array('!error' => $errorData), 'error'));
+  }
+}
+
+/**
+ * Implementation of command 'civicrm-extension-install'
+ */
+function drush_civicrm_extension_install($extension_name) {
+  civicrm_initialize();
+  try{
+    $result = civicrm_api('extension', 'install', array('key' => $extension_name, 'version' => 3));
+    if($result['values'] && $result['values'] == 1) {
+      drush_print(dt("Extension !ename installed.", array('!ename' => $extension_name)));
+    } else {
+      drush_log(t('Extension !ename could not be installed.', array('!ename' => $extension_name)), 'error');    
+    }
+  }
+  catch (CiviCRM_API3_Exception $e) {
+    // handle error here
+    $errorMessage = $e->getMessage();
+    $errorCode = $e->getErrorCode();
+    $errorData = $e->getExtraParams();
+    drush_log(dt("!error", array('!error' => $errorData), 'error'));
+  }
+}
+
+/**
+ * Implementation of command 'civicrm-extension-disable'
+ */
+function drush_civicrm_extension_disable($extension_name) {
+  civicrm_initialize();
+  try{
+    $result = civicrm_api('extension', 'disable', array('key' => $extension_name, 'version' => 3));
+    if($result['values'] && $result['values'] == 1) {
+      drush_print(dt("Extension !ename disabled.", array('!ename' => $extension_name)));
+    } else {
+      drush_log(t('Extension !ename could not be disabled.', array('!ename' => $extension_name)), 'error');
+    }
+  }
+  catch (CiviCRM_API3_Exception $e) {
+    // handle error here
+    $errorMessage = $e->getMessage();
+    $errorCode = $e->getErrorCode();
+    $errorData = $e->getExtraParams();
+    drush_log(dt("!error", array('!error' => $errorData), 'error'));
+  }
+}
+
+/**
+ * Implementation of command 'civicrm-extension-uninstall'
+ */
+function drush_civicrm_extension_uninstall($extension_name) {
+  civicrm_initialize();
+  try{
+    $result = civicrm_api('extension', 'uninstall', array('key' => $extension_name, 'version' => 3));
+    if($result['values'] && $result['values'] == 1) {
+      drush_print(dt("Extension !ename uninstalled.", array('!ename' => $extension_name)));
+    } else {
+      drush_log(t('Extension !ename could not be uninstalled.', array('!ename' => $extension_name)), 'error');    
+    }
+  }
+  catch (CiviCRM_API3_Exception $e) {
+    // handle error here
+    $errorMessage = $e->getMessage();
+    $errorCode = $e->getErrorCode();
+    $errorData = $e->getExtraParams();
+    drush_log(dt("!error", array('!error' => $errorData), 'error'));
+  }
+}
+
+/**
  * Implementation of drush_hook_COMMAND_validate for command 'civicrm-upgrade-db'
  */
 function drush_civicrm_upgrade_db_validate() {
@@ -603,6 +748,8 @@ function drush_civicrm_cacheclear() {
   // also cleanup the templates_c directory
   $config->cleanup(1, FALSE);
 
+  CRM_Core_BAO_WordReplacement::rebuild();
+
   // also cleanup the session object
   $session = CRM_Core_Session::singleton();
   $session->reset(1);
@@ -616,13 +763,46 @@ function drush_civicrm_enable_debug_validate() {
 }
 
 function drush_civicrm_enable_debug() {
-  $params['debug'] = 1;
-  $params['backtrace'] = 1;
+  $settings = array(
+    'debug_enabled' => 1,
+    'backtrace' => 1,
+  );
 
-  require_once 'CRM/Admin/Form/Setting.php';
-  CRM_Admin_Form_Setting::commonProcess($params);
+  foreach ($settings as $key => $val) {
+    $result = civicrm_api('Setting', 'create', array('version' => 3, $key => $val));
 
-  drush_log(dt('Debug setting enabled.'), 'ok');
+    if ($result['is_error']) {
+      drush_log(dt('An error occured: !message', array('!message' => $result['error_message'])), 'error');
+      return;
+    }
+  }
+
+  drush_log(dt('CiviCRM debug setting enabled.'), 'ok');
+}
+
+/**
+ * Implementation of drush_hook_COMMAND_validate for command 'civicrm-disable-debug'
+ */
+function drush_civicrm_disable_debug_validate() {
+  return _civicrm_init();
+}
+
+function drush_civicrm_disable_debug() {
+  $settings = array(
+    'debug_enabled' => 0,
+    'backtrace' => 0,
+  );
+
+  foreach ($settings as $key => $val) {
+    $result = civicrm_api('Setting', 'create', array('version' => 3, $key => $val));
+
+    if ($result['is_error']) {
+      drush_log(dt('An error occured: !message', array('!message' => $result['error_message'])), 'error');
+      return;
+    }
+  }
+
+  drush_log(dt('CiviCRM debug setting disabled.'), 'ok');
 }
 
 /**
@@ -1141,6 +1321,12 @@ function drush_civicrm_api() {
   }
 
   civicrm_initialize();
+
+  global $user;
+  CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal',
+    civicrm_get_ctype('Individual')
+  );
+
   $result = civicrm_api($entity, $action, $params);
 
   switch (drush_get_option('out', 'pretty')) {
