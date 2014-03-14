@@ -34,7 +34,9 @@ class views_handler_argument_civicrm_year extends views_handler_argument_date {
   function construct() {
     parent::construct();
     $this->arg_format = 'Y';
-    $this->formula = views_date_sql_extract('YEAR', "***table***.$this->real_field");
+    $this->formula = views_date_sql_format('Y', "***table***.$this->real_field", "datetime");
+    //$this->formula = views_date_sql_extract('YEAR', "***table***.$this->real_field");
+    // Any reason the above was used?
   }
 }
 
