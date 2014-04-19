@@ -93,10 +93,10 @@ function _civicrm_core_data(&$data, $enabled) {
       'field' => 'id',
     ),
     // Links to case contacts
-      'civicrm_case_contact' => array(
+    'civicrm_case_contact' => array(
       'left_field' => 'contact_id',
       'field' => 'id',
-     ),
+    ),
   );
 
   // For other base tables, explain how we join -
@@ -608,7 +608,7 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
     'sort' => array(
       'handler' => 'civicrm_handler_sort_date',
-     ),
+    ),
   );
 
   // Last modified date
@@ -625,9 +625,25 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
     'sort' => array(
       'handler' => 'civicrm_handler_sort_date',
-     ),
+    ),
   );
-  
+  // Image URL
+  $data['civicrm_contact']['image_URL'] = array(
+    'title' => t('Contact Image'),
+    'help' => t('The image associated with the contact.'),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_contact_image',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+      'allow empty' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   // add the other generic fields
   $objType = 'Individual';
   $fields = CRM_Contact_BAO_Contact::exportableFields($objType);
@@ -1718,8 +1734,8 @@ function _civicrm_core_data(&$data, $enabled) {
   );
   civicrm_views_add_date_arguments($data['civicrm_activity'], array(
     'title' => 'Scheduled Activity Date',
-      'name' => 'activity_date_time',
-    ));
+    'name' => 'activity_date_time',
+  ));
 
   //Activity Duration
   $data['civicrm_activity']['duration'] = array(
@@ -1898,7 +1914,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
-   ),
+    ),
     'argument' => array(
       'handler' => 'views_handler_argument',
     ),
@@ -1915,7 +1931,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
-   ),
+    ),
     'argument' => array(
       'handler' => 'views_handler_argument',
     ),
@@ -2047,7 +2063,6 @@ function _civicrm_core_data(&$data, $enabled) {
     'left_field' => 'contact_id',
     'field' => 'contact_id_a',
   );
-
 
 
   //CiviCRM Relationships - FIELDS
@@ -2222,8 +2237,8 @@ function _civicrm_core_data(&$data, $enabled) {
 
   civicrm_views_add_date_arguments($data['civicrm_relationship'], array(
     'title' => 'Start Date',
-      'name' => 'start_date',
-    ));
+    'name' => 'start_date',
+  ));
 
   //Relationship end date
   $data['civicrm_relationship']['end_date'] = array(
@@ -2244,8 +2259,8 @@ function _civicrm_core_data(&$data, $enabled) {
 
   civicrm_views_add_date_arguments($data['civicrm_relationship'], array(
     'title' => 'End Date',
-      'name' => 'end_date',
-    ));
+    'name' => 'end_date',
+  ));
   //BOOLEAN : IS RELATIONSHIP ACTIVE
   $data['civicrm_relationship']['is_active'] = array(
     'title' => t('Is Relationship Active'),
@@ -2276,28 +2291,28 @@ function _civicrm_core_data(&$data, $enabled) {
 
   // Case ID for CiviCase
   if (isset($enabled['CiviCase'])) {
-	  $data['civicrm_relationship']['case_id'] = array(
-		'title' => t('Case ID'),
-		'real field' => 'case_id',
-		'help' => t('The case ID of this relationship'),
-		'field' => array(
-		  'handler' => 'views_handler_field',
-		  'click sortable' => FALSE,
-		),
-		'argument' => array(
-		  'handler' => 'views_handler_argument',
-		),
-		'filter' => array(
-		  'handler' => 'views_handler_filter_numeric',
-		  'allow empty' => TRUE,
-		),
-		'relationship' => array(
-		  'base' => 'civicrm_case',
-		  'field' => 'case_id',
-		  'handler' => 'views_handler_relationship',
-		  'label' => t('CiviCRM Case'),
-		),
-	  );
+    $data['civicrm_relationship']['case_id'] = array(
+      'title' => t('Case ID'),
+      'real field' => 'case_id',
+      'help' => t('The case ID of this relationship'),
+      'field' => array(
+        'handler' => 'views_handler_field',
+        'click sortable' => FALSE,
+      ),
+      'argument' => array(
+        'handler' => 'views_handler_argument',
+      ),
+      'filter' => array(
+        'handler' => 'views_handler_filter_numeric',
+        'allow empty' => TRUE,
+      ),
+      'relationship' => array(
+        'base' => 'civicrm_case',
+        'field' => 'case_id',
+        'handler' => 'views_handler_relationship',
+        'label' => t('CiviCRM Case'),
+      ),
+    );
   }
 
   /*
@@ -2397,7 +2412,6 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'views_handler_sort',
     ),
   );
-
 
 
   $data['civicrm_group']['title'] = array(
