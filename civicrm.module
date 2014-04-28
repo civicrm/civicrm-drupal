@@ -767,6 +767,7 @@ function civicrm_add_jquery(&$html) {
 function civicrm_form_alter(&$form, $formValues, $formID) {
   switch ($formID) {
     case 'user_admin_permissions':
+      $form['#submit'][] = 'civicrm_user_admin_permissions_submit';
     case 'system_clean_url_settings':
       if (!empty($formValues['input'])) {
         // reset navigation for permissions changed and clean url
@@ -820,6 +821,33 @@ function civicrm_form_alter(&$form, $formValues, $formID) {
       break;
   }
   return;
+}
+
+/**
+ * Custom submit handler for CiviCRM to warn about unsafe permission configs.
+ */
+function civicrm_user_admin_permissions_submit($form, &$form_state) {
+  $rid = array_search('anonymous user', $form_state['values']['role_names']);
+  if ($rid === FALSE) {
+    return;
+  }
+  civicrm_initialize();
+  $roles = user_roles();
+  $permissions = array_filter($form_state['values'][$rid]);
+  $warning_permissions = CRM_Core_Permission::validateForPermissionWarnings($permissions);
+  $warning_permission_names = array();
+  foreach (module_implements('permission') as $module) {
+    if ($permissions = module_invoke($module, 'permission')) {
+      foreach ($permissions as $key => $permission) {
+        if (in_array($key, $warning_permissions)) {
+          $warning_permission_names[$key] = $permission['title'];
+        }
+      }
+    }
+  }
+  if (!empty($warning_permission_names)) {
+    drupal_set_message(t('The %1 role was assigned one or more permissions that may prove dangerous for users of that role to have. Please reconsider assigning %2 to them.', array( '%1' => $roles[$rid], '%2' => implode(', ', $warning_permission_names))), 'warning');
+  }
 }
 
 /*
