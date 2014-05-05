@@ -1155,14 +1155,20 @@ function drush_civicrm_sqlconnect_validate() {
  * Implementation of command 'civicrm-sql-connect'
  */
 function drush_civicrm_sqlconnect() {
-  drush_sql_connect();
+  return drush_sql_connect();
+}
+
+/**
+ * Implements drush_post_COMMAND hook
+ */
+function drush_civicrm_post_civicrm_sql_connect() {
   _civicrm_dsn_close();
 }
 
 /**
- * Implementation of drush_hook_COMMAND_validate for command 'civicrm-sql-query'
+ * Implementation of drush_hook_pre_COMMAND for command 'civicrm-sql-query'
  */
-function drush_civicrm_sqlquery_validate() {
+function drush_civicrm_pre_civicrm_sql_query() {
   _civicrm_dsn_init();
 }
 
@@ -1170,7 +1176,10 @@ function drush_civicrm_sqlquery_validate() {
  * Implementation of command 'civicrm-sql-query'
  */
 function drush_civicrm_sqlquery($query) {
-  drush_sql_query($query);
+  return drush_sql_query($query);
+}
+
+function drush_civicrm_post_civicrm_sql_query() {
   _civicrm_dsn_close();
 }
 
