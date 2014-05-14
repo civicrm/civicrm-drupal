@@ -65,8 +65,7 @@
  * Run hook_views_data for active CiviCRM components
  */
 function civicrm_views_data_alter(&$data) {
-
-  if (!civicrm_initialize()) {
+  if (!civicrm_initialize() || CRM_Utils_System::isInUpgradeMode()) {
     return;
   }
 
