@@ -20,6 +20,9 @@ class Routes {
         array(
           '_title' => isset($item['title']) ? $item['title'] : 'CiviCRM',
           '_content' => 'Drupal\civicrm\Controller\CivicrmController::main',
+          // We explicitly provide a _controller key so that this page will
+          // be accessible when Accept headers are non-html.
+          '_controller' => 'controller.page:content',
           'args' => explode('/', $path),
         ),
         array(
