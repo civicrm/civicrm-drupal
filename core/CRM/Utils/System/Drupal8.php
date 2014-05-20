@@ -50,52 +50,65 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
    *
    */
   function createUser(&$params, $mail) {
-    $form_state = form_state_defaults();
-    
-    $form_state['input'] = array(
-      'name' => $params['cms_name'],
-      'mail' => $params[$mail],
-      'op' => 'Create new account',
-    );
+    $user = \Drupal::currentUser();
+    $user_register_conf = \Drupal::config('user.settings')->get('register');
+    $verify_mail_conf = \Drupal::config('user.settings')->get('verify_mail');
 
-    $admin = user_access('administer users');
-    if (!variable_get('user_email_verification', TRUE) || $admin) {
-      $form_state['input']['pass'] = array('pass1'=>$params['cms_pass'],'pass2'=>$params['cms_pass']);
-    }
-
-    if(!empty($params['notify'])){
-      $form_state['input']['notify'] = $params['notify'];
-    }
-
-    $form_state['rebuild'] = FALSE;
-    $form_state['programmed'] = TRUE;
-    $form_state['complete form'] = FALSE;
-    $form_state['method'] = 'post';
-    $form_state['build_info']['args'] = array();
-    /*
-    * if we want to submit this form more than once in a process (e.g. create more than one user)
-    * we must force it to validate each time for this form. Otherwise it will not validate
-    * subsequent submissions and the manner in which the password is passed in will be invalid
-    * */
-    $form_state['must_validate'] = TRUE;
-    $config = CRM_Core_Config::singleton();
-
-    // we also need to redirect b
-    $config->inCiviCRM = TRUE;
-
-    $form = drupal_retrieve_form('user_register_form', $form_state);
-    $form_state['process_input'] = 1;
-    $form_state['submitted'] = 1;
-    $form['#array_parents'] = array();
-    $form['#tree'] = FALSE;
-    drupal_process_form('user_register_form', $form, $form_state);
-
-    $config->inCiviCRM = FALSE;
-
-    if (form_get_errors()) {
+    // Don't create user if we don't have permission to.
+    if (!$user->hasPermission('administer users') && $user_register_conf == 'admin_only') {
       return FALSE;
     }
-    return $form_state['user']->uid;
+
+    $account = entity_create('user');
+    $account->setUsername($params['cms_name'])->setEmail($params[$mail]);
+
+    // Allow user to set password only if they are an admin or if
+    // the site settings don't require email verification.
+    if (!$verify_mail_conf || $user->hasPermission('administer users')) {
+      // @Todo: do we need to check that passwords match or assume this has already been done for us?
+      $account->setPassword($params['cms_pass']);
+    }
+
+    // Only activate account if we're admin or if anonymous users don't require
+    // approval to create accounts.
+    if ($user_register_conf != 'visitors' && !$user->hasPermission('administer users')) {
+      $account->block();
+    }
+
+    // Validate the user object
+    $violations = $account->validate();
+    if (count($violations)) {
+      return FALSE;
+    }
+
+    try {
+      $account->save();
+    }
+    catch (\Drupal\Core\Entity\EntityStorageException $e) {
+      return FALSE;
+    }
+
+    // Send off any emails as required.
+    // Possible values for $op:
+    // *   - 'register_admin_created': Welcome message for user created by the admin.
+    // *   - 'register_no_approval_required': Welcome message when user
+    // *     self-registers.
+    // *   - 'register_pending_approval': Welcome message, user pending admin
+    // *     approval.
+    // @Todo: Should we only send off emails if $params['notify'] is set?
+    switch (TRUE) {
+      case $user_register_conf == 'admin_only' || $user->isAuthenticated():
+        _user_mail_notify('register_admin_created', $account);
+        break;
+      case $user_register_conf == 'visitors':
+        _user_mail_notify('register_no_approval_required', $account);
+        break;
+      case 'visitors_admin_approval':
+        _user_mail_notify('register_pending_approval', $account);
+        break;
+    }
+
+    return $account->id();
   }
 
   /*
