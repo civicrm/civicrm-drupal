@@ -8,32 +8,28 @@
 namespace Drupal\civicrm\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\civicrm\CivicrmPageState;
 use Drupal\civicrm\Civicrm;
 
 class CivicrmController extends ControllerBase {
-  protected $civicrmPageState;
-  protected $request;
   protected $civicrm;
+  protected $civicrmPageState;
 
-  public function __construct(Request $request, CivicrmPageState $civicrmPageState, Civicrm $civicrm) {
-    $this->request = $request;
-    $this->civicrmPageState = $civicrmPageState;
+  public function __construct(Civicrm $civicrm, CivicrmPageState $civicrmPageState) {
     $this->civicrm = $civicrm;
+    $this->civicrmPageState = $civicrmPageState;
   }
 
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('request'),
-      $container->get('civicrm.page_state'),
-      $container->get('civicrm')
+      $container->get('civicrm'),
+      $container->get('civicrm.page_state')
     );
   }
 
-  public function main() {
-    $content = $this->civicrm->invoke($this->request->attributes->get('args', array('civicrm')));
+  public function main($args) {
+    $content = $this->civicrm->invoke($args);
 
     // Add CSS, JS, etc. that is required for this page.
     \CRM_Core_Resources::singleton()->addCoreResources();
