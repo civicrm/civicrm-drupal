@@ -4,6 +4,7 @@ namespace Drupal\civicrm\Routing;
 
 use \Symfony\Component\Routing\Route;
 use \Symfony\Component\Routing\RouteCollection;
+use \Drupal\civicrm\CivicrmHelper;
 
 class Routes {
   public function routes() {
@@ -30,9 +31,7 @@ class Routes {
         )
       );
 
-      // Create a route name by replacing the forward slashes in the path
-      // with underscores, eg. civicrm/contact/search => civicrm.civicrm_contact_search
-      $route_name = 'civicrm.' . implode('_', explode('/', $path));
+      $route_name = CivicrmHelper::parseURL($path)['route_name'];
       $collection->add($route_name, $route);
     }
 

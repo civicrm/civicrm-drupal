@@ -59,11 +59,12 @@ function civicrm_toolbar() {
  * @Todo Remove links from placeholder menu items (eg. menu headings).
  */
 function _civicrm_toolbar(&$items, $leaf) {
+  $url = \Drupal\civicrm\CivicrmHelper::parseUrl($leaf['attributes']['url']);
   $item = array(
     '#theme' => 'menu_link',
     '#title' => $leaf['attributes']['label'],
-    '#href' => $leaf['attributes']['url'],
-    '#localized_options' => array('query' => $leaf['attributes']['query']),
+    '#href' => $url['path'],
+    '#localized_options' => array('query' => $url['query']),
     '#below' => array(),
     '#attributes' => array(
       'class' => array('collapsed'),

@@ -107,41 +107,7 @@ class Civicrm {
    */
   public function navigationTree() {
     $navigationTree = array();
-    \CRM_Core_BAO_Navigation::buildNavigationTree($navigationTree, 0);
-
-    // Separate path and query string in URL component
-    foreach ($navigationTree as &$leaf) {
-      $this->_NavigationTreeURLFix($leaf);
-    }
-    return $navigationTree;
-  }
-
-  /**
-   * Recursive function helper to separate navigation URLs into
-   * their paths and query parameters.
-   *
-   * @param $leaf
-   */
-  protected function _NavigationTreeURLFix(&$leaf) {
-    // Recurse on child menu items.
-    if (is_array($leaf['child'])) {
-      foreach ($leaf['child'] as &$child) {
-        $this->_NavigationTreeURLFix($child);
-      }
-    }
-
-    // Separate out the url into its path and query components.
-    $url = parse_url($leaf['attributes']['url']);
-    if (!empty($url['path'])) {
-      $leaf['attributes']['url'] = $url['path'];
-    }
-
-    // Turn the query string (if it exists) into an associative array.
-    $query = array();
-    if (!empty($url['query'])) {
-      parse_str($url['query'], $query);
-    }
-    $leaf['attributes']['query'] = $query;
+    return \CRM_Core_BAO_Navigation::buildNavigationTree($navigationTree, 0);
   }
 
   /**
