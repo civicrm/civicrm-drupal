@@ -1,0 +1,5 @@
+services:
+  civicrm:
+    class: Drupal\civicrm\Civicrm
+  civicrm.page_state:
+    class: Drupal\civicrm\CivicrmPageState
