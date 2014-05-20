@@ -79,6 +79,26 @@ function _civicrm_event_data(&$data, $enabled) {
     ),
   );
 
+  // Event Max-Partipicants
+  $data['civicrm_event']['max_participants'] = array(
+    'title' => t('Event Max-Participants'),
+    'help' => t('The maximal number of participants of the Event'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+      'click sortable' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+      'numeric' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   //Event Type
   $data['civicrm_event']['event_type'] = array(
     'title' => t('Event Type'),
