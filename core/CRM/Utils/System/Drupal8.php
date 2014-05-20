@@ -90,11 +90,11 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
 
     // Send off any emails as required.
     // Possible values for $op:
-    // *   - 'register_admin_created': Welcome message for user created by the admin.
-    // *   - 'register_no_approval_required': Welcome message when user
-    // *     self-registers.
-    // *   - 'register_pending_approval': Welcome message, user pending admin
-    // *     approval.
+    //    - 'register_admin_created': Welcome message for user created by the admin.
+    //    - 'register_no_approval_required': Welcome message when user
+    //      self-registers.
+    //    - 'register_pending_approval': Welcome message, user pending admin
+    //      approval.
     // @Todo: Should we only send off emails if $params['notify'] is set?
     switch (TRUE) {
       case $user_register_conf == 'admin_only' || $user->isAuthenticated():
