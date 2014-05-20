@@ -121,9 +121,12 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
     // CRM-5555
     if (function_exists('user_load')) {
       $user = user_load($ufID);
-      $user->setUsername($ufName);
-      if (!count($user->validate())) {
-        $user->save();
+      // @Todo Document the reason for this conditional (inherited from Drupal 7 version)
+      if ($user && $user->getEmail() != $ufName) {
+        $user->setUsername($ufName);
+        if (!count($user->validate())) {
+          $user->save();
+        }
       }
     }
   }
