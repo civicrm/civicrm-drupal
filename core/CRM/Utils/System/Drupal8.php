@@ -125,47 +125,35 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
    * @return void
    */
   static function checkUserNameEmailExists(&$params, &$errors, $emailName = 'email') {
-    $config = CRM_Core_Config::singleton();
+    // If we are given a name, let's check to see if it already exists.
+    if (!empty($params['name'])) {
+      $name = $params['name'];
 
-    $dao    = new CRM_Core_DAO();
-    $name   = $dao->escape(CRM_Utils_Array::value('name', $params));
-    $email  = $dao->escape(CRM_Utils_Array::value('mail', $params));
-    $errors = form_get_errors();
-    if ($errors) {
-      // unset drupal messages to avoid twice display of errors
-      unset($_SESSION['messages']);
-    }
+      $user = entity_create('user');
+      $user->setUsername($name);
 
-    if (CRM_Utils_Array::value('name', $params)) {
-      if ($nameError = user_validate_name($params['name'])) {
-        $errors['cms_name'] = $nameError;
-      }
-      else {
-        $uid = db_query(
-          "SELECT uid FROM {users} WHERE name = :name",
-          array(':name' => $params['name'])
-        )->fetchField();
-        if ((bool) $uid) {
-          $errors['cms_name'] = ts('The username %1 is already taken. Please select another username.', array(1 => $params['name']));
-        }
+      // This checks for both username uniqueness and validity.
+      $violations = iterator_to_array($user->validate());
+      // We only care about violations on the username field; discard the rest.
+      $violations = array_filter($violations, function ($v) { return $v->getPropertyPath() == 'name.0.value'; });
+      if (count($violations) > 0) {
+        $errors['cms_name'] = $violations[0]->getMessage();
       }
     }
 
-    if (CRM_Utils_Array::value('mail', $params)) {
-      if ($emailError = user_validate_mail($params['mail'])) {
-        $errors[$emailName] = $emailError;
-      }
-      else {
-        $uid = db_query(
-          "SELECT uid FROM {users} WHERE mail = :mail",
-          array(':mail' => $params['mail'])
-        )->fetchField();
-        if ((bool) $uid) {
-          $resetUrl = $config->userFrameworkBaseURL . 'user/password';
-          $errors[$emailName] = ts('The email address %1 is already registered. <a href="%2">Have you forgotten your password?</a>',
-            array(1 => $params['mail'], 2 => $resetUrl)
-          );
-        }
+    // And if we are given an email address, let's check to see if it already exists.
+    if (!empty($params[$emailName])) {
+      $mail = $params[$emailName];
+
+      $user = entity_create('user');
+      $user->setEmail($email);
+
+      // This checks for both email uniqueness.
+      $violations = iterator_to_array($user->validate());
+      // We only care about violations on the email field; discard the rest.
+      $violations = array_filter($violations, function ($v) { return $v->getPropertyPath() == 'mail.0.value'; });
+      if (count($violations) > 0) {
+        $errors[$emailName] = $violations[0]->getMessage();
       }
     }
   }
