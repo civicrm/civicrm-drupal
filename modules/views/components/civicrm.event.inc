@@ -71,6 +71,12 @@ function _civicrm_event_data(&$data, $enabled) {
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
+    'relationship' => array(
+      'base' => 'civicrm_participant',
+      'base field' => 'event_id',
+      'handler' => 'views_handler_relationship',
+      'label' => t('Event -> Participant'),
+    ),
   );
 
   //Event Type
