@@ -35,6 +35,17 @@ class CivicrmController extends ControllerBase {
       throw new \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException();
     }
 
+    // Synchronize the Drupal user with the Contacts database (why?)
+    // @Todo: reimplement civicrm_get_ctype()?
+    // CiviCRM is probing Drupal user object based on the CMS type, and for Drupal it is expecting a Drupal 6/7 user object.
+    // It really should be using an standardised interface and requiring the CMS's to offer an implementation.
+    // Alas, we'll mock an object for it to use.
+    $account = new \stdClass();
+    $account->uid = $this->currentUser()->id();
+    $account->name = $this->currentUser()->getUsername();
+    $account->mail = $this->currentUser()->getEmail();
+    \CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Drupal', 'Individual');
+
     // Add CSS, JS, etc. that is required for this page.
     \CRM_Core_Resources::singleton()->addCoreResources();
     if ($region = \CRM_Core_Region::instance('html-header', FALSE)) {
