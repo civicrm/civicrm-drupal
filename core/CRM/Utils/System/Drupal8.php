@@ -421,24 +421,34 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
   }
 
   /**
-   * @param null $path
-   * @param null $query
-   * @param bool $absolute
-   * @param null $fragment
-   * @param bool $htmlize
-   * @param bool $frontend
-   * @param bool $forceBackend
+   * @param null $path         The base path (eg. civicrm/search/contact)
+   * @param string $query      The query string (eg. reset=1&cid=66) but html encoded(?) (optional)
+   * @param bool $absolute     Produce an absolute including domain and protocol (optional)
+   * @param string $fragment   A named anchor (optional)
+   * @param bool $htmlize      Produce a html encoded url (optional)
+   * @param bool $frontend     A joomla hack (unused)
+   * @param bool $forceBackend A joomla jack (unused)
    * @return string
    *
    * @Todo Take into account full function parameter listing.
    */
-  function url($path = NULL, $query = NULL, $absolute = FALSE, $fragment = NULL, $htmlize = TRUE, $frontend = FALSE, $forceBackend = FALSE) {
-    $route_name = 'civicrm.' . implode('_', explode('/', $path));
+  function url($path = '', $query = '', $absolute = FALSE, $fragment = '', $htmlize = FALSE, $frontend = FALSE, $forceBackend = FALSE) {
+    $query = html_entity_decode($query);
+    $url = \Drupal\civicrm\CivicrmHelper::parseURL("{$path}?{$query}");
+
     try {
-      $url = \Drupal::url($route_name);
+      $url = \Drupal::url($url['route_name'], array(), array(
+        'query' => $url['query'],
+        'absolute' => $absolute,
+        'fragment' => $fragment,
+      ));
     }
     catch (Exception $e) {
       $url = '';
+    }
+
+    if ($htmlize) {
+      $url = htmlentities($url);
     }
     return $url;
   }
