@@ -26,7 +26,7 @@ class CivicrmBreadcrumbBuilder extends BreadcrumbBuilderBase {
    * {@inheritdoc}
    */
   public function applies(array $attributes) {
-    if ($attributes['_content'] == 'Drupal\civicrm\Controller\CivicrmController::main') {
+    if (isset($attributes['_content']) && $attributes['_content'] == 'Drupal\civicrm\Controller\CivicrmController::main') {
       return TRUE;
     }
     return FALSE;
