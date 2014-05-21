@@ -6,6 +6,7 @@ class CivicrmPageState {
   protected $title = '';
   protected $css = array();
   protected $js = array();
+  protected $breadcrumbs = array();
 
   public function setTitle($title) {
     $this->title = $title;
@@ -29,5 +30,17 @@ class CivicrmPageState {
 
   public function getJS() {
     return $this->js;
+  }
+
+  public function addBreadcrumb($name, $url) {
+    $this->breadcrumbs[$name] = $url;
+  }
+
+  public function resetBreadcrumbs() {
+    $this->breadcrumbs = array();
+  }
+
+  public function getBreadcrumbs() {
+    return $this->breadcrumbs;
   }
 }

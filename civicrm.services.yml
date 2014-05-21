@@ -3,3 +3,8 @@ services:
     class: Drupal\civicrm\Civicrm
   civicrm.page_state:
     class: Drupal\civicrm\CivicrmPageState
+  civicrm.breadcrumb:
+    class: Drupal\civicrm\CivicrmBreadcrumbBuilder
+    arguments: [@civicrm.page_state]
+    tags:
+      - { name: breadcrumb_builder, priority: 1002 }

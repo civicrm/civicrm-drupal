@@ -252,26 +252,11 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
    * @return void
    * @access public
    */
-  function appendBreadCrumb($breadCrumbs) {
-    //$breadCrumb = drupal_get_breadcrumb();
-
-    if (is_array($breadCrumbs)) {
-      foreach ($breadCrumbs as $crumbs) {
-        if (stripos($crumbs['url'], 'id%%')) {
-          $args = array('cid', 'mid');
-          foreach ($args as $a) {
-            $val = CRM_Utils_Request::retrieve($a, 'Positive', CRM_Core_DAO::$_nullObject,
-              FALSE, NULL, $_GET
-            );
-            if ($val) {
-              $crumbs['url'] = str_ireplace("%%{$a}%%", $val, $crumbs['url']);
-            }
-          }
-        }
-        $breadCrumb[] = "<a href=\"{$crumbs['url']}\">{$crumbs['title']}</a>";
-      }
+  function appendBreadCrumb($breadcrumbs) {
+    $civicrmPageState = \Drupal::service('civicrm.page_state');
+    foreach ($breadcrumbs as $breadcrumb) {
+      $civicrmPageState->addBreadcrumb($breadcrumb['title'], $breadcrumb['url']);
     }
-    //drupal_set_breadcrumb($breadCrumb);
   }
 
   /**
@@ -281,8 +266,7 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
    * @access public
    */
   function resetBreadCrumb() {
-    $bc = array();
-    drupal_set_breadcrumb($bc);
+    \Drupal::service('civicrm.page_state')->resetBreadcrumbs();
   }
 
   /**
