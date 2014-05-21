@@ -69,6 +69,8 @@ class CRM_Core_Permission_Drupal8 extends CRM_Core_Permission_DrupalBase{
    *
    * @return boolean true if yes, else false
    * @access public
+   *
+   * @Todo Update for Drupal 8
    */
   function check($str, $contactID = NULL) {
     $str = $this->translatePermission($str, 'Drupal', array(
@@ -94,6 +96,8 @@ class CRM_Core_Permission_Drupal8 extends CRM_Core_Permission_DrupalBase{
    *
    * @return boolean true if yes, else false
    * @access public
+   *
+   * @Todo Update for Drupal 8
    */
   function checkGroupRole($array) {
     if (function_exists('user_load') && isset($array)) {
@@ -117,6 +121,8 @@ class CRM_Core_Permission_Drupal8 extends CRM_Core_Permission_DrupalBase{
 
   /**
    * {@inheritdoc}
+   *
+   * @Todo Update for Drupal 8
    */
   function upgradePermissions($permissions) {
     if (empty($permissions)) {
@@ -134,6 +140,8 @@ class CRM_Core_Permission_Drupal8 extends CRM_Core_Permission_DrupalBase{
    * @param string $permissionName name of the permission we are interested in
    *
    * @return string a comma separated list of email addresses
+   *
+   * @Todo Update for Drupal 8
    */
   public function permissionEmails($permissionName) {
     static $_cache = array();

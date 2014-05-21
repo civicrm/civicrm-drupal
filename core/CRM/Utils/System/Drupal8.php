@@ -466,6 +466,8 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
    *               array(
    *  contactID, ufID, unique string ) if success
    * @access public
+   *
+   * @Todo Update for Drupal 8
    */
    static function authenticate($name, $password, $loadCMSBootstrap = FALSE, $realPath = NULL) {
     require_once 'DB.php';
@@ -540,6 +542,8 @@ AND    u.status = 1
 
   /*
    * Load user into session
+   *
+   * @Todo Update for Drupal 8
    */
   function loadUser($username) {
     global $user;
@@ -568,6 +572,8 @@ AND    u.status = 1
    * @param array params
    *
    * FIXME: Document values accepted/required by $params
+   *
+   * @Todo Update for Drupal 8
    */
   function userLoginFinalize($params = array()){
     user_login_finalize($params);
@@ -578,6 +584,8 @@ AND    u.status = 1
    *
    * @param $username
    * @return int|NULL
+   *
+   * @Todo Update for Drupal 8
    */
   function getUfId($username) {
     $user = user_load_by_name($username);
@@ -593,6 +601,8 @@ AND    u.status = 1
    * @param string $message the message to set
    *
    * @access public
+   *
+   * @Todo Update for Drupal 8
    */
   function setMessage($message) {
     drupal_set_message($message);
@@ -607,6 +617,9 @@ AND    u.status = 1
     return user_logout();
   }
 
+  /**
+   * @Todo Update for Drupal 8
+   */
   function updateCategories() {
     // copied this from profile.module. Seems a bit inefficient, but i dont know a better way
     // CRM-3600
@@ -618,6 +631,8 @@ AND    u.status = 1
    * Get the default location for CiviCRM blocks
    *
    * @return string
+   *
+   * @Todo Update for Drupal 8
    */
   function getDefaultBlockLocation() {
     return 'sidebar_first';
@@ -627,6 +642,8 @@ AND    u.status = 1
    * Get the locale set in the hosting CMS
    *
    * @return string  with the locale or null for none
+   *
+   * @Todo Update for Drupal 8
    */
   function getUFLocale() {
     // return CiviCRM’s xx_YY locale that either matches Drupal’s Chinese locale
@@ -664,6 +681,8 @@ AND    u.status = 1
    * @param boolean $loadUser boolean Require CMS user load.
    * @param boolean $throwError If true, print error on failure and exit.
    * @param boolean|string $realPath path to script
+   *
+   * @Todo Update for Drupal 8
    */
   function loadBootStrap($params = array(), $loadUser = TRUE, $throwError = TRUE, $realPath = NULL) {
     //take the cms root path.
@@ -763,7 +782,7 @@ AND    u.status = 1
   }
 
   /**
-   *
+   * @Todo Update for Drupal 8
    */
   function cmsRootPath($scriptFilename = NULL) {
     $cmsRoot = $valid = NULL;
@@ -816,6 +835,8 @@ AND    u.status = 1
    * check is user logged in.
    *
    * @return boolean true/false.
+   *
+   * @Todo Update for Drupal 8
    */
   public function isUserLoggedIn() {
     $isloggedIn = FALSE;
@@ -830,6 +851,8 @@ AND    u.status = 1
    * Get currently logged in user uf id.
    *
    * @return int $userID logged in user uf id.
+   *
+   * @Todo Update for Drupal 8
    */
   public function getLoggedInUfID() {
     $ufID = NULL;
@@ -850,6 +873,8 @@ AND    u.status = 1
    *
    * @return string $url, formatted url.
    * @static
+   *
+   * @Todo Update for Drupal 8
    */
   function languageNegotiationURL($url, $addLanguagePart = TRUE, $removeLanguagePart = FALSE) {
     if (empty($url)) {
@@ -916,6 +941,8 @@ AND    u.status = 1
    * @param $newPerms array, strings
    *
    * @return void
+   *
+   * @Todo Update for Drupal 8
    */
   function replacePermission($oldPerm, $newPerms) {
     $roles = user_roles(FALSE, $oldPerm);
@@ -931,6 +958,8 @@ AND    u.status = 1
    * Get a list of all installed modules, including enabled and disabled ones
    *
    * @return array CRM_Core_Module
+   *
+   * @Todo Update for Drupal 8
    */
   function getModules() {
     $result = array();
@@ -946,6 +975,8 @@ AND    u.status = 1
    *
    * @param integer $ogID Organic Group ID
    * @param integer $drupalID drupal User ID
+   *
+   * @Todo Update for Drupal 8
    */
   function og_membership_create($ogID, $drupalID){
     if (function_exists('og_entity_query_alter')) {
@@ -967,6 +998,8 @@ AND    u.status = 1
    *
    * @param integer $ogID Organic Group ID
    * @param integer $drupalID drupal User ID
+   *
+   * @Todo Update for Drupal 8
    */
   function og_membership_delete($ogID, $drupalID) {
     if (function_exists('og_entity_query_alter')) {
@@ -983,6 +1016,8 @@ AND    u.status = 1
   /**
    * Get timezone from Drupal
    * @return boolean|string
+   *
+   * @Todo Update for Drupal 8
    */
   function getTimeZoneOffset(){
     global $user;
@@ -1009,6 +1044,8 @@ AND    u.status = 1
   /**
    * Reset any system caches that may be required for proper CiviCRM
    * integration.
+   *
+   * @Todo Update for Drupal 8
    */
   function flush() {
     drupal_flush_all_caches();

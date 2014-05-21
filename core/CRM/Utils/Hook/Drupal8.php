@@ -55,6 +55,9 @@ class CRM_Utils_Hook_Drupal8 extends CRM_Utils_Hook {
    */
   private $drupalModules = NULL;
 
+  /**
+   * @Todo Update for Drupal 8
+   */
   function invoke($numParams,
                   &$arg1, &$arg2, &$arg3, &$arg4, &$arg5,
                   $fnSuffix
@@ -69,6 +72,8 @@ class CRM_Utils_Hook_Drupal8 extends CRM_Utils_Hook {
 
   /**
    * Build the list of modules to be processed for hooks.
+   *
+   * @Todo Update for Drupal 8
    */
   function buildModuleList() {
     if ($this->isBuilt === FALSE) {
