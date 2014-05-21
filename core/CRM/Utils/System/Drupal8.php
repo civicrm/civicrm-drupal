@@ -601,8 +601,6 @@ AND    u.status = 1
    * @param string $message the message to set
    *
    * @access public
-   *
-   * @Todo Update for Drupal 8
    */
   function setMessage($message) {
     drupal_set_message($message);
