@@ -610,9 +610,12 @@ AND    u.status = 1
     \Drupal::service('civicrm.page_state')->setAccessDenied();
   }
 
+  /**
+   * In previous versions, this function was the controller for logging out. In Drupal 8, we rewrite the route
+   * to hand off logout to the standard Drupal logout controller. This function should therefore never be called.
+   */
   function logout() {
-    module_load_include('inc', 'user', 'user.pages');
-    return user_logout();
+    // Pass
   }
 
   /**

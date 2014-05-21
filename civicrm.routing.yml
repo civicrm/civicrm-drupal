@@ -1,2 +1,11 @@
 route_callbacks:
   - '\Drupal\civicrm\Routing\Routes::routes'
+
+# Let Drupal handle logouts directly. This entry clobbers the entry that will be
+# automatically generated in the route_callback above.
+civicrm.civicrm_logout:
+  path: '/civicrm/logout'
+  defaults:
+    _controller: '\Drupal\user\Controller\UserController::logout'
+  requirements:
+    _user_is_logged_in: 'TRUE'
