@@ -833,19 +833,12 @@ AND    u.status = 1
   }
 
   /**
-   * check is user logged in.
+   * Check if user is logged in.
    *
-   * @return boolean true/false.
-   *
-   * @Todo Update for Drupal 8
+   * @return bool
    */
   public function isUserLoggedIn() {
-    $isloggedIn = FALSE;
-    if (function_exists('user_is_logged_in')) {
-      $isloggedIn = user_is_logged_in();
-    }
-
-    return $isloggedIn;
+    return \Drupal::currentUser()->isAuthenticated();
   }
 
   /**
