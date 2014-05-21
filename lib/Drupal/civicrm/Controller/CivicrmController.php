@@ -31,6 +31,10 @@ class CivicrmController extends ControllerBase {
   public function main($args) {
     $content = $this->civicrm->invoke($args);
 
+    if ($this->civicrmPageState->isAccessDenied()) {
+      throw new \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException();
+    }
+
     // Add CSS, JS, etc. that is required for this page.
     \CRM_Core_Resources::singleton()->addCoreResources();
     if ($region = \CRM_Core_Region::instance('html-header', FALSE)) {

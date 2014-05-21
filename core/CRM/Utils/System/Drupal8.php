@@ -609,7 +609,7 @@ AND    u.status = 1
   }
 
   function permissionDenied() {
-    drupal_access_denied();
+    \Drupal::service('civicrm.page_state')->setAccessDenied();
   }
 
   function logout() {

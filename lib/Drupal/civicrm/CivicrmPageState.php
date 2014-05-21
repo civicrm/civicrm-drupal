@@ -7,6 +7,7 @@ class CivicrmPageState {
   protected $css = array();
   protected $js = array();
   protected $breadcrumbs = array();
+  protected $accessDenied = FALSE;
 
   public function setTitle($title) {
     $this->title = $title;
@@ -42,5 +43,13 @@ class CivicrmPageState {
 
   public function getBreadcrumbs() {
     return $this->breadcrumbs;
+  }
+
+  public function setAccessDenied() {
+    $this->accessDenied = TRUE;
+  }
+
+  public function isAccessDenied() {
+    return $this->accessDenied;
   }
 }
