@@ -574,24 +574,25 @@ AND    u.status = 1
     return FALSE;
   }
 
-  /*
+  /**
    * Load user into session
-   *
-   * @Todo Update for Drupal 8
    */
   function loadUser($username) {
-    global $user;
-
     $user = user_load_by_name($username);
-
-    if (empty($user->uid)) {
+    if (!$user) {
       return FALSE;
     }
 
-    $uid = $user->uid;
+    // Set Drupal's current user to the loaded user.
+    \Drupal::getContainer()->set('current_user', $user);
+    // Todo: In the next alpha release, it looks like we should replace
+    // the above with the following (following Cron.php's example).
+    // \Drupal::currentUser()->setAccount($user);
+
+    $uid = $user->id();
     $contact_id = CRM_Core_BAO_UFMatch::getContactId($uid);
 
-    // lets store contact id and user id in session
+    // Store the contact id and user id in the session
     $session = CRM_Core_Session::singleton();
     $session->set('ufID', $uid);
     $session->set('userID', $contact_id);
