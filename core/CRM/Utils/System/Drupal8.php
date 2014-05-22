@@ -618,15 +618,11 @@ AND    u.status = 1
    *
    * @param $username
    * @return int|NULL
-   *
-   * @Todo Update for Drupal 8
    */
   function getUfId($username) {
-    $user = user_load_by_name($username);
-    if (empty($user->uid)) {
-      return NULL;
+    if ($id = user_load_by_name($username)->id()) {
+      return $id;
     }
-    return $user->uid;
   }
 
   /**
