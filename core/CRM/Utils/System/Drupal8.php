@@ -465,8 +465,6 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
    * @param bool $frontend     A joomla hack (unused)
    * @param bool $forceBackend A joomla jack (unused)
    * @return string
-   *
-   * @Todo Take into account full function parameter listing.
    */
   function url($path = '', $query = '', $absolute = FALSE, $fragment = '', $htmlize = FALSE, $frontend = FALSE, $forceBackend = FALSE) {
     $query = html_entity_decode($query);
