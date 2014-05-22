@@ -427,7 +427,7 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
   }
 
   /**
-   * rewrite various system urls to https
+   * Rewrite various system urls to https
    *
    * @param null
    *
