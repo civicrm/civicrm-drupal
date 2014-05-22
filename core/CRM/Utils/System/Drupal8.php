@@ -876,19 +876,11 @@ AND    u.status = 1
    * Get currently logged in user uf id.
    *
    * @return int $userID logged in user uf id.
-   *
-   * @Todo Update for Drupal 8
    */
   public function getLoggedInUfID() {
-    $ufID = NULL;
-    if (function_exists('user_is_logged_in') &&
-      user_is_logged_in() &&
-      function_exists('user_uid_optional_to_arg')
-    ) {
-      $ufID = user_uid_optional_to_arg(array());
+    if ($id = \Drupal::currentUser()->id()) {
+      return $id;
     }
-
-    return $ufID;
   }
 
   /**
