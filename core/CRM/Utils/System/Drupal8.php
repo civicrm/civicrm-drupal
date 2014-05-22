@@ -416,7 +416,7 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
     // Handle relative urls that are within the CiviCRM module directory
     elseif (strpos($url, $base) === 0) {
       $internal = TRUE;
-      $url = $this->appendCoreDirectoryToResourceBase(substr(drupal_get_path('module', 'civicrm'), 0, -6)) . trim(substr($url, strlen($base)), '/');
+      $url = $this->appendCoreDirectoryToResourceBase(substr(drupal_get_path('module', 'civicrm'), 0, -7)) . trim(substr($url, strlen($base)), '/');
     }
     // Strip query string
     $q = strpos($url, '?');
