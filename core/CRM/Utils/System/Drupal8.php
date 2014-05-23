@@ -813,54 +813,8 @@ AND    u.status = 1
     return FALSE;
   }
 
-  /**
-   * @Todo Update for Drupal 8
-   */
   function cmsRootPath($scriptFilename = NULL) {
-    $cmsRoot = $valid = NULL;
-
-    if (!is_null($scriptFilename)) {
-      $path = $scriptFilename;
-    }
-    else {
-      $path = $_SERVER['SCRIPT_FILENAME'];
-    }
-
-    if (function_exists('drush_get_context')) {
-      // drush anyway takes care of multisite install etc
-      return drush_get_context('DRUSH_DRUPAL_ROOT');
-    }
-    // CRM-7582
-    $pathVars = explode('/',
-      str_replace('//', '/',
-        str_replace('\\', '/', $path)
-      )
-    );
-
-    //lets store first var,
-    //need to get back for windows.
-    $firstVar = array_shift($pathVars);
-
-    //lets remove sript name to reduce one iteration.
-    array_pop($pathVars);
-
-    //CRM-7429 --do check for upper most 'includes' dir,
-    //which would effectually work for multisite installation.
-    do {
-      $cmsRoot = $firstVar . '/' . implode('/', $pathVars);
-      $cmsIncludePath = "$cmsRoot/includes";
-      //stop as we found bootstrap.
-      if (@opendir($cmsIncludePath) &&
-        file_exists("$cmsIncludePath/bootstrap.inc")
-      ) {
-        $valid = TRUE;
-        break;
-      }
-      //remove one directory level.
-      array_pop($pathVars);
-    } while (count($pathVars));
-
-    return ($valid) ? $cmsRoot : NULL;
+    return DRUPAL_ROOT;
   }
 
   /**
