@@ -40,8 +40,9 @@ class CivicrmBreadcrumbBuilder extends BreadcrumbBuilderBase {
     $breadcrumbs[] = l(t('Home'), '<front>');
 
     foreach ($this->civicrmPageState->getBreadcrumbs() as $name => $url) {
-      $url = CivicrmHelper::parseUrl($url);
-      $breadcrumbs[] = $this->l($name, $url['route_name'], array(), array('query' => $url['query']));
+      // We expect all urls to have already been passed through the url helper, and therefore
+      // be valid Drupal urls.
+      $breadcrumbs[] = "<a href=\"{$url}\">{$name}</a>";
     }
     return $breadcrumbs;
   }
