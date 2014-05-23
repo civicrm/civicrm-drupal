@@ -813,8 +813,33 @@ AND    u.status = 1
     return FALSE;
   }
 
-  function cmsRootPath($scriptFilename = NULL) {
-    return DRUPAL_ROOT;
+  function cmsRootPath($path = NULL) {
+    if (DRUPAL_ROOT) {
+      return DRUPAL_ROOT;
+    }
+
+    // It looks like Drupal hasn't been bootstrapped.
+    // We're going to attempt to discover the root Drupal path
+    // by climbing out of the folder hierarchy and looking around to see
+    // if we've found the Drupal root directory.
+    if (!$path) {
+      $path = $_SERVER['SCRIPT_FILENAME'];
+    }
+
+    // Normalize and explode path into its component paths.
+    $paths = explode(DIRECTORY_SEPARATOR, realpath($path));
+
+    // Remove script filename from array of directories.
+    array_pop($paths);
+
+    while (count($paths)) {
+      $candidate = implode('/', $paths);
+      if (file_exists($candidate . "/core/includes/bootstrap.inc")) {
+        return $candidate;
+      }
+
+      array_pop($paths);
+    }
   }
 
   /**
