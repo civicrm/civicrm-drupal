@@ -3,6 +3,7 @@
 namespace Drupal\civicrm;
 
 use Drupal\Core\Config\ConfigException;
+use Drupal\Core\Session\AccountInterface;
 
 class Civicrm {
   /**
@@ -137,5 +138,48 @@ class Civicrm {
 
     require_once $path;
     \CRM_Core_ClassLoader::singleton()->register();
+  }
+
+  /**
+   * Synchronize a Drupal account with CiviCRM. This is a wrapper for CRM_Core_BAO_UFMatch::synchronize().
+   *
+   * @param AccountInterface $account
+   * @param string $contact_type
+   */
+  public function synchronizeUser(AccountInterface $account, $contact_type = 'Individual') {
+    // CiviCRM is probing Drupal user object based on the CMS type, and for Drupal it is expecting a Drupal 6/7 user object.
+    // It really should be using an standardised interface and requiring the CMS's to offer an implementation.
+    // Alas, we'll mock an object for it to use.
+    $user = new \stdClass();
+    $user->uid = $account->id();
+    $user->name = $account->getUsername();
+    $user->mail = $account->getEmail();
+    \CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal', $this->getCtype($contact_type));
+  }
+
+  /**
+   * Function to get the contact type
+   *
+   * @param string $default Default contact type
+   *
+   * @return $ctype Contact type
+   *
+   * @Todo: Document what this function is doing and why.
+   */
+  protected function getCtype($default = 'Individual') {
+    if (!empty($_REQUEST['ctype'])) {
+      $ctype = $_REQUEST['ctype'];
+    }
+    else if (!empty($_REQUEST['edit']['ctype'])) {
+      $ctype = $_REQUEST['edit']['ctype'];
+    }
+    else {
+      $ctype = $default;
+    }
+
+    if (!in_array($ctype, array('Individual', 'Organization', 'Household'))) {
+      $ctype = $default;
+    }
+    return $ctype;
   }
 }
