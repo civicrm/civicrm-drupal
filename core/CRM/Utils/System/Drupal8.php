@@ -652,103 +652,37 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
    * @param boolean $throwError If true, print error on failure and exit.
    * @param boolean|string $realPath path to script
    *
-   * @Todo Update for Drupal 8
+   * @Todo Handle setting cleanurls configuration for CiviCRM?
    */
   function loadBootStrap($params = array(), $loadUser = TRUE, $throwError = TRUE, $realPath = NULL) {
-    //take the cms root path.
-    $cmsPath = $this->cmsRootPath($realPath);
+    static $run_once = FALSE;
+    if ($run_once) return TRUE; else $run_once = TRUE;
 
-    if (!file_exists("$cmsPath/includes/bootstrap.inc")) {
-      if ($throwError) {
-        echo '<br />Sorry, could not locate bootstrap.inc\n';
-        exit();
-      }
+    if (!($root = $this->cmsRootPath())) {
       return FALSE;
     }
-    // load drupal bootstrap
-    chdir($cmsPath);
-    define('DRUPAL_ROOT', $cmsPath);
+    chdir($root);
 
-    // For drupal multi-site CRM-11313
-    if ($realPath && strpos($realPath, 'sites/all/modules/') === FALSE) {
-      preg_match('@sites/([^/]*)/modules@s', $realPath, $matches);
-      if (!empty($matches[1])) {
-        $_SERVER['HTTP_HOST'] = $matches[1];
-      }
-    }
-    require_once 'includes/bootstrap.inc';
-    // @ to suppress notices eg 'DRUPALFOO already defined'.
-    @drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+    require_once $root . '/core/vendor/autoload.php';
+    require_once $root . '/core/includes/bootstrap.inc';
+    drupal_bootstrap(DRUPAL_BOOTSTRAP_CODE);
 
-    // explicitly setting error reporting, since we cannot handle drupal related notices
-    error_reporting(1);
-    if (!function_exists('module_exists') || !module_exists('civicrm')) {
-      if ($throwError) {
-        echo '<br />Sorry, could not load drupal bootstrap.';
-        exit();
-      }
-      return FALSE;
-    }
+    // Initialize Civicrm
+    \Drupal::service('civicrm');
 
-    // seems like we've bootstrapped drupal
-    $config = CRM_Core_Config::singleton();
-
-    // lets also fix the clean url setting
-    // CRM-6948
-    $config->cleanURL = (int) variable_get('clean_url', '0');
-
-    // we need to call the config hook again, since we now know
-    // all the modules that are listening on it, does not apply
-    // to J! and WP as yet
-    // CRM-8655
+    // We need to call the config hook again, since we now know
+    // all the modules that are listening on it (CRM-8655).
     CRM_Utils_Hook::config($config);
 
-    if (!$loadUser) {
-      return TRUE;
-    }
-
-    $uid = CRM_Utils_Array::value('uid', $params);
-    if (!$uid) {
-      //load user, we need to check drupal permissions.
-      $name = CRM_Utils_Array::value('name', $params, FALSE) ? $params['name'] : trim(CRM_Utils_Array::value('name', $_REQUEST));
-      $pass = CRM_Utils_Array::value('pass', $params, FALSE) ? $params['pass'] : trim(CRM_Utils_Array::value('pass', $_REQUEST));
-
-      if ($name) {
-        $uid = user_authenticate($name, $pass);
-        if (!$uid) {
-          if ($throwError) {
-            echo '<br />Sorry, unrecognized username or password.';
-            exit();
-          }
-          return FALSE;
-        }
+    if ($loadUser) {
+      if (!empty($params['uid']) && $username = user_load($uid)->getUsername()) {
+        $this->loadUser($username);
+      }
+      elseif (!empty($params['name']) && !empty($params['pass']) && authenticate($params['name'], $params['pass'])) {
+        $this->loadUser($params['name']);
       }
     }
-
-    if ($uid) {
-      $account = user_load($uid);
-      if ($account && $account->uid) {
-        global $user;
-        $user = $account;
-        return TRUE;
-      }
-    }
-
-    if ($throwError) {
-      echo '<br />Sorry, can not load CMS user account.';
-      exit();
-    }
-
-    // CRM-6948: When using loadBootStrap, it's implicit that CiviCRM has already loaded its settings
-    // which means that define(CIVICRM_CLEANURL) was correctly set.
-    // So we correct it
-    $config = CRM_Core_Config::singleton();
-    $config->cleanURL = (int)variable_get('clean_url', '0');
-
-    // CRM-8655: Drupal wasn't available during bootstrap, so hook_civicrm_config never executes
-    CRM_Utils_Hook::config($config);
-
-    return FALSE;
+    return TRUE;
   }
 
   function cmsRootPath($path = NULL) {
