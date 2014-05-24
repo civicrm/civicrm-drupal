@@ -686,7 +686,7 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
   }
 
   function cmsRootPath($path = NULL) {
-    if (DRUPAL_ROOT) {
+    if (defined('DRUPAL_ROOT')) {
       return DRUPAL_ROOT;
     }
 
