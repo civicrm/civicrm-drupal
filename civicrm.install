@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function civicrm_install() {
+  // Initialize Civicrm
+  \Drupal::service('civicrm');
+
+  // Place default blocks in default theme
+  // @Todo Should this be set to default to the admin theme?
+  // Or hardcoded to Bartik (or whatever D8 theme becomes the Civicrm go-to theme?
+  $theme = \Drupal::config('system.theme')->get('default');
+  foreach (\CRM_Core_Block::getInfo() as $block_id => $block) {
+    if (!$block['status']) { continue; }
+
+    $values = array(
+      'plugin' => "civicrm_block:{$block_id}",
+      'module' => 'civicrm',
+      'region' => $block['region'],
+      'id' => "civicrm_block_{$block_id}",
+      'theme' => $theme,
+      'settings' => array(
+        'label' => str_replace('CiviCRM ', '', $block['info']), // Remove leading 'CiviCRM' from each label
+      ),
+      'visibility' => array(
+        'path' => array(
+          'visibility' => 1,
+          'pages' => $block['pages']
+        ),
+      ),
+      'weight' => $block['weight'],
+    );
+
+    $block = entity_create('block', $values);
+    try {
+      $block->save();
+    }
+    catch (Drupal\Core\Entity\EntityStorageException $e) {
+      // Pass. Almost certainly a duplicate block, ie. Civicrm has been reinstalled.
+    }
+  }
+}
