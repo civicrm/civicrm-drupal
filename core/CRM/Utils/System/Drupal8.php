@@ -112,21 +112,18 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
   }
 
   /*
-   *  Change user name in host CMS
+   * Update the Drupal user's email address.
    *
-   *  @param integer $ufID User ID in CMS
-   *  @param string $ufName User name
+   * @param integer $ufID  User ID in CMS
+   * @param string $ufName Primary contact email address
    */
-  function updateCMSName($ufID, $ufName) {
-    // CRM-5555
-    if (function_exists('user_load')) {
-      $user = user_load($ufID);
-      // @Todo Document the reason for this conditional (inherited from Drupal 7 version)
-      if ($user && $user->getEmail() != $ufName) {
-        $user->setUsername($ufName);
-        if (!count($user->validate())) {
-          $user->save();
-        }
+  function updateCMSName($ufID, $email) {
+    $user = user_load($ufID);
+    if ($user && $user->getEmail() != $email) {
+      $user->setEmail($email);
+
+      if (!count($user->validate())) {
+        $user->save();
       }
     }
   }
