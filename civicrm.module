@@ -1,6 +1,20 @@
 <?php
 
 /**
+ * Implements hook_permission().
+ */
+function civicrm_permission() {
+  // Initialize civicrm.
+  \Drupal::service('civicrm');
+
+  $permissions = array();
+  foreach (CRM_Core_Permission::basicPermissions() as $permission => $title) {
+    $permissions[$permission] = array('title' => $title);
+  }
+  return $permissions;
+}
+
+/**
  * Implements hook_toolbar().
  */
 function civicrm_toolbar() {
