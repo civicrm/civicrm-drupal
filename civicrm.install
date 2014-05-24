@@ -4,7 +4,7 @@
  * Implements hook_install().
  */
 function civicrm_install() {
-  // Initialize Civicrm
+  // Initialize Civicrm.
   \Drupal::service('civicrm');
 
   // Place default blocks in default theme
@@ -14,6 +14,9 @@ function civicrm_install() {
   foreach (\CRM_Core_Block::getInfo() as $block_id => $block) {
     if (!$block['status']) { continue; }
 
+    // Remove leading 'CiviCRM' from each label.
+    $label = str_replace('CiviCRM ', '', $block['info']);
+
     $values = array(
       'plugin' => "civicrm_block:{$block_id}",
       'module' => 'civicrm',
@@ -21,7 +24,7 @@ function civicrm_install() {
       'id' => "civicrm_block_{$block_id}",
       'theme' => $theme,
       'settings' => array(
-        'label' => str_replace('CiviCRM ', '', $block['info']), // Remove leading 'CiviCRM' from each label
+        'label' => $label
       ),
       'visibility' => array(
         'path' => array(
