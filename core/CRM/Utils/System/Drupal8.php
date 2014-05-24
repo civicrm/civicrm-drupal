@@ -501,77 +501,15 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
    *  contactID, ufID, unique string ) if success
    * @access public
    *
-   * @Todo Update for Drupal 8
+   * @Todo This always bootstraps Drupal. Do we need to provide a non-bootstrap alternative?
    */
-   static function authenticate($name, $password, $loadCMSBootstrap = FALSE, $realPath = NULL) {
-    require_once 'DB.php';
+   function authenticate($name, $password, $loadCMSBootstrap = FALSE, $realPath = NULL) {
+     (new CRM_Utils_System_Drupal8())->loadBootStrap(array('user' => $name, 'password' => $password), TRUE);
 
-    $config = CRM_Core_Config::singleton();
+     $uid = \Drupal::service('user.auth')->authenticate($name, $password);
+     $contact_id = CRM_Core_BAO_UFMatch::getContactId($uid);
 
-    $dbDrupal = DB::connect($config->userFrameworkDSN);
-    if (DB::isError($dbDrupal)) {
-      CRM_Core_Error::fatal("Cannot connect to drupal db via $config->userFrameworkDSN, " . $dbDrupal->getMessage());
-    }
-
-    $account = $userUid = $userMail = NULL;
-    if ($loadCMSBootstrap) {
-      $bootStrapParams = array();
-      if ($name && $password) {
-        $bootStrapParams = array(
-          'name' => $name,
-          'pass' => $password,
-        );
-      }
-      CRM_Utils_System::loadBootStrap($bootStrapParams, TRUE, TRUE, $realPath);
-
-      global $user;
-      if ($user) {
-        $userUid = $user->uid;
-        $userMail = $user->mail;
-      }
-    }
-    else {
-      // CRM-8638
-      // SOAP cannot load drupal bootstrap and hence we do it the old way
-      // Contact CiviSMTP folks if we run into issues with this :)
-      $cmsPath = $config->userSystem->cmsRootPath($realPath);
-
-      require_once ("$cmsPath/includes/bootstrap.inc");
-      require_once ("$cmsPath/includes/password.inc");
-
-      $strtolower = function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower';
-      $name       = $dbDrupal->escapeSimple($strtolower($name));
-      $sql        = "
-SELECT u.*
-FROM   {$config->userFrameworkUsersTableName} u
-WHERE  LOWER(u.name) = '$name'
-AND    u.status = 1
-";
-
-      $query = $dbDrupal->query($sql);
-      $row = $query->fetchRow(DB_FETCHMODE_ASSOC);
-
-      if ($row) {
-        $fakeDrupalAccount = drupal_anonymous_user();
-        $fakeDrupalAccount->name = $name;
-        $fakeDrupalAccount->pass = $row['pass'];
-        $passwordCheck = user_check_password($password, $fakeDrupalAccount);
-        if ($passwordCheck) {
-          $userUid = $row['uid'];
-          $userMail = $row['mail'];
-        }
-      }
-    }
-
-    if ($userUid && $userMail) {
-      CRM_Core_BAO_UFMatch::synchronizeUFMatch($account, $userUid, $userMail, 'Drupal');
-      $contactID = CRM_Core_BAO_UFMatch::getContactId($userUid);
-      if (!$contactID) {
-        return FALSE;
-      }
-      return array($contactID, $userUid, mt_rand());
-    }
-    return FALSE;
+     return array($contact_id, $uid, mt_rand());
   }
 
   /**
