@@ -1,5 +1,7 @@
 <?php
 
+define('CIVICRM_UF_HEAD', TRUE);
+
 /**
  * Implements hook_permission().
  */
