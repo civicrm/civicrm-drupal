@@ -96,3 +96,141 @@ function _civicrm_toolbar(&$items, $leaf) {
 
   $items[] = $item;
 }
+
+/**
+ * Implements hook_entity_extra_field_info().
+ *
+ * Add additional pseudo-fields to the user display. This allows the UI
+ * to control the order in which these are displayed, or whether they are displayed
+ * at all.
+ */
+function civicrm_entity_extra_field_info() {
+  $extra['user']['user']['display']['civicrm_record'] = array(
+    'label' => t('CiviCRM record link'),
+    'description' => t('Link to user’s CiviCRM record.'),
+    'weight' => 0,
+  );
+  $extra['user']['user']['display']['civicrm_dashboard'] = array(
+    'label' => t('CiviCRM dashboard link'),
+    'description' => t('Link to user’s CiviCRM dashboard.'),
+    'weight' => 0,
+  );
+  $extra['user']['user']['display']['civicrm_profiles'] = array(
+    'label' => t('CiviCRM profile summaries'),
+    'description' => t('A list CiviCRM profile summaries.'),
+    'weight' => 0,
+  );
+
+  return $extra;
+}
+
+/**
+ * Implements hook_user_view().
+ *
+ * We use this hook to add the pseudo-fields we've added in civicrm_entity_extra_field_info()
+ * to the user display.
+ */
+function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode, $langcode) {
+  \Drupal::service('civicrm');
+
+  // We need the $contact_id so that we know what data to pull out of Civicrm.
+  // And we need the contact_id of the current user ($current_contact_id) so
+  // that we can perform proper access checks.
+  $current_user = \Drupal::currentUser();
+  $contact_id = \CRM_Core_BAO_UFMatch::getContactId($account->id());
+  $current_contact_id = \CRM_Core_BAO_UFMatch::getContactId($current_user->id());
+  if (!$contact_id ||!$current_contact_id) {
+    return;
+  }
+
+  // Contact record link.
+  if (($conf = $display->getComponent('civicrm_record')) && $current_user->hasPermission('access CiviCRM') && \CRM_Contact_BAO_Contact_Permission::allow($current_contact_id)) {
+    $build['civicrm_record'] = array(
+      '#type' => 'item',
+      '#title' => t('Contact record'),
+      '#weight' => $conf['weight'],
+      0 => array(
+        '#type' => 'link',
+        '#title' => t('View contact record'),
+        '#route_name' => 'civicrm.civicrm_contact_view',
+        '#route_parameters' => array(
+          'reset' => 1,
+          'cid' => $contact_id,
+        ),
+      ),
+    );
+  }
+
+  // Contact dashboard link.
+  if (($conf = $display->getComponent('civicrm_dashboard')) && $current_user->hasPermission('access Contact Dashboard') || \CRM_Contact_BAO_Contact_Permission::allow($current_contact_id)) {
+    $build['civicrm_dashboard'] = array(
+      '#type' => 'item',
+      '#title' => t('Contact dashboard'),
+      '#weight' => $conf['weight'],
+      0 => array(
+        '#type' => 'link',
+        '#title' => t('View contact dashboard'),
+        '#route_name' => 'civicrm.civicrm_user',
+        '#route_parameters' => array(
+          'reset' => 1,
+          'id' => $contact_id,
+        ),
+      ),
+    );
+  }
+
+  // Add profile summaries.
+  // @Todo Do we need to check permissions before viewing each profile?
+  if (($conf = $display->getComponent('civicrm_profiles')) && $current_user->hasPermission('profile view')) {
+    $build['civicrm_profiles'] = array(
+      '#weight' => $conf['weight'],
+    );
+
+    foreach (_civicrm_get_profiles($contact_id) as $id => $profile) {
+      $html = (new \CRM_Profile_Page_Dynamic($contact_id, $id, NULL))->run();
+      $build['civicrm_profiles']["civicrm_profile_{$id}"] = array(
+        '#type' => 'item',
+        '#title' => $profile['title'],
+        0 => array(
+          '#markup' => $html,
+        ),
+        // @Todo Check access to this route before displaying the link
+        1 => array(
+          '#type' => 'link',
+          '#options' => array('html' => TRUE),
+          '#title' => t('Edit %profile_name', array('%profile_name' => $profile['title'])),
+          '#route_name' => 'civicrm.user_profile',
+          '#route_parameters' => array(
+            'user' => $account->id(),
+            'profile' => $id,
+          ),
+        ),
+      );
+    }
+  }
+}
+
+/**
+ * Get 'User Account' profiles.
+ *
+ * We return a list of profiles filtered down to only those that are Contact based or
+ * based on the $contact_id's contact type.
+ */
+function _civicrm_get_profiles($contact_id) {
+  \Drupal::service('civicrm');
+  $profiles = array();
+  $ctype = \CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $contact_id, 'contact_type');
+
+  foreach (\CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account') as $id => $uf_group) {
+    $fieldType = CRM_Core_BAO_UFField::getProfileType($id);
+    if (CRM_Contact_BAO_ContactType::isaSubType($fieldType)) {
+      $fieldType = CRM_Contact_BAO_ContactType::getBasicType($fieldType);
+    }
+
+    // Filter profiles
+    if ($fieldType == 'Contact' || $fieldType == $ctype) {
+      $profiles[$id] = $uf_group;
+    }
+  }
+  return $profiles;
+}
