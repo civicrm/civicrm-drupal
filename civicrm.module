@@ -37,7 +37,7 @@ function civicrm_toolbar() {
       '#options' => array(
         'attributes' => array(
           'title' => t('CiviCRM'),
-          'class' => array('toolbar-icon', 'toolbar-icon-home'),
+          'class' => array('toolbar-icon', 'toolbar-icon-menu', 'toolbar-item'),
         ),
       ),
     ),
