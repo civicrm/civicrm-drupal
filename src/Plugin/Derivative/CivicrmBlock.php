@@ -31,7 +31,7 @@ class CivicrmBlock extends DerivativeBase implements ContainerDerivativeInterfac
 
       $this->derivatives[$block_id] = $base_plugin_definition;
       $this->derivatives[$block_id]['admin_label'] = $label;
-      $this->derivatives[$block_id]['cache'] = DRUPAL_NO_CACHE;
+      // @Todo Ensure blocks aren't cached
     }
     return $this->derivatives;
   }
