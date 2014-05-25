@@ -115,9 +115,9 @@ class Civicrm {
     //$path = variable_get('civicrm_class_loader');
     if (empty($path) || !file_exists($path)) {
       $candidates = array(
-        dirname(__FILE__) . '/../../../../CRM/Core/ClassLoader.php',
-        dirname(__FILE__) . '/../../../../civicrm-core/CRM/Core/ClassLoader.php',
-        dirname(__FILE__) . '/../../../../core/CRM/Core/ClassLoader.php',
+        dirname(__FILE__) . '/../../CRM/Core/ClassLoader.php',
+        dirname(__FILE__) . '/../../civicrm-core/CRM/Core/ClassLoader.php',
+        dirname(__FILE__) . '/../../core/CRM/Core/ClassLoader.php',
         // ... ad nauseum ...
       );
 

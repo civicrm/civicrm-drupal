@@ -24,7 +24,7 @@ class CivicrmBlock extends BlockBase implements ContainerFactoryPluginInterface 
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
-  static public function create(ContainerInterface $container, array $configuration, $plugin_id, array $plugin_definition) {
+  static public function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
       $container->get('civicrm'),
       $configuration,
