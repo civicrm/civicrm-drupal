@@ -20,12 +20,6 @@ class Civicrm {
       array('!1' => $docLinkInstall, '!2' => $docLinkTrouble, '!3' => $forumLink)
     );
 
-    // Check for php version and ensure its greater than minPhpVersion
-    // $minPhpVersion = '5.3.3';
-    // if (version_compare(PHP_VERSION, $minPhpVersion) < 0) {
-    //   echo "CiviCRM requires PHP Version $minPhpVersion or greater. You are running PHP Version " . PHP_VERSION . "<p>";
-    //   exit();
-    // }
     $this->registerClassLoader();
 
     $settingsFile = conf_path() . '/civicrm.settings.php';
