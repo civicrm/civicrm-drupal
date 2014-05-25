@@ -9,3 +9,10 @@ civicrm.civicrm_logout:
     _controller: '\Drupal\user\Controller\UserController::logout'
   requirements:
     _user_is_logged_in: 'TRUE'
+
+civicrm.user_profile:
+  path: '/user/{user}/edit/profile/{profile}'
+  defaults:
+    _form: '\Drupal\civicrm\Form\UserProfile'
+  requirements:
+    _custom_access: '\Drupal\civicrm\Form\UserProfile::access'
