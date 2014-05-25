@@ -160,7 +160,7 @@ class Civicrm {
    *
    * @Todo: Document what this function is doing and why.
    */
-  protected function getCtype($default = 'Individual') {
+  public function getCtype($default = 'Individual') {
     if (!empty($_REQUEST['ctype'])) {
       $ctype = $_REQUEST['ctype'];
     }
