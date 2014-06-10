@@ -639,6 +639,8 @@ function drush_civicrm_cacheclear() {
     $params['session'] = 1;
   }
 
+  // Need to set API version or drush cc civicrm fails
+  $params['version'] = 3;
   $result = civicrm_api('System', 'flush', $params);
 
   if ($result['is_error']) {
