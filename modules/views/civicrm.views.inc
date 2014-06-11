@@ -441,6 +441,11 @@ function civicrm_views_get_field($data_type, $html_type = NULL) {
         'click sortable' => TRUE,
       );
     case "Float":
+      return array(
+        'handler' => 'views_handler_field_numeric',
+        'click sortable' => TRUE,
+        'float' => TRUE,
+      );
     case "Int":
       return array(
         'handler' => 'views_handler_field_numeric',
