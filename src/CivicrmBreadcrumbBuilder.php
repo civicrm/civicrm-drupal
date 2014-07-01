@@ -7,10 +7,9 @@
 
 namespace Drupal\civicrm;
 
-use Drupal\civicrm\CivicrmHelper;
 use Drupal\civicrm\CivicrmPageState;
 use Drupal\Core\Breadcrumb\BreadcrumbBuilderBase;
-use Symfony\Cmf\Component\Routing\RouteObjectInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Provides a custom taxonomy breadcrumb builder that uses the term hierarchy.
@@ -25,8 +24,9 @@ class CivicrmBreadcrumbBuilder extends BreadcrumbBuilderBase {
   /**
    * {@inheritdoc}
    */
-  public function applies(array $attributes) {
-    if (isset($attributes['_content']) && $attributes['_content'] == 'Drupal\civicrm\Controller\CivicrmController::main') {
+  public function applies(RouteMatchInterface $route_match) {
+    $content = $route_match->getRouteObject()->getDefault('_content');
+    if (isset($content) && $content == 'Drupal\civicrm\Controller\CivicrmController::main') {
       return TRUE;
     }
     return FALSE;
@@ -35,7 +35,7 @@ class CivicrmBreadcrumbBuilder extends BreadcrumbBuilderBase {
   /**
    * {@inheritdoc}
    */
-  public function build(array $attributes) {
+  public function build(RouteMatchInterface $route_match) {
     $breadcrumbs = array();
     $breadcrumbs[] = l(t('Home'), '<front>');
 
