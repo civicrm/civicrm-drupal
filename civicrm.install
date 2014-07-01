@@ -4,43 +4,116 @@
  * Implements hook_install().
  */
 function civicrm_install() {
-  // Initialize Civicrm.
-  \Drupal::service('civicrm');
+  // If civicrm.settings.php file is already present, we assume CiviCRM
+  // is already installed and abort.
+  if (file_exists(conf_path() . '/civicrm.settings.php')) {
+    drupal_set_message(t("CiviCRM appears to have already been installed. Skipping full installation."));
+    return;
+  }
 
-  // Place default blocks in default theme
-  // @Todo Should this be set to default to the admin theme?
-  // Or hardcoded to Bartik (or whatever D8 theme becomes the Civicrm go-to theme?
-  $theme = \Drupal::config('system.theme')->get('default');
-  foreach (\CRM_Core_Block::getInfo() as $block_id => $block) {
-    if (!$block['status']) { continue; }
+  $civicrm_base = _civicrm_find_civicrm();
 
-    // Remove leading 'CiviCRM' from each label.
-    $label = str_replace('CiviCRM ', '', $block['info']);
+  // The civicrm install process uses globals all over the place. Ideally these
+  // will go sometime soon and will be passed as explicit parameters.
+  global $crmPath, $cmsPath, $installType;
+  $crmPath = $civicrm_base;
+  $cmsPath = DRUPAL_ROOT;
+  $installType = 'drupal';
 
-    $values = array(
-      'plugin' => "civicrm_block:{$block_id}",
-      'module' => 'civicrm',
-      'region' => $block['region'],
-      'id' => "civicrm_block_{$block_id}",
-      'theme' => $theme,
-      'settings' => array(
-        'label' => $label
-      ),
-      'visibility' => array(
-        'path' => array(
-          'visibility' => 1,
-          'pages' => $block['pages']
-        ),
-      ),
-      'weight' => $block['weight'],
+  // Get database connection details.
+  // We attempt to get a separate set of details for a civicrm database, but
+  // otherwise default to using the same database as Drupal.
+  $drupal_db = \Drupal\Core\Database\Database::getConnection('default')->getConnectionOptions();
+  if (!$civicrm_db = \Drupal\Core\Database\Database::getConnectionInfo('civicrm')['default']) {
+    $civicrm_db = \Drupal\Core\Database\Database::getConnectionInfo('default')['default'];
+  }
+
+  $config = array(
+    'cms' => 'Drupal8',
+    'base_url' => $GLOBALS['base_url'],
+    'site_dir' => substr(conf_path(), 6), // Remove leading 'sites/'
+    'mysql' => array(
+      'username' => $civicrm_db['username'],
+      'password' => $civicrm_db['password'],
+      'server' => "{$civicrm_db['host']}:{$civicrm_db['port']}",
+      'database' => $civicrm_db['database'],
+    ),
+    'cmsdb' => array(
+      'username' => $drupal_db['username'],
+      'password' => $drupal_db['password'],
+      'server' => "{$drupal_db['host']}:{$drupal_db['port']}",
+      'database' => $drupal_db['database'],
+    )
+  );
+
+  require_once("{$civicrm_base}/install/civicrm.php");
+  civicrm_main($config);
+}
+
+/**
+ * Implements hook_requirements().
+ *
+ * @param $phase
+ */
+function civicrm_requirements($phase) {
+  $requirements = array();
+
+  $civicrm_base = _civicrm_find_civicrm();
+
+  if ($civicrm_base) {
+    require_once($civicrm_base . '/install/InstallRequirements.php');
+    $requirements['civicrm.location'] = array(
+      'title' => 'CiviCRM location',
+      'value' => $civicrm_base,
+      'severity' => REQUIREMENT_OK,
+      'description' => 'CiviCRM core directory',
     );
+  }
+  else {
+    $requirements['civicrm.location'] = array(
+      'title' => 'CiviCRM location',
+      'value' => NULL,
+      'severity' => REQUIREMENT_ERROR,
+      'description' => 'CiviCRM must be downloaded alongside the CiviCRM module.',
+    );
+    return $requirements;
+  }
 
-    $block = entity_create('block', $values);
-    try {
-      $block->save();
-    }
-    catch (Drupal\Core\Entity\EntityStorageException $e) {
-      // Pass. Almost certainly a duplicate block, ie. Civicrm has been reinstalled.
+  // Grab db connection info
+  if (!$db_config = \Drupal\Core\Database\Database::getConnectionInfo('civicrm')['default']) {
+    $db_config = \Drupal\Core\Database\Database::getConnectionInfo('default')['default'];
+  }
+  $db_config['host'] = "{$db_config['host']}:{$db_config['port']}";
+
+  $install_requirements = new InstallRequirements();
+
+  // Gather directories that need to be writable
+  $file_paths = array(
+    realpath(conf_path()),
+    realpath(\Drupal\Core\StreamWrapper\PublicStream::basePath()),
+  );
+
+  foreach ($install_requirements->checkAll(array('db_config' => $db_config, 'file_paths' => $file_paths)) as $key => $result) {
+    $requirements["civicrm.$key"] = array(
+      'title' => $result['title'],
+      'value' => NULL,
+      'severity' => $result['severity'],
+      'description' => $result['details'],
+    );
+  }
+
+  return $requirements;
+}
+
+function _civicrm_find_civicrm() {
+  $candidates = array(
+    dirname(__FILE__) . '/../CRM',
+    dirname(__FILE__) . '/../civicrm-core',
+    dirname(__FILE__) . '/../core',
+  );
+  foreach ($candidates as $candidate) {
+    if (file_exists($candidate . '/install/InstallRequirements.php')) {
+      return realpath($candidate);
     }
   }
 }
