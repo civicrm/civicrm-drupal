@@ -118,7 +118,8 @@ function civicrm_engage_civicrm_postProcess($class, &$form) {
 
       if (isset($groupTree) && is_array($groupTree)) {
         require_once 'CRM/Core/BAO/CustomValueTable.php';
-        CRM_Core_BAO_CustomValueTable::postProcess($form->controller->exportValues($form->getVar('_name')),
+        $params = $form->controller->exportValues($form->getVar('_name'));
+        CRM_Core_BAO_CustomValueTable::postProcess($params,
           $groupTree[$cgID]['fields'],
           'civicrm_contact',
           $form->getVar('_contactId'),
