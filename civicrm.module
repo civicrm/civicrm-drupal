@@ -821,8 +821,10 @@ function civicrm_enable() {
   // also invoke civicrm menu rebuild
   CRM_Core_Menu::store();
 
-  //Update the 'blocks' DB table with the blocks
-  _block_rehash();
+  // Update the 'blocks' DB table with the blocks.
+  if (module_exists('block')) {
+    _block_rehash();
+  }
 }
 
 /**
