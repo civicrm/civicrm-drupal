@@ -275,20 +275,7 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
    * @access public
    */
   function addHTMLHead($header) {
-    static $count = 0;
-
-    if (!empty($header)) {
-      $data = array(
-        '#type' => 'markup',
-        '#markup' => $header,
-      );
-
-      // The second parameter of drupal_add_html_head() is required to be a unique
-      // key. We simply increment a counter string. This makes it useless for implementations
-      // of hook_html_head_alter() but is required so that we don't clobber previous calls.
-      $count++;
-      drupal_add_html_head($data, "civicrm_{$count}");
-    }
+    \Drupal::service('civicrm.page_state')->addHtmlHeader($header);
   }
 
   /**

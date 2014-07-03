@@ -8,6 +8,7 @@ class CivicrmPageState {
   protected $js = array();
   protected $breadcrumbs = array();
   protected $accessDenied = FALSE;
+  protected $html_headers = array();
 
   public function setTitle($title) {
     $this->title = $title;
@@ -43,6 +44,14 @@ class CivicrmPageState {
 
   public function getBreadcrumbs() {
     return $this->breadcrumbs;
+  }
+
+  public function addHtmlHeader($html) {
+    $this->html_headers[] = $html;
+  }
+
+  public function getHtmlHeaders() {
+    return implode(' ', $this->html_headers);
   }
 
   public function setAccessDenied() {
