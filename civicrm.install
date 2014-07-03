@@ -32,6 +32,7 @@ function civicrm_install() {
     'cms' => 'Drupal8',
     'base_url' => $GLOBALS['base_url'],
     'site_dir' => substr(conf_path(), 6), // Remove leading 'sites/'
+    'loadGenerated' => \Drupal\Core\Site\Settings::get('civicrm_load_generated', FALSE),
     'mysql' => array(
       'username' => $civicrm_db['username'],
       'password' => $civicrm_db['password'],
