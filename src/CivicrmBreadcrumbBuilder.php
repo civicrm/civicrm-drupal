@@ -25,9 +25,12 @@ class CivicrmBreadcrumbBuilder extends BreadcrumbBuilderBase {
    * {@inheritdoc}
    */
   public function applies(RouteMatchInterface $route_match) {
-    $content = $route_match->getRouteObject()->getDefault('_content');
-    if (isset($content) && $content == 'Drupal\civicrm\Controller\CivicrmController::main') {
-      return TRUE;
+    $route_object = $route_match->getRouteObject();
+    if ($route_object) {
+      $content = $route_object->getDefault('_content');
+      if (isset($content) && $content == 'Drupal\civicrm\Controller\CivicrmController::main') {
+        return TRUE;
+      }
     }
     return FALSE;
   }
