@@ -761,7 +761,6 @@ function drush_civicrm_cacheclear() {
 
   // Flush all caches using the API
   $params = array('version' => 3);
-
   if (drush_get_option('triggers', FALSE)) {
     $params['triggers'] = 1;
   }
