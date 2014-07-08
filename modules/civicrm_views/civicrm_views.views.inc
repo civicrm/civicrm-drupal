@@ -13,7 +13,8 @@ function civicrm_views_views_data() {
 
   // Use CiviCRM schema data to automatically populate $data array with fields and
   // make intelligent guesses for field, sort and filter plugins.
-  foreach (_civicrm_views_civicrm_entities() as $table => $civicrm_entity) {
+  $civicrm_entities = _civicrm_views_civicrm_entities();
+  foreach ($civicrm_entities as $table => $civicrm_entity) {
     $data[$table]['table']['group'] = $civicrm_entity['display_name'];
 
     // Only define the base key if we intend for the current CiviCRM table to
@@ -34,7 +35,7 @@ function civicrm_views_views_data() {
         'title' => !empty($field['title']) ? $field['title'] : "{$civicrm_entity['display_name']}.{$field['name']}",
         'help' => !empty($field['title']) ? $field['title'] : "{$civicrm_entity['display_name']}.{$field['name']}",
         'field' => _civicrm_views_field_to_field_plugin($civicrm_entity, $field),
-        'sort' => _civicrm_views_field_to_sort_plugin($field['type']),
+        'sort' => _civicrm_views_field_to_sort_plugin($civicrm_entity, $field),
         'filter' => _civicrm_views_field_to_filter_plugin($civicrm_entity, $field),
         'relationship' => array(),
       );
@@ -44,7 +45,35 @@ function civicrm_views_views_data() {
   _civicrm_views_add_relationships($data);
   _civicrm_views_add_implicit_joins($data);
 
-  ksm($data);
+  // Now load any custom tables.
+  // We attach fields via their 'custom_n' notation to avoid accidentally clobbering any core
+  // fields by the same name.
+  foreach (_civicrm_views_get_custom_fields() as $field) {
+    $data[$field['table']]['table']['group'] = "CiviCRM {$field['group']}";
+
+    $data[$field['join']]["id_{$field['group']}"] = array(
+      'relationship' => array(
+        'id' => 'standard',
+        'field' => 'id',
+        'base' => $field['table'],
+        'base field' => 'entity_id',
+        'title' => t('CiviCRM Custom Field: !title', array('!title' => $field['group'])),
+        'label' => t('CiviCRM Custom Field: !title', array('!title' => $field['group'])),
+        'help' => t('CiviCRM Custom Field: !title', array('!title' => $field['group'])),
+      ),
+    );
+
+    $data[$field['table']][$field['name']] = array(
+      'title' => $field['title'],
+      'help' => $field['title'],
+      'real field' => $field['real field'],
+      'field' => _civicrm_views_field_to_field_plugin($civicrm_entities[$field['join']], $field),
+      'sort' => _civicrm_views_field_to_sort_plugin($civicrm_entities[$field['join']], $field),
+      'filter' => _civicrm_views_field_to_filter_plugin($civicrm_entities[$field['join']], $field),
+      'relationship' => array(),
+    );
+  }
+
   return $data;
 }
 
@@ -57,6 +86,7 @@ function _civicrm_views_civicrm_entities() {
       'display_name' => t('CiviCRM Activity'),
       'dao' => 'CRM_Activity_DAO_Activity',
       'base' => TRUE,
+      'custom_fields' => TRUE,
     ),
     'civicrm_address' => array(
       'display_name' => t('CiviCRM Address'),
@@ -490,8 +520,8 @@ function _civicrm_views_field_to_field_plugin($entity, $field) {
  *
  * @Todo: sorting for dates
  */
-function _civicrm_views_field_to_sort_plugin($type) {
-  switch($type) {
+function _civicrm_views_field_to_sort_plugin($entity, $field) {
+  switch($field['type']) {
     default:
       return array(
         'id' => 'standard',
@@ -555,58 +585,67 @@ function _civicrm_views_field_to_filter_plugin($entity, $field) {
   }
 }
 
-function _civicrm_views_field_to_relationship_plugin($entity, $field) {
-  if (empty($field['FKClassName'])) {
-    return array();
-  }
+function _civicrm_views_get_custom_fields() {
+  // Pull in all the Custom fields
+  $query = "SELECT f.id, f.label, g.title, g.extends, f.data_type, f.column_name, f.option_group_id, g.table_name FROM civicrm_custom_field f
+            LEFT JOIN civicrm_custom_group g ON g.id = f.custom_group_id
+            where g.is_active = 1";
 
-  switch ($field['FKClassName']) {
-    case 'CRM_Contact_DAO_Contact':
-      return array(
-        'base' => 'civicrm_contact',
-        'id' => 'standard',
-        'title' => 'CiviCRM Contact',
-        'label' => "CiviCRM Contact (from {$entity['display_name']}.{$field['name']})",
-        'help' => "CiviCRM Contact (from {$entity['display_name']}.{$field['name']})",
-      );
-    case 'CRM_Event_DAO_Event':
-      // @Todo: delete this?
-      return array(
-        'base' => 'civicrm_event',
-        'id' => 'standard',
-        'title' => 'CiviCRM Event',
-        'label' => "CiviCRM Event (from {$entity['display_name']}.{$field['name']})",
-        'help' => "CiviCRM Event (from {$entity['display_name']}.{$field['name']})",
-      );
-    case 'CRM_Member_DAO_MembershipType':
-      // @Todo: remove this?
-      return array(
-        'base' => 'civicrm_membership_type',
-        'base field' => 'id',
-        'id' => 'standard',
-        'title' => 'CiviCRM Membership Type',
-        'label' => "CiviCRM Membership Type (from {$entity['display_name']}.{$field['name']})",
-        'help' => "CiviCRM Membership Type (from {$entity['display_name']}.{$field['name']})",
-      );
-    case 'CRM_Contact_DAO_RelationshipType':
-      // @Todo: remove this?
-      return array(
-        'base' => 'civicrm_relationship_type',
-        'base field' => 'id',
-        'id' => 'standard',
-        'title' => 'CiviCRM Relationship Type',
-        'label' => "CiviCRM Relationship Type (from {$entity['display_name']}.{$field['name']})",
-        'help' => "CiviCRM Relationship Type (from {$entity['display_name']}.{$field['name']})",
-      );
-    case 'CRM_Contact_DAO_Group':
-      return array(
-        'base' => 'civicrm_group',
-        'id' => 'standard',
-        'title' => 'CiviCRM Group',
-        'label' => "CiviCRM Group (from {$entity['display_name']}.{$field['name']})",
-        'help' => "CiviCRM Group (from {$entity['display_name']}.{$field['name']})",
-      );
+  // We make a bogus call to civicrm_api() so that it will include its requisite files
+  // for the two function calls below. Yes, this is gross — but that's what you get it if you break autoloading conventions.
+  civicrm_api(NULL, NULL, array());
+
+  $custom_fields = array();
+  $dao = \CRM_Core_DAO::executeQuery($query);
+  while ($dao->fetch()) {
+    $custom_fields[] = array(
+      'title' => $dao->label,
+      'group' => $dao->title,
+      'table' => $dao->table_name,
+      'name' => "custom_{$dao->id}",
+      'real field' => $dao->column_name,
+      'type' => _getStandardTypeFromCustomDataType($dao->data_type),
+      'join' => _civicrm_views_get_join_table($dao->extends),
+      'pseudoconstant' => $dao->option_group_id,
+    );
+  }
+  return $custom_fields;
+}
+
+/**
+ * Return the implicit join table for a custom group table based on its entity type.
+ */
+function _civicrm_views_get_join_table($entity_type) {
+  switch ($entity_type) {
+    case "Contact":
+    case "Individual":
+    case "Household":
+    case "Organization":
+      return 'civicrm_contact';
+    case "Group":
+      return 'civicrm_group';
+    case "Address":
+      return 'civicrm_address';
+    case "Event":
+      return 'civicrm_event';
+    case "Participant":
+      return 'civicrm_participant';
+    case "Contribution":
+      return 'civicrm_contribution';
+    case "Activity":
+      return 'civicrm_activity';
+    case "Relationship":
+      return 'civicrm_relationship';
+    case "Membership":
+      return 'civicrm_membership';
+    case "Grant":
+      return 'civicrm_grant';
+    case "Campaign":
+    case "Survey":
+      return 'civicrm_campaign';
+    case "Case":
+      return 'civicrm_case';
     default:
-      return array();
+      return NULL;
   }
 }
