@@ -173,225 +173,189 @@ function _civicrm_views_civicrm_entities() {
  */
 function _civicrm_views_add_relationships(&$data) {
   foreach (\CRM_Activity_DAO_ActivityContact::buildOptions('record_type_id') as $record_type_id => $name) {
-    $data['civicrm_activity']["id_contact_record_type_{$record_type_id}"] = array(
-      'relationship' => array(
-        'id' => 'standard',
-        'field' => 'id',
-        'base' => 'civicrm_activity_contact',
-        'base field' => 'activity_id',
-        'extra' => array(
-          array(
-            'field' => 'record_type_id',
-            'value' => $record_type_id,
-          ),
+    $data['civicrm_activity']["id_contact_record_type_{$record_type_id}"]['relationship'] = array(
+      'id' => 'standard',
+      'field' => 'id',
+      'base' => 'civicrm_activity_contact',
+      'base field' => 'activity_id',
+      'extra' => array(
+        array(
+          'field' => 'record_type_id',
+          'value' => $record_type_id,
         ),
-        'title' => t('CiviCRM !record_type_name', array('!record_type_name' => $name)),
-        'label' => t('CiviCRM !record_type_name (from Activity)', array('!record_type_name' => $name)),
-        'help' => t('CiviCRM !record_type_name (from Activity)', array('!record_type_name' => $name)),
       ),
+      'title' => t('CiviCRM !record_type_name', array('!record_type_name' => $name)),
+      'label' => t('CiviCRM !record_type_name (from Activity)', array('!record_type_name' => $name)),
+      'help' => t('CiviCRM !record_type_name (from Activity)', array('!record_type_name' => $name)),
     );
   }
-  $data['civicrm_contact']['employer_id_contact'] = array(
-    'relationship' => array(
-      'id' => 'standard',
-      'field' => 'employer_id',
-      'base' => 'civicrm_contact',
-      'base field' => 'id',
-      'title' => t('CiviCRM Employer'),
-      'label' => t('CiviCRM Employer (from Contact.employer_id'),
-      'help' => t('CiviCRM Employer (from Contact.employer_id'),
-    ),
+  $data['civicrm_contact']['employer_id_contact']['relationship'] = array(
+    'id' => 'standard',
+    'field' => 'employer_id',
+    'base' => 'civicrm_contact',
+    'base field' => 'id',
+    'title' => t('CiviCRM Employer'),
+    'label' => t('CiviCRM Employer (from Contact.employer_id'),
+    'help' => t('CiviCRM Employer (from Contact.employer_id'),
   );
-  $data['civicrm_contact']['id_address'] = array(
-    'relationship' => array(
-      'id' => 'civicrm_location',
-      'field' => 'id',
-      'base' => 'civicrm_address',
-      'base field' => 'contact_id',
-      'title' => t('CiviCRM Addresses'),
-      'label' => t('CiviCRM Addresses (from Contact.id)'),
-      'help' => t('CiviCRM Addresses (from Contact.id)'),
-    ),
+  $data['civicrm_contact']['id_address']['relationship'] = array(
+    'id' => 'civicrm_location',
+    'field' => 'id',
+    'base' => 'civicrm_address',
+    'base field' => 'contact_id',
+    'title' => t('CiviCRM Addresses'),
+    'label' => t('CiviCRM Addresses (from Contact.id)'),
+    'help' => t('CiviCRM Addresses (from Contact.id)'),
   );
-  $data['civicrm_contact']['id_contribution'] = array(
-    'relationship' => array(
-      'id' => 'standard',
-      'field' => 'id',
-      'base' => 'civicrm_contribution',
-      'base field' => 'contact_id',
-      'title' => t('CiviCRM Contributions'),
-      'label' => t('CiviCRM Contributions (from Contact.id)'),
-      'help' => t('CiviCRM Contributions (from Contact.id)'),
-    ),
+  $data['civicrm_contact']['id_contribution']['relationship'] = array(
+    'id' => 'standard',
+    'field' => 'id',
+    'base' => 'civicrm_contribution',
+    'base field' => 'contact_id',
+    'title' => t('CiviCRM Contributions'),
+    'label' => t('CiviCRM Contributions (from Contact.id)'),
+    'help' => t('CiviCRM Contributions (from Contact.id)'),
   );
-  $data['civicrm_contact']['id_entity_tag'] = array(
-    'relationship' => array(
-      'id' => 'standard',
-      'field' => 'id',
-      'base' => 'civicrm_entity_tag',
-      'base field' => 'entity_id',
-      'extra' => array(
-        array(
-          'field' => 'entity_table',
-          'value' => 'civicrm_contact',
-        ),
+  $data['civicrm_contact']['id_entity_tag']['relationship'] = array(
+    'id' => 'standard',
+    'field' => 'id',
+    'base' => 'civicrm_entity_tag',
+    'base field' => 'entity_id',
+    'extra' => array(
+      array(
+        'field' => 'entity_table',
+        'value' => 'civicrm_contact',
       ),
-      'title' => t('CiviCRM Tags'),
-      'label' => t('CiviCRM Tags (from Contact.id)'),
-      'help' => t('CiviCRM Tags (from Contact.id)'),
     ),
+    'title' => t('CiviCRM Tags'),
+    'label' => t('CiviCRM Tags (from Contact.id)'),
+    'help' => t('CiviCRM Tags (from Contact.id)'),
   );
-  $data['civicrm_contact']['id_email'] = array(
-    'relationship' => array(
-      'id' => 'civicrm_location',
-      'field' => 'id',
-      'base' => 'civicrm_email',
-      'base field' => 'contact_id',
-      'title' => t('CiviCRM Emails'),
-      'label' => t('CiviCRM Emails (from Contact.id)'),
-      'help' => t('CiviCRM Emails (from Contact.id)'),
-    ),
+  $data['civicrm_contact']['id_email']['relationship'] = array(
+    'id' => 'civicrm_location',
+    'field' => 'id',
+    'base' => 'civicrm_email',
+    'base field' => 'contact_id',
+    'title' => t('CiviCRM Emails'),
+    'label' => t('CiviCRM Emails (from Contact.id)'),
+    'help' => t('CiviCRM Emails (from Contact.id)'),
   );
-  $data['civicrm_contact']['id_group_contact'] = array(
-    'relationship' => array(
-      'id' => 'standard',
-      'field' => 'id',
-      'base' => 'civicrm_group_contact',
-      'base field' => 'contact_id',
-      'title' => t('CiviCRM Groups'),
-      'label' => t('CiviCRM Groups (from Contact.id)'),
-      'help' => t('CiviCRM Groups (from Contact.id)'),
-    ),
+  $data['civicrm_contact']['id_group_contact']['relationship'] = array(
+    'id' => 'standard',
+    'field' => 'id',
+    'base' => 'civicrm_group_contact',
+    'base field' => 'contact_id',
+    'title' => t('CiviCRM Groups'),
+    'label' => t('CiviCRM Groups (from Contact.id)'),
+    'help' => t('CiviCRM Groups (from Contact.id)'),
   );
-  $data['civicrm_contact']['id_membership'] = array(
-    'relationship' => array(
-      'id' => 'standard',
-      'field' => 'id',
-      'base' => 'civicrm_membership',
-      'base field' => 'contact_id',
-      'title' => t('CiviCRM Memberships'),
-      'label' => t('CiviCRM Memberships (from Contact.id)'),
-      'help' => t('CiviCRM Memberships (from Contact.id)'),
-    ),
+  $data['civicrm_contact']['id_membership']['relationship'] = array(
+    'id' => 'standard',
+    'field' => 'id',
+    'base' => 'civicrm_membership',
+    'base field' => 'contact_id',
+    'title' => t('CiviCRM Memberships'),
+    'label' => t('CiviCRM Memberships (from Contact.id)'),
+    'help' => t('CiviCRM Memberships (from Contact.id)'),
   );
-  $data['civicrm_contact']['id_participant'] = array(
-    'relationship' => array(
-      'id' => 'standard',
-      'field' => 'id',
-      'base' => 'civicrm_participant',
-      'base field' => 'contact_id',
-      'title' => t('CiviCRM Participants'),
-      'label' => t('CiviCRM Participants (from Contact.id)'),
-      'help' => t('CiviCRM Participants (from Contact.id)'),
-    ),
+  $data['civicrm_contact']['id_participant']['relationship'] = array(
+    'id' => 'standard',
+    'field' => 'id',
+    'base' => 'civicrm_participant',
+    'base field' => 'contact_id',
+    'title' => t('CiviCRM Participants'),
+    'label' => t('CiviCRM Participants (from Contact.id)'),
+    'help' => t('CiviCRM Participants (from Contact.id)'),
   );
-  $data['civicrm_contact']['id_phone'] = array(
-    'relationship' => array(
-      'id' => 'civicrm_location',
-      'field' => 'id',
-      'base' => 'civicrm_phone',
-      'base field' => 'contact_id',
-      'title' => t('CiviCRM Phones'),
-      'label' => t('CiviCRM Phones (from Contact.id)'),
-      'help' => t('CiviCRM Phones (from Contact.id)'),
-    ),
+  $data['civicrm_contact']['id_phone']['relationship'] = array(
+    'id' => 'civicrm_location',
+    'field' => 'id',
+    'base' => 'civicrm_phone',
+    'base field' => 'contact_id',
+    'title' => t('CiviCRM Phones'),
+    'label' => t('CiviCRM Phones (from Contact.id)'),
+    'help' => t('CiviCRM Phones (from Contact.id)'),
   );
-  $data['civicrm_contact']['id_relationship_a'] = array(
-    'relationship' => array(
-      'id' => 'civicrm_relationship',
-      'field' => 'id',
-      'base' => 'civicrm_relationship',
-      'base field' => 'contact_id_a',
-      'title' => t('CiviCRM Relationship as Contact A'),
-      'label' => t('CiviCRM Relationship as Contact A (from Contact.id)'),
-      'help' => t('CiviCRM Relationship as Contact A (from Contact.id)'),
-    ),
+  $data['civicrm_contact']['id_relationship_a']['relationship'] = array(
+    'id' => 'civicrm_relationship',
+    'field' => 'id',
+    'base' => 'civicrm_relationship',
+    'base field' => 'contact_id_a',
+    'title' => t('CiviCRM Relationship as Contact A'),
+    'label' => t('CiviCRM Relationship as Contact A (from Contact.id)'),
+    'help' => t('CiviCRM Relationship as Contact A (from Contact.id)'),
   );
-  $data['civicrm_contact']['id_relationship_b'] = array(
-    'relationship' => array(
-      'id' => 'civicrm_relationship',
-      'field' => 'id',
-      'base' => 'civicrm_relationship',
-      'base field' => 'contact_id_b',
-      'title' => t('CiviCRM Relationship as Contact B'),
-      'label' => t('CiviCRM Relationships as Contact B (from Contact.id)'),
-      'help' => t('CiviCRM Relationships as Contact B (from Contact.id)'),
-    ),
+  $data['civicrm_contact']['id_relationship_b']['relationship'] = array(
+    'id' => 'civicrm_relationship',
+    'field' => 'id',
+    'base' => 'civicrm_relationship',
+    'base field' => 'contact_id_b',
+    'title' => t('CiviCRM Relationship as Contact B'),
+    'label' => t('CiviCRM Relationships as Contact B (from Contact.id)'),
+    'help' => t('CiviCRM Relationships as Contact B (from Contact.id)'),
   );
-  $data['civicrm_contact']['primary_contact_id_contact'] = array(
-    'relationship' => array(
-      'id' => 'standard',
-      'field' => 'primary_contact_id',
-      'base' => 'civicrm_contact',
-      'base field' => 'id',
-      'title' => t('CiviCRM Primary Contact'),
-      'label' => t('CiviCRM Primary Contact (from Contact.primary_contact_id'),
-      'help' => t('CiviCRM Primary Contact (from Contact.primary_contact_id'),
-    ),
+  $data['civicrm_contact']['primary_contact_id_contact']['relationship'] = array(
+    'id' => 'standard',
+    'field' => 'primary_contact_id',
+    'base' => 'civicrm_contact',
+    'base field' => 'id',
+    'title' => t('CiviCRM Primary Contact'),
+    'label' => t('CiviCRM Primary Contact (from Contact.primary_contact_id'),
+    'help' => t('CiviCRM Primary Contact (from Contact.primary_contact_id'),
   );
-  $data['civicrm_entity_tag']['entity_id_contact'] = array(
-    'relationship' => array(
-      'id' => 'standard',
-      'field' => 'entity_id',
-      'base' => 'civicrm_contact',
-      'base field' => 'id',
-      'extra' => array(
-        array(
-          'table' => 'civicrm_entity_tag',
-          'field' => 'entity_table',
-          'value' => 'civicrm_contact',
-        ),
+  $data['civicrm_entity_tag']['entity_id_contact']['relationship'] = array(
+    'id' => 'standard',
+    'field' => 'entity_id',
+    'base' => 'civicrm_contact',
+    'base field' => 'id',
+    'extra' => array(
+      array(
+        'table' => 'civicrm_entity_tag',
+        'field' => 'entity_table',
+        'value' => 'civicrm_contact',
       ),
-      'title' => t('CiviCRM Contacts'),
-      'label' => t('CiviCRM Contacts (from Tag.entity_id)'),
-      'help' => t('CiviCRM Contacts (from Tag.entity_id)'),
     ),
+    'title' => t('CiviCRM Contacts'),
+    'label' => t('CiviCRM Contacts (from Tag.entity_id)'),
+    'help' => t('CiviCRM Contacts (from Tag.entity_id)'),
   );
-  $data['civicrm_event']['id_participant'] = array(
-    'relationship' => array(
-      'id' => 'standard',
-      'field' => 'id',
-      'base' => 'civicrm_participant',
-      'base field' => 'event_id',
-      'title' => t('CiviCRM Participants'),
-      'label' => t('CiviCRM Participants (from Event.id)'),
-      'help' => t('CiviCRM Participants (from Event.id)'),
-    ),
+  $data['civicrm_event']['id_participant']['relationship'] = array(
+    'id' => 'standard',
+    'field' => 'id',
+    'base' => 'civicrm_participant',
+    'base field' => 'event_id',
+    'title' => t('CiviCRM Participants'),
+    'label' => t('CiviCRM Participants (from Event.id)'),
+    'help' => t('CiviCRM Participants (from Event.id)'),
   );
-  $data['civicrm_group']['id_group_contact'] = array(
-    'relationship' => array(
-      'id' => 'standard',
-      'field' => 'id',
-      'base' => 'civicrm_group_contact',
-      'base field' => 'group_id',
-      'title' => t('CiviCRM Group Contacts'),
-      'label' => t('CiviCRM Group Contacts (from Group.id)'),
-      'help' => t('CiviCRM Group Contacts (from Group.id)'),
-    ),
+  $data['civicrm_group']['id_group_contact']['relationship'] = array(
+    'id' => 'standard',
+    'field' => 'id',
+    'base' => 'civicrm_group_contact',
+    'base field' => 'group_id',
+    'title' => t('CiviCRM Group Contacts'),
+    'label' => t('CiviCRM Group Contacts (from Group.id)'),
+    'help' => t('CiviCRM Group Contacts (from Group.id)'),
   );
-  $data['civicrm_relationship']['contact_id_a_contact'] = array(
-    'relationship' => array(
-      'id' => 'standard',
-      'field' => 'contact_id_a',
-      'base' => 'civicrm_contact',
-      'base field' => 'id',
-      'title' => t('CiviCRM Contact A'),
-      'label' => t('CiviCRM Contact A (from Relationship.contact_id_a)'),
-      'help' => t('CiviCRM Contact A (from Relationship.contact_id_a)'),
-    ),
+  $data['civicrm_relationship']['contact_id_a_contact']['relationship'] = array(
+    'id' => 'standard',
+    'field' => 'contact_id_a',
+    'base' => 'civicrm_contact',
+    'base field' => 'id',
+    'title' => t('CiviCRM Contact A'),
+    'label' => t('CiviCRM Contact A (from Relationship.contact_id_a)'),
+    'help' => t('CiviCRM Contact A (from Relationship.contact_id_a)'),
   );
-  $data['civicrm_relationship']['contact_id_b_contact'] = array(
-    'relationship' => array(
-      'id' => 'standard',
-      'field' => 'contact_id_b',
-      'base' => 'civicrm_contact',
-      'base field' => 'id',
-      'title' => t('CiviCRM Contact B'),
-      'label' => t('CiviCRM Contact B (from Relationship.contact_id_b)'),
-      'help' => t('CiviCRM Contact B (from Relationship.contact_id_b)'),
-    ),
+  $data['civicrm_relationship']['contact_id_b_contact']['relationship'] = array(
+    'id' => 'standard',
+    'field' => 'contact_id_b',
+    'base' => 'civicrm_contact',
+    'base field' => 'id',
+    'title' => t('CiviCRM Contact B'),
+    'label' => t('CiviCRM Contact B (from Relationship.contact_id_b)'),
+    'help' => t('CiviCRM Contact B (from Relationship.contact_id_b)'),
   );
-  $data['civicrm_relationship_type']['id_relationship'] = array(
+  $data['civicrm_relationship_type']['id_relationship']['relationship'] = array(
     'id' => 'standard',
     'field' => 'id',
     'base' => 'civicrm_relationship',
