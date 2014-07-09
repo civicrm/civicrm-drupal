@@ -7,5 +7,5 @@ civicrm.user_profile:
   route_name: civicrm.user_profile
   title: derived
   parent_id: user.edit
-  derivative: Drupal\civicrm\Plugin\Derivative\LocalTasks
+  deriver: Drupal\civicrm\Plugin\Derivative\LocalTasks
   weight: 100

@@ -3,11 +3,11 @@
 namespace Drupal\civicrm\Plugin\Derivative;
 
 use Drupal\civicrm\Civicrm;
-use Drupal\Component\Plugin\Derivative\DerivativeBase;
-use Drupal\Core\Plugin\Discovery\ContainerDerivativeInterface;
+use Drupal\Component\Plugin\Derivative\DeriverBase;
+use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class LocalTasks extends DerivativeBase implements ContainerDerivativeInterface {
+class LocalTasks extends DeriverBase implements ContainerDeriverInterface {
   public function __construct(Civicrm $civicrm) {
     // We don't do anything with the Civicrm service, only ensure that it
     // has been initialized.
