@@ -83,9 +83,6 @@ function civicrm_views_views_data() {
   return $data;
 }
 
-/**
- * @Todo: Contributions
- */
 function _civicrm_views_civicrm_entities() {
   return array(
     'civicrm_activity' => array(
@@ -102,6 +99,11 @@ function _civicrm_views_civicrm_entities() {
     'civicrm_contact' => array(
       'display_name' => t('CiviCRM Contact'),
       'dao' => 'CRM_Contact_DAO_Contact',
+      'base' => TRUE,
+    ),
+    'civicrm_contribution' => array(
+      'display_name' => t('CiviCRM Contribution'),
+      'dao' => 'CRM_Contribute_DAO_Contribution',
       'base' => TRUE,
     ),
     'civicrm_email' => array(
@@ -198,6 +200,17 @@ function _civicrm_views_add_relationships(&$data) {
       'title' => t('CiviCRM Addresses'),
       'label' => t('CiviCRM Addresses (from Contact.id)'),
       'help' => t('CiviCRM Addresses (from Contact.id)'),
+    ),
+  );
+  $data['civicrm_contact']['id_contribution'] = array(
+    'relationship' => array(
+      'id' => 'standard',
+      'field' => 'id',
+      'base' => 'civicrm_contribution',
+      'base field' => 'contact_id',
+      'title' => t('CiviCRM Contributions'),
+      'label' => t('CiviCRM Contributions (from Contact.id)'),
+      'help' => t('CiviCRM Contributions (from Contact.id)'),
     ),
   );
   $data['civicrm_contact']['id_entity_tag'] = array(
@@ -396,8 +409,18 @@ function _civicrm_views_add_relationships(&$data) {
  * This is ordered alphabetically by array key.
  */
 function _civicrm_views_add_implicit_joins(&$data) {
+  $data['civicrm_address']['table']['join'] = array(
+    'civicrm_contribution' => array(
+      'left_field' => 'address_id',
+      'field' => 'id',
+    ),
+  );
   $data['civicrm_contact']['table']['join'] = array(
     'civicrm_activity_contact' => array(
+      'left_field' => 'contact_id',
+      'field' => 'id',
+    ),
+    'civicrm_contribution' => array(
       'left_field' => 'contact_id',
       'field' => 'id',
     ),
