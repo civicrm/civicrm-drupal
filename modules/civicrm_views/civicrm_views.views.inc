@@ -12,6 +12,7 @@ function civicrm_views_views_data() {
   }
 
   // Attempt to use 'civicrm' named database. Otherwise default to using default Drupal database.
+  // @Todo: linking to the Drupal user table doesn't actually work when using a separate civicrm database.
   $database = 'default';
   if (\Drupal\Core\Database\Database::getConnectionInfo('civicrm')) {
     $database = 'civicrm';
@@ -81,6 +82,29 @@ function civicrm_views_views_data() {
   }
 
   return $data;
+}
+
+function civicrm_views_views_data_alter(&$data) {
+  try {
+    \Drupal::service('civicrm');
+  }
+  catch (Exception $e) {
+    \Drupal::logger('civicrm_views')->error("Unable to initialize CiviCRM. Aborting hook_views_data_alter().");
+    return;
+  }
+
+  $data['users']['table']['join']['civicrm_uf_match'] = array(
+    'left_field' => 'uf_id',
+    'field' => 'uid',
+    'extra' => array(
+      array(
+        'table' => 'civicrm_uf_match',
+        'field' => 'domain_id',
+        'value' => \CRM_Core_Config::domainID(),
+        'numeric' => TRUE,
+      ),
+    ),
+  );
 }
 
 function _civicrm_views_civicrm_entities() {
@@ -159,6 +183,11 @@ function _civicrm_views_civicrm_entities() {
     'civicrm_relationship_type' => array(
       'display_name' => 'CiviCRM Relationship Type',
       'dao' => 'CRM_Contact_DAO_RelationshipType',
+      'base' => FALSE,
+    ),
+    'civicrm_uf_match' => array(
+      'display_name' => 'CiviCRM UF Match',
+      'dao' => 'CRM_Core_DAO_UFMatch',
       'base' => FALSE,
     ),
   );
@@ -294,6 +323,15 @@ function _civicrm_views_add_relationships(&$data) {
     'label' => t('CiviCRM Relationships as Contact B (from Contact.id)'),
     'help' => t('CiviCRM Relationships as Contact B (from Contact.id)'),
   );
+  $data['civicrm_contact']['id_uf_match']['relationship'] = array(
+    'id' => 'civicrm_uf_match',
+    'field' => 'id',
+    'base' => 'civicrm_uf_match',
+    'base field' => 'contact_id',
+    'title' => t('Drupal Users'),
+    'label' => t('Drupal Users (from Contact.id)'),
+    'help' => t('Drupal Users (from Contact.id)'),
+  );
   $data['civicrm_contact']['primary_contact_id_contact']['relationship'] = array(
     'id' => 'standard',
     'field' => 'primary_contact_id',
@@ -388,6 +426,10 @@ function _civicrm_views_add_implicit_joins(&$data) {
       'field' => 'id',
     ),
     'civicrm_participant' => array(
+      'left_field' => 'contact_id',
+      'field' => 'id',
+    ),
+    'civicrm_uf_match' => array(
       'left_field' => 'contact_id',
       'field' => 'id',
     ),
