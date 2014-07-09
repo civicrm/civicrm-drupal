@@ -11,6 +11,12 @@ function civicrm_views_views_data() {
     return $data;
   }
 
+  // Attempt to use 'civicrm' named database. Otherwise default to using default Drupal database.
+  $database = 'default';
+  if (\Drupal\Core\Database\Database::getConnectionInfo('civicrm')) {
+    $database = 'civicrm';
+  }
+
   // Use CiviCRM schema data to automatically populate $data array with fields and
   // make intelligent guesses for field, sort and filter plugins.
   $civicrm_entities = _civicrm_views_civicrm_entities();
@@ -24,7 +30,7 @@ function civicrm_views_views_data() {
       $data[$table]['table']['base'] = array(
         'field' => 'id',
         'title' => $civicrm_entity['display_name'],
-        //'database' => 'civicrm',
+        'database' => $database,
       );
     };
 
