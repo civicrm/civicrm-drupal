@@ -191,6 +191,17 @@ function _civicrm_views_add_relationships(&$data) {
       ),
     );
   }
+  $data['civicrm_contact']['employer_id_contact'] = array(
+    'relationship' => array(
+      'id' => 'standard',
+      'field' => 'employer_id',
+      'base' => 'civicrm_contact',
+      'base field' => 'id',
+      'title' => t('CiviCRM Employer'),
+      'label' => t('CiviCRM Employer (from Contact.employer_id'),
+      'help' => t('CiviCRM Employer (from Contact.employer_id'),
+    ),
+  );
   $data['civicrm_contact']['id_address'] = array(
     'relationship' => array(
       'id' => 'civicrm_location',
@@ -305,17 +316,6 @@ function _civicrm_views_add_relationships(&$data) {
       'title' => t('CiviCRM Relationship as Contact B'),
       'label' => t('CiviCRM Relationships as Contact B (from Contact.id)'),
       'help' => t('CiviCRM Relationships as Contact B (from Contact.id)'),
-    ),
-  );
-  $data['civicrm_contact']['employer_id_contact'] = array(
-    'relationship' => array(
-      'id' => 'standard',
-      'field' => 'employer_id',
-      'base' => 'civicrm_contact',
-      'base field' => 'id',
-      'title' => t('CiviCRM Employer'),
-      'label' => t('CiviCRM Empolyer (from Contact.employer_id'),
-      'help' => t('CiviCRM Employer (from Contact.employer_id'),
     ),
   );
   $data['civicrm_contact']['primary_contact_id_contact'] = array(
