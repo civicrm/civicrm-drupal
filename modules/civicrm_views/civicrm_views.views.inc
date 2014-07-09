@@ -456,6 +456,19 @@ function _civicrm_views_add_implicit_joins(&$data) {
       'field' => 'id',
     ),
   );
+  $data['civicrm_uf_match']['table']['join'] = array(
+    'users' => array(
+      'left_field' => 'uid',
+      'field' => 'uf_id',
+      'extra' => array(
+        array(
+          'field' => 'domain_id',
+          'value' => \CRM_Core_Config::domainID(),
+          'numerical' => TRUE,
+        ),
+      ),
+    ),
+  );
 }
 
 /**
