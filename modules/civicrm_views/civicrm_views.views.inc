@@ -355,15 +355,6 @@ function _civicrm_views_add_relationships(&$data) {
     'label' => t('CiviCRM Contact B (from Relationship.contact_id_b)'),
     'help' => t('CiviCRM Contact B (from Relationship.contact_id_b)'),
   );
-  $data['civicrm_relationship_type']['id_relationship']['relationship'] = array(
-    'id' => 'standard',
-    'field' => 'id',
-    'base' => 'civicrm_relationship',
-    'base field' => 'relationship_type_id',
-    'title' => t('CiviCRM Relationships'),
-    'label' => t('CiviCRM Relationships (from Relationship.id)'),
-    'help' => t('CiviCRM Relationships (from Relationship.id)'),
-  );
 }
 
 /**
