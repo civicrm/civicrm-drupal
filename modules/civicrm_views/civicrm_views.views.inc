@@ -35,9 +35,7 @@ function civicrm_views_views_data() {
       );
     };
 
-    $fields = $civicrm_entity['dao']::fields();
-    //ksm($fields);
-    foreach ($fields as $field) {
+    foreach ($civicrm_entity['dao']::fields() as $field) {
       $data[$table][$field['name']] = array(
         'title' => !empty($field['title']) ? $field['title'] : "{$civicrm_entity['display_name']}.{$field['name']}",
         'help' => !empty($field['title']) ? $field['title'] : "{$civicrm_entity['display_name']}.{$field['name']}",
