@@ -91,18 +91,21 @@ function civicrm_views_views_data_alter(&$data) {
     return;
   }
 
-  $data['users']['table']['join']['civicrm_uf_match'] = array(
-    'left_field' => 'uf_id',
-    'field' => 'uid',
-    'extra' => array(
-      array(
-        'table' => 'civicrm_uf_match',
-        'field' => 'domain_id',
-        'value' => \CRM_Core_Config::domainID(),
-        'numeric' => TRUE,
+  // Only join to the users table if the civicrm tables are in the same database.
+  if (!\Drupal\Core\Database\Database::getConnectionInfo('civicrm')) {
+    $data['users']['table']['join']['civicrm_uf_match'] = array(
+      'left_field' => 'uf_id',
+      'field' => 'uid',
+      'extra' => array(
+        array(
+          'table' => 'civicrm_uf_match',
+          'field' => 'domain_id',
+          'value' => \CRM_Core_Config::domainID(),
+          'numeric' => TRUE,
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 function _civicrm_views_civicrm_entities() {
@@ -456,19 +459,24 @@ function _civicrm_views_add_implicit_joins(&$data) {
       'field' => 'id',
     ),
   );
-  $data['civicrm_uf_match']['table']['join'] = array(
-    'users' => array(
-      'left_field' => 'uid',
-      'field' => 'uf_id',
-      'extra' => array(
-        array(
-          'field' => 'domain_id',
-          'value' => \CRM_Core_Config::domainID(),
-          'numerical' => TRUE,
+
+  // Only join to the users table if the civicrm tables are
+  // in the same database.
+  if (!\Drupal\Core\Database\Database::getConnectionInfo('civicrm')) {
+    $data['civicrm_uf_match']['table']['join'] = array(
+      'users' => array(
+        'left_field' => 'uid',
+        'field' => 'uf_id',
+        'extra' => array(
+          array(
+            'field' => 'domain_id',
+            'value' => \CRM_Core_Config::domainID(),
+            'numerical' => TRUE,
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 /**
