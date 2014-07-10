@@ -456,13 +456,8 @@ class InstallRequirements {
 
     $unwritable_dirs = array();
     foreach ($file_paths as $path) {
-
-      $tmpfile = tempnam($path, 'civicrm');
-      if (!$tmpfile) {
+      if (!is_writable($path)) {
         $unwritable_dirs[] = $path;
-      }
-      else {
-        unlink($tmpfile);
       }
     }
 
