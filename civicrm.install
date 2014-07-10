@@ -6,7 +6,7 @@
 function civicrm_install() {
   // If civicrm.settings.php file is already present, we assume CiviCRM
   // is already installed and abort.
-  if (file_exists(conf_path() . '/civicrm.settings.php')) {
+  if (file_exists(\Drupal::service('kernel')->getSitePath() . '/civicrm.settings.php')) {
     drupal_set_message(t("CiviCRM appears to have already been installed. Skipping full installation."));
     return;
   }
@@ -31,7 +31,7 @@ function civicrm_install() {
   $config = array(
     'cms' => 'Drupal8',
     'base_url' => $GLOBALS['base_url'],
-    'site_dir' => substr(conf_path(), 6), // Remove leading 'sites/'
+    'site_dir' => substr(\Drupal::service('kernel')->getSitePath(), 6), // Remove leading 'sites/'
     'loadGenerated' => \Drupal\Core\Site\Settings::get('civicrm_load_generated', FALSE),
     'mysql' => array(
       'username' => $civicrm_db['username'],
@@ -90,8 +90,8 @@ function civicrm_requirements($phase) {
 
   // Gather directories that need to be writable
   $file_paths = array(
-    realpath(conf_path()),
-    realpath(\Drupal\Core\StreamWrapper\PublicStream::basePath()),
+    realpath(\Drupal::service('kernel')->getSitePath()), // eg. sites/default folder
+    realpath(\Drupal\Core\StreamWrapper\PublicStream::basePath()), // eg. sites/default/files folder
   );
 
   foreach ($install_requirements->checkAll(array('db_config' => $db_config, 'file_paths' => $file_paths)) as $key => $result) {
