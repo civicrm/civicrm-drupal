@@ -8,7 +8,7 @@ use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Defines the user entity class.
+ * Defines the civicrm_contact entity class.
  *
  * @ContentEntityType(
  *   id = "civicrm_contact",
