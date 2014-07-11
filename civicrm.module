@@ -280,3 +280,24 @@ function _civicrm_user_register_form_validate(&$form, &$form_state) {
     }
   }
 }
+
+/**
+ * Implements hook_theme().
+ */
+function civicrm_theme() {
+  return array(
+    'civicrm_contact' => array(
+      'render element' => 'elements',
+      'template' => 'civicrm-contact',
+    ),
+  );
+}
+
+/**
+ * Prepares variables for civicrm_contact templates.
+ *
+ * Default template: civicrm-contact.html.twig.
+ */
+function template_preprocess_civicrm_contact(&$vars) {
+  $vars['civicrm_contact'] = $vars['elements']['#civicrm_contact'];
+}
