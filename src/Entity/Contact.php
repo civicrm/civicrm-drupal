@@ -17,6 +17,7 @@ use Drupal\Core\Session\AccountInterface;
  *   fieldable = FALSE,
  *   translatable = FALSE,
  *   controllers = {
+ *     "storage" = "Drupal\civicrm\Entity\CivicrmDatabaseStorage",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *   },
  *   entity_keys = {
