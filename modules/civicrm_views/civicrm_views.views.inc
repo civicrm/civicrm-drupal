@@ -13,10 +13,8 @@ function civicrm_views_views_data() {
 
   // Attempt to use 'civicrm' named database. Otherwise default to using default Drupal database.
   // @Todo: linking to the Drupal user table doesn't actually work when using a separate civicrm database.
-  $database = 'default';
-  if (\Drupal\Core\Database\Database::getConnectionInfo('civicrm')) {
-    $database = 'civicrm';
-  }
+  module_load_install('civicrm'); // We need to include civicrm.install so that we can use _civicrm_get_db_config().
+  $database = _civicrm_get_db_config()['key'];
 
   // Use CiviCRM schema data to automatically populate $data array with fields and
   // make intelligent guesses for field, sort and filter plugins.

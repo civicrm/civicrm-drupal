@@ -24,9 +24,7 @@ function civicrm_install() {
   // We attempt to get a separate set of details for a civicrm database, but
   // otherwise default to using the same database as Drupal.
   $drupal_db = \Drupal\Core\Database\Database::getConnection('default')->getConnectionOptions();
-  if (!$civicrm_db = \Drupal\Core\Database\Database::getConnectionInfo('civicrm')['default']) {
-    $civicrm_db = \Drupal\Core\Database\Database::getConnectionInfo('default')['default'];
-  }
+  $civicrm_db = _civicrm_get_db_config()['info'];
 
   $config = array(
     'cms' => 'Drupal8',
@@ -81,9 +79,7 @@ function civicrm_requirements($phase) {
   }
 
   // Grab db connection info
-  if (!$db_config = \Drupal\Core\Database\Database::getConnectionInfo('civicrm')['default']) {
-    $db_config = \Drupal\Core\Database\Database::getConnectionInfo('default')['default'];
-  }
+  $db_config = _civicrm_get_db_config()['info'];
   $db_config['host'] = "{$db_config['host']}:{$db_config['port']}";
 
   $install_requirements = new InstallRequirements();
@@ -111,10 +107,45 @@ function _civicrm_find_civicrm() {
     dirname(__FILE__) . '/../CRM',
     dirname(__FILE__) . '/../civicrm-core',
     dirname(__FILE__) . '/../core',
+    dirname(__FILE__) . '/../../libraries/civicrm',
   );
   foreach ($candidates as $candidate) {
     if (file_exists($candidate . '/install/InstallRequirements.php')) {
       return realpath($candidate);
     }
+  }
+}
+
+/**
+ * Attempt to use a 'civicrm' labelled database connection if one exists.
+ * Otherwise default to using the same connection used by drupal.
+ *
+ * Also handle the special case where this is running as a test.
+ */
+function _civicrm_get_db_config() {
+  if (drupal_valid_test_ua()) {
+    $config = \Drupal\Core\Database\Database::getConnectionInfo('civicrm_test');
+    if ($config) {
+      return array(
+        'key' => 'civicrm_test',
+        'info' => $config['default'],
+      );
+    }
+    else {
+      throw new \RuntimeException("No civicrm_test database provided");
+    }
+  }
+
+  if ($config = \Drupal\Core\Database\Database::getConnectionInfo('civicrm')) {
+    return array(
+      'key' => 'civicrm',
+      'info' => $config['default'],
+    );
+  }
+  else {
+    return array(
+      'key' => 'default',
+      'info' => \Drupal\Core\Database\Database::getConnectionInfo('default')['default'],
+    );
   }
 }
