@@ -379,35 +379,21 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
   /**
    * Check if a resource url is within the drupal directory and format appropriately
    *
-   * @param url (reference)
-   *
-   * @return bool: TRUE for internal paths, FALSE for external. The drupal_add_js fn is able to add js more
-   * efficiently if it is known to be in the drupal site.
+   * This seems to be a legacy function. We assume all resources are within the drupal
+   * directory and always return TRUE. As well, we clean up the $url.
    *
    * @Todo Update for Drupal 8
    */
   function formatResourceUrl(&$url) {
-    $internal = FALSE;
-    $base = CRM_Core_Config::singleton()->resourceBase;
-    global $base_url;
-    // Handle absolute urls
-    // compares $url (which is some unknown/untrusted value from a third-party dev) to the CMS's base url (which is independent of civi's url)
-    // to see if the url is within our drupal dir, if it is we are able to treated it as an internal url
-    if (strpos($url, $base_url) === 0) {
-      $internal = TRUE;
-      $url = trim(str_replace($base_url, '', $url), '/');
+    // Remove leading slash if present.
+    $url = ltrim($url, '/');
+
+    // Remove query string — presumably added to stop intermediary caching.
+    if (($pos = strpos($url, '?')) !== FALSE) {
+      $url = substr($url, 0, $pos);
     }
-    // Handle relative urls that are within the CiviCRM module directory
-    elseif (strpos($url, $base) === 0) {
-      $internal = TRUE;
-      $url = $this->appendCoreDirectoryToResourceBase(substr(drupal_get_path('module', 'civicrm'), 0, -7)) . trim(substr($url, strlen($base)), '/');
-    }
-    // Strip query string
-    $q = strpos($url, '?');
-    if ($q && $internal) {
-      $url = substr($url, 0, $q);
-    }
-    return $internal;
+
+    return TRUE;
   }
 
   /**
