@@ -20,8 +20,6 @@ class Civicrm {
       array('!1' => $docLinkInstall, '!2' => $docLinkTrouble, '!3' => $forumLink)
     );
 
-    $this->registerClassLoader();
-
     $settingsFile = conf_path() . '/civicrm.settings.php';
     if (!defined('CIVICRM_SETTINGS_PATH')) {
       define('CIVICRM_SETTINGS_PATH', $settingsFile);
@@ -103,35 +101,6 @@ class Civicrm {
   public function navigationTree() {
     $navigationTree = array();
     return \CRM_Core_BAO_Navigation::buildNavigationTree($navigationTree, 0);
-  }
-
-  /**
-   * Find & register classloader and store location in Drupal variable.
-   * Per CRM-13737 this allows for drupal code to be outside the core directory
-   * which makes it easier for sites managing their own installation methods that
-   * may need to cover different drupal versions
-   */
-  protected function registerClassLoader() {
-    //$path = variable_get('civicrm_class_loader');
-    if (empty($path) || !file_exists($path)) {
-      $candidates = array(
-        dirname(__FILE__) . '/../../CRM/Core/ClassLoader.php',
-        dirname(__FILE__) . '/../../civicrm-core/CRM/Core/ClassLoader.php',
-        dirname(__FILE__) . '/../../core/CRM/Core/ClassLoader.php',
-        // ... ad nauseum ...
-      );
-
-      foreach ($candidates as $candidate) {
-        if (file_exists($candidate)) {
-          $path = $candidate;
-          //variable_set('civicrm_class_loader', $candidate);
-          break;
-        }
-      }
-    }
-
-    require_once $path;
-    \CRM_Core_ClassLoader::singleton()->register();
   }
 
   /**
