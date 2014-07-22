@@ -29,6 +29,8 @@ class CivicrmController extends ControllerBase {
   }
 
   public function main($args) {
+    // @Todo: Enable CiviCRM's CRM_Core_TemporaryErrorScope::useException() and possibly catch exceptions.
+    // At the moment, civicrm doesn't allow exceptions to bubble up to Drupal. See CRM-15022.
     $content = $this->civicrm->invoke($args);
 
     if ($this->civicrmPageState->isAccessDenied()) {
