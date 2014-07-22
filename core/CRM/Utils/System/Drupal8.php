@@ -489,10 +489,7 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
     }
 
     // Set Drupal's current user to the loaded user.
-    \Drupal::getContainer()->set('current_user', $user);
-    // Todo: In the next alpha release, it looks like we should replace
-    // the above with the following (following Cron.php's example).
-    // \Drupal::currentUser()->setAccount($user);
+    \Drupal::currentUser()->setAccount($user);
 
     $uid = $user->id();
     $contact_id = CRM_Core_BAO_UFMatch::getContactId($uid);
