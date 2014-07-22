@@ -471,7 +471,7 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
    * @Todo This always bootstraps Drupal. Do we need to provide a non-bootstrap alternative?
    */
    function authenticate($name, $password, $loadCMSBootstrap = FALSE, $realPath = NULL) {
-     (new CRM_Utils_System_Drupal8())->loadBootStrap(array('user' => $name, 'password' => $password), TRUE);
+     (new CRM_Utils_System_Drupal8())->loadBootStrap(array(), FALSE);
 
      $uid = \Drupal::service('user.auth')->authenticate($name, $password);
      $contact_id = CRM_Core_BAO_UFMatch::getContactId($uid);
