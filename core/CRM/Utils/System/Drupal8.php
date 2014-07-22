@@ -646,7 +646,7 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
       if (!empty($params['uid']) && $username = \Drupal\user\Entity\User::load($uid)->getUsername()) {
         $this->loadUser($username);
       }
-      elseif (!empty($params['name']) && !empty($params['pass']) && authenticate($params['name'], $params['pass'])) {
+      elseif (!empty($params['name']) && !empty($params['pass']) && $this->authenticate($params['name'], $params['pass'])) {
         $this->loadUser($params['name']);
       }
     }
