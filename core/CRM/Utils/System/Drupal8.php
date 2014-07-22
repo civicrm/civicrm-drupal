@@ -397,16 +397,15 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
   /**
    * Rewrite various system urls to https
    *
+   * This function does nothing in Drupal 8. Changes to the base_url should be made
+   * in settings.php directly.
+   *
    * @param null
    *
    * @return void
    * @access public
-   *
-   * @Todo Update for Drupal 8
    */
   function mapConfigToSSL() {
-    global $base_url;
-    $base_url = str_replace('http://', 'https://', $base_url);
   }
 
   /**
