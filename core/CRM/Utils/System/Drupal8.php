@@ -381,8 +381,6 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
    *
    * This seems to be a legacy function. We assume all resources are within the drupal
    * directory and always return TRUE. As well, we clean up the $url.
-   *
-   * @Todo Update for Drupal 8
    */
   function formatResourceUrl(&$url) {
     // Remove leading slash if present.
