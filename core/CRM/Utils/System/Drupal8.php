@@ -627,9 +627,13 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
     }
     chdir($root);
 
-    require_once $root . '/core/vendor/autoload.php';
-    require_once $root . '/core/includes/bootstrap.inc';
-    drupal_bootstrap(DRUPAL_BOOTSTRAP_CODE);
+    // Create a mock $request object
+    $autoloader = require_once $root . '/core/vendor/autoload.php';
+    // @Todo: do we need to handle case where $_SERVER has no HTTP_HOST key, ie. when run via cli?
+    $request = new \Symfony\Component\HttpFoundation\Request(array(), array(), array(), array(), array(), $_SERVER);
+
+    // Create a kernel and boot it.
+    \Drupal\Core\DrupalKernel::createFromRequest($request, $autoloader, 'prod')->prepareLegacyRequest($request);
 
     // Initialize Civicrm
     \Drupal::service('civicrm');
