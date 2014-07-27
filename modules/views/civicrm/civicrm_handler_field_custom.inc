@@ -37,13 +37,6 @@ class civicrm_handler_field_custom extends views_handler_field {
   function render($values) {
     $value = $values->{$this->field_alias};
     if (!is_null($value)) {
-      // get the field id from the db
-      if (!empty($this->options['label'])) {
-        $customFieldID = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_CustomField', $this->options['label'], 'id', 'label');
-        require_once 'CRM/Core/BAO/CustomOption.php';
-        return CRM_Core_BAO_CustomOption::getOptionLabel($customFieldID, $value);
-      }
-      // could not get custom id, lets just return what we have
       return $value;
     }
     return NULL;
