@@ -20,7 +20,7 @@ class Civicrm {
       array('!1' => $docLinkInstall, '!2' => $docLinkTrouble, '!3' => $forumLink)
     );
 
-    $settingsFile = conf_path() . '/civicrm.settings.php';
+    $settingsFile = \Drupal::service('kernel')->getSitePath() . '/civicrm.settings.php';
     if (!defined('CIVICRM_SETTINGS_PATH')) {
       define('CIVICRM_SETTINGS_PATH', $settingsFile);
     }
