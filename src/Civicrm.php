@@ -94,16 +94,6 @@ class Civicrm {
   }
 
   /**
-   * Get the civicrm admin menu.
-   *
-   * @return array
-   */
-  public function navigationTree() {
-    $navigationTree = array();
-    return \CRM_Core_BAO_Navigation::buildNavigationTree($navigationTree, 0);
-  }
-
-  /**
    * Synchronize a Drupal account with CiviCRM. This is a wrapper for CRM_Core_BAO_UFMatch::synchronize().
    *
    * @param AccountInterface $account

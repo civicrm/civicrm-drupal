@@ -19,56 +19,6 @@ function civicrm_permission() {
 }
 
 /**
- * Implements hook_toolbar().
- */
-function civicrm_toolbar() {
-  $items = array();
-
-  // Initialize civicrm
-  $civicrm = \Drupal::service('civicrm');
-  $navigationTree = $civicrm->navigationTree();
-
-  $items['civicrm'] = array(
-    '#type' => 'toolbar_item',
-    'tab' => array(
-      '#type' => 'link',
-      '#title' => t('CiviCRM'),
-      '#href' => 'civicrm.civicrm',
-      '#options' => array(
-        'attributes' => array(
-          'title' => t('CiviCRM'),
-          'class' => array('toolbar-icon', 'toolbar-icon-menu', 'toolbar-item'),
-        ),
-      ),
-    ),
-    'tray' => array(
-      '#heading' => t('CiviCRM menu'),
-      'civicrm_toolbar' => array(
-        '#type' => 'container',
-        '#attributes' => array(
-          'class' => array('civicrm-toolbar-menu'),
-        ),
-        'civicrm_menu' => array(
-          '#theme_wrappers' => array('menu_tree'),
-        ),
-      ),
-    ),
-    '#weight' => 0,
-    '#attached' => array(
-      'js' => array(
-        'jQuery(function() { jQuery("#toolbar-administration .civicrm-toolbar-menu ul.menu").drupalToolbarMenu(); });' => array('type' => 'inline'),
-      ),
-    ),
-  );
-
-  foreach ($navigationTree as $leaf) {
-    _civicrm_toolbar($items['civicrm']['tray']['civicrm_toolbar']['civicrm_menu'], $leaf);
-  }
-
-  return $items;
-}
-
-/**
  * Implements hook_page_alter().
  *
  * The aim of this is to inject arbitrary html into the head region (but
@@ -80,37 +30,6 @@ function civicrm_toolbar() {
 function civicrm_page_alter(&$page) {
   $headers = \Drupal::service('civicrm.page_state')->getHtmlHeaders();
   $page['page_top']['civicrm_headers']['#markup'] = $headers;
-}
-
-/**
- * Recursive helper function for building the toolbar menu.
- *
- * @param $items
- * @param $leaf
- *
- * @Todo Remove links from placeholder menu items (eg. menu headings).
- */
-function _civicrm_toolbar(&$items, $leaf) {
-  $url = \Drupal\civicrm\CivicrmHelper::parseUrl($leaf['attributes']['url']);
-  $item = array(
-    '#theme' => 'menu_link',
-    '#title' => $leaf['attributes']['label'],
-    '#href' => $url['path'],
-    '#localized_options' => array('query' => $url['query']),
-    '#below' => array(),
-    '#attributes' => array(
-      'class' => array('collapsed'),
-    ),
-  );
-
-  if (is_array($leaf['child'])) {
-    foreach ($leaf['child'] as $child) {
-      _civicrm_toolbar($item['#below'], $child);
-    }
-    $item['#below']['#theme_wrappers'] = array('menu_tree');
-  }
-
-  $items[] = $item;
 }
 
 /**
