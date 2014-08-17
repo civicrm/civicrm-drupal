@@ -4,7 +4,7 @@ namespace Drupal\civicrm\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
 
 /**
@@ -52,12 +52,12 @@ class Contact extends ContentEntityBase {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields['id'] = FieldDefinition::create('integer')
+    $fields['id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Contact ID'))
       ->setDescription(t('The contact ID.'))
       ->setReadOnly(TRUE);
 
-    $fields['display_name'] = FieldDefinition::create('string')
+    $fields['display_name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Display name'))
       ->setDescription(t("The contact's display name"))
       ->setReadOnly(TRUE);
