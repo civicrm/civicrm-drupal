@@ -1,11 +1,13 @@
 civicrm.account:
-  route_name: user.edit
+  route_name: entity.user.edit_form
   title: 'Account'
-  parent_id: user.edit
+  base_route: civicrm_account
+  parent_id: entity.user.edit_form
 
 civicrm.user_profile:
   route_name: civicrm.user_profile
   title: derived
-  parent_id: user.edit
+  base_route: civicrm_account
+  parent_id: entity.user.edit_form
   deriver: Drupal\civicrm\Plugin\Derivative\LocalTasks
   weight: 100
