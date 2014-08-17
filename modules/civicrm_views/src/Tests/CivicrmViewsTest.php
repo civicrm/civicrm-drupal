@@ -5,16 +5,13 @@ namespace Drupal\civicrm_views\Tests;
 use Drupal\civicrm\Tests\CivicrmTestBase;
 use Drupal\views\Views;
 
+/**
+ * Tests basic CiviCRM views functionality.
+ *
+ * @group CiviCRM
+ */
 class CivicrmViewsTest extends CivicrmTestBase {
   public static $modules = array('civicrm_views', 'civicrm_views_config');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'CiviCRM Views',
-      'description' => 'Tests CiviCRM views integration.',
-      'group' => 'CiviCRM',
-    );
-  }
 
   protected $contact_data = array(
     array(
