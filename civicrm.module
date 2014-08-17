@@ -102,7 +102,7 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
   }
 
   // Contact dashboard link.
-  if (($conf = $display->getComponent('civicrm_dashboard')) && $current_user->hasPermission('access Contact Dashboard') || \CRM_Contact_BAO_Contact_Permission::allow($current_contact_id)) {
+  if (($conf = $display->getComponent('civicrm_dashboard')) && $current_user->hasPermission('access Contact Dashboard') && \CRM_Contact_BAO_Contact_Permission::allow($current_contact_id)) {
     $build['civicrm_dashboard'] = array(
       '#type' => 'item',
       '#title' => t('Contact dashboard'),
