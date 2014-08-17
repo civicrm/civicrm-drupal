@@ -19,7 +19,8 @@ class CivicrmDatabaseStorage extends ContentEntityDatabaseStorage {
     return new static(
       $entity_type,
       $database,
-      $container->get('entity.manager')
+      $container->get('entity.manager'),
+      $container->get('cache.entity')
     );
   }
 }
