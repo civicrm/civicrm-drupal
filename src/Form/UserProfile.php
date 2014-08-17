@@ -5,6 +5,7 @@ namespace Drupal\civicrm\Form;
 use Drupal\civicrm\Civicrm;
 use Drupal\Core\Access\AccessInterface;
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
@@ -30,9 +31,9 @@ class UserProfile extends FormBase  {
     return 'civicrm_user_profile';
   }
 
-  public function buildForm(array $form, array &$form_state, AccountInterface $user = NULL, $profile = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, AccountInterface $user = NULL, $profile = NULL) {
     // Make the controller state available to form overrides.
-    $form_state['controller'] = $this;
+    $form_state->set('controller', $this);
     $this->user = $user;
     $this->profile = $profile;
 
@@ -67,17 +68,17 @@ class UserProfile extends FormBase  {
     return $form;
   }
 
-  public function validateForm(array &$form, array &$form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
     $errors = \CRM_Core_BAO_UFGroup::isValid($this->contact_id, $this->uf_group['title']);
 
     if (is_array($errors)) {
       foreach ($errors as $name => $error) {
-        $this->setFormError($name, $form_state, $error);
+        $form_state->setErrorByName($name, $error);
       }
     }
   }
 
-  public function submitForm(array &$form, array &$form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     // Somehow, somewhere, CiviCRM is processing our form. I have no idea how.
     drupal_set_message($this->t("Profile successfully updated."));
   }
