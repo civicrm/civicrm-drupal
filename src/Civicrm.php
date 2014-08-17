@@ -43,45 +43,6 @@ class Civicrm {
 
     // Initialize the system by creating a config object
     \CRM_Core_Config::singleton();
-
-    // Add module-specific header elements
-    // $header = civicrm_html_head();
-    // if (!empty($header)) {
-    //   drupal_add_html_head($header);
-    // }
-
-    // $args = explode('/', $_GET['q']);
-    // if (
-    //   (!isset($args[1]) || $args[1] != 'upgrade') &&
-    //   // drupal wysiwyg
-    //   CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'editor_id') == 4
-    // ) {
-    //   // CRM-12164
-    //   if (!function_exists('wysiwyg_get_profile')) {
-    //     // reset the editor choice so the warning is not displayed all the time
-    //     CRM_Core_BAO_Setting::setItem(NULL, CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'editor_id');
-
-    //     // display warning and url to fix
-    //     $url = CRM_Utils_System::url('civicrm/admin/setting/preferences/display', 'reset=1');
-    //     $msg = ts(
-    //       'You had configured CiviCRM to use Drupal default editor but the WYSIWYG module is disabled. Please goto <a href="%1">display preferences</a> and choose another editor',
-    //       array(1 => $url)
-    //     );
-    //     CRM_Core_Session::setStatus($msg);
-    //   }
-    //   else {
-    //     //we have to ensure that wysiwyg is loaded since
-    //     //pages load only with ajax callbacks
-    //     $formats = filter_formats();
-    //     foreach ($formats as $id => $format) {
-    //       wysiwyg_get_profile($id);
-    //     }
-    //     $path = drupal_get_path('module', 'filter');
-    //     drupal_add_js($path . '/filter.js');
-    //     drupal_add_css($path . '/filter.css');
-    //   }
-    // }
-    // CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
   }
 
   public function invoke($args) {
