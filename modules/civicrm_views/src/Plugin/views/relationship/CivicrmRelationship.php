@@ -7,6 +7,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\civicrm\Civicrm;
+use Drupal\core\form\FormStateInterface;
 
 /**
  * @ingroup views_relationship_handlers
@@ -66,7 +67,7 @@ class CivicrmRelationship extends RelationshipPluginBase {
     return $options;
   }
 
-  public function buildOptionsForm(&$form, &$form_state) {
+  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['relationship_type'] = array(
       '#type' => 'select',
       '#title' => 'Relationship type',

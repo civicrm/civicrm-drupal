@@ -6,6 +6,7 @@ use Drupal\civicrm\Civicrm;
 use Drupal\views\ResultRow;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\core\form\FormStateInterface;
 
 /**
  * @Todo: offer to display raw value or human friendly value
@@ -37,7 +38,7 @@ class CivicrmPseudoconstant extends FieldPluginBase {
     return $options;
   }
 
-  public function buildOptionsForm(&$form, &$form_state) {
+  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['pseudoconstant_format'] = array(
       '#type' => 'radios',
       '#title' => t('Display format'),

@@ -6,6 +6,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\civicrm\Civicrm;
+use Drupal\core\form\FormStateInterface;
 
 /**
  * @ingroup views_relationship_handlers
@@ -59,7 +60,7 @@ class CivicrmUFMatch extends RelationshipPluginBase {
     return $options;
   }
 
-  public function buildOptionsForm(&$form, &$form_state) {
+  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['civicrm_domain'] = array(
       '#type' => 'select',
       '#title' => 'Which domain of Drupal users do you want to join to?',
