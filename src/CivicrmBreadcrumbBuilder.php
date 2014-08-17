@@ -8,13 +8,13 @@
 namespace Drupal\civicrm;
 
 use Drupal\civicrm\CivicrmPageState;
-use Drupal\Core\Breadcrumb\BreadcrumbBuilderBase;
+use Drupal\Core\Breadcrumb\BreadcrumbBuilderInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Provides a custom taxonomy breadcrumb builder that uses the term hierarchy.
  */
-class CivicrmBreadcrumbBuilder extends BreadcrumbBuilderBase {
+class CivicrmBreadcrumbBuilder implements BreadcrumbBuilderInterface {
   protected $civicrmPageState;
 
   public function __construct(CivicrmPageState $civicrmPageState) {
