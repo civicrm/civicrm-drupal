@@ -38,22 +38,27 @@ function civicrm_page_alter(&$page) {
  * Add additional pseudo-fields to the user display. This allows the UI
  * to control the order in which these are displayed, or whether they are displayed
  * at all.
+ *
+ * @Todo: set these fields are visible ONLY for the 'full' user display.
  */
 function civicrm_entity_extra_field_info() {
   $extra['user']['user']['display']['civicrm_record'] = array(
     'label' => t('CiviCRM record link'),
     'description' => t('Link to user’s CiviCRM record.'),
     'weight' => 0,
+    'visible' => FALSE,
   );
   $extra['user']['user']['display']['civicrm_dashboard'] = array(
     'label' => t('CiviCRM dashboard link'),
     'description' => t('Link to user’s CiviCRM dashboard.'),
     'weight' => 0,
+    'visible' => FALSE,
   );
   $extra['user']['user']['display']['civicrm_profiles'] = array(
     'label' => t('CiviCRM profile summaries'),
     'description' => t('A list CiviCRM profile summaries.'),
     'weight' => 0,
+    'visible' => FALSE,
   );
 
   return $extra;
