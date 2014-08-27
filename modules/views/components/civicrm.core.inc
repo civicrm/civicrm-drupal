@@ -876,7 +876,7 @@ function _civicrm_core_data(&$data, $enabled) {
 
   //STATE OR PROVINCE
   $data['civicrm_address']['state_province'] = array(
-    'title' => t('State / Province'),
+    'title' => t('State/Province'),
     'real field' => 'state_province_id',
     'help' => t('The State or Province of the Address'),
     'field' => array(
