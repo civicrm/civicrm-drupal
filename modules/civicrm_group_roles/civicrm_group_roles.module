@@ -332,6 +332,7 @@ function civicrm_group_roles_show_rules($action = NULL, $id = NULL) {
   // get civicrm groups
   $params = array(
     'version' => '3',
+    'option.limit' => 0,
   );
 
   $groups = civicrm_api('group_contact','get',$params);
