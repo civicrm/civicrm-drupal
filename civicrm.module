@@ -648,6 +648,7 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
   $ctype = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $userID, 'contact_type');
 
   //to allow Edit any profile if user have permission
+<<<<<<< HEAD
   $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'title');
   if (empty($profileID)) {
     // CRM-15330 The urls have changed to the non-translated name version but we should
@@ -656,11 +657,14 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
     $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'title');
   }
 
+=======
+  $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'name');
+>>>>>>> Use UFGroup name instead of title in Drupal profile url
   $ufGroupIDs = CRM_Core_Permission::ufGroupClause(CRM_Core_Permission::EDIT, NULL, TRUE);
 
   if (in_array($profileID, $ufGroupIDs)) {
     // get all the data for this specific category
-    $html = CRM_Core_BAO_UFGroup::getEditHTML($userID, $category, NULL, FALSE, $reset, NULL, $doNotProcess, $ctype);
+    $html = CRM_Core_BAO_UFGroup::getEditHTML($userID, $category, NULL, FALSE, $reset, $profileID, $doNotProcess, $ctype);
   }
   else {
     CRM_Core_Error::fatal(ts('The requested Profile (gid=%1) is disabled OR it is not configured to be used for \'Profile\' listings in its Settings OR there is no Profile with that ID OR you do not have permission to access this profile. Please contact the site administrator if you need assistance.',
@@ -669,6 +673,7 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
   }
 
   if ($html) {
+    $title = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $profileID, 'title', 'id');
     $html = civicrm_add_jquery($html);
     $index = empty($category) ? 'civicrm-profile-my-account' : $category;
     $output[$index][] = array(
