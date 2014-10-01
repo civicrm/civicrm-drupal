@@ -42,11 +42,9 @@ function civicrm_conf_init() {
         return $conf;
     }
 
-    /**
-     * We are within the civicrm module, the drupal root is 2 links
-     * above us, so use that
-     */
     $currentDir = dirname( __FILE__ ) . DIRECTORY_SEPARATOR;
+
+    //define CIVICRM_CONFDIR in a file called settings_location.php if you wish to override the logic here
     if ( file_exists( $currentDir . 'settings_location.php' ) ) {
         include $currentDir . 'settings_location.php';
     }
@@ -54,21 +52,38 @@ function civicrm_conf_init() {
     if ( defined( 'CIVICRM_CONFDIR' ) && ! isset( $confdir ) ) {
         $confdir = CIVICRM_CONFDIR;
     } else {
-        // make it relative to civicrm.config.php, else php makes it relative
-        // to the script that invokes it
-        $moduleDir  = 'sites' . DIRECTORY_SEPARATOR . 'all' . DIRECTORY_SEPARATOR . 'modules';
-        $contribDir = $moduleDir . DIRECTORY_SEPARATOR . 'contrib';
-        // check to see if this is under sites/all/modules/contrib or subdir civicrm-core
-        if ( strpos( $currentDir, $contribDir ) !== false || strpos( $currentDir, 'civicrm-core' ) !== false) {
-            $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..';
-        // check to see if this is under sites/all/modules
-        } else if ( strpos( $currentDir, $moduleDir ) !== false ) {
-            $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..';
-        } else if ( strpos( $currentDir, 'plugins' . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR . 'civicrm' ) !== false ) {
-             //if its wordpress
-            $confdir = $currentDir . DIRECTORY_SEPARATOR . '..';
-        } else {
-            $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
+        /**
+         * CRM-15405: Updated logic for drupal 7 to support install profiles:
+         * find the drupal root by looking at the current script_path and walking up
+         * use the conf_path function (copied here) to load the appropriate directory
+        */
+        //walk up the directory tree looking for an index.php and a sites folder
+        $directories = explode('/', dirname($_SERVER['SCRIPT_FILENAME']));
+        while ($directory = array_pop($directories)) {
+          if (file_exists(implode('/', $directories) . DIRECTORY_SEPARATOR . 'index.php')
+             && (file_exists(implode('/', $directories) . DIRECTORY_SEPARATOR . 'sites'))) {
+            $drupal_root = implode('/', $directories);
+            $confdir = $drupal_root . DIRECTORY_SEPARATOR . _civicrm_drupal_conf_path($drupal_root);
+          }
+        }
+        //legacy checks, probably could be cleaned up
+        if (empty($confdir)) {
+          // make it relative to civicrm.config.php, else php makes it relative
+          // to the script that invokes it
+          $moduleDir  = 'sites' . DIRECTORY_SEPARATOR . 'all' . DIRECTORY_SEPARATOR . 'modules';
+          $contribDir = $moduleDir . DIRECTORY_SEPARATOR . 'contrib';
+          // check to see if this is under sites/all/modules/contrib or subdir civicrm-core
+          if ( strpos( $currentDir, $contribDir ) !== false || strpos( $currentDir, 'civicrm-core' ) !== false) {
+              $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..';
+          // check to see if this is under sites/all/modules
+          } else if ( strpos( $currentDir, $moduleDir ) !== false ) {
+              $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..';
+          } else if ( strpos( $currentDir, 'plugins' . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR . 'civicrm' ) !== false ) {
+               //if its wordpress
+              $confdir = $currentDir . DIRECTORY_SEPARATOR . '..';
+          } else {
+              $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
+          }
         }
     }
 
@@ -100,6 +115,35 @@ function civicrm_conf_init() {
     $conf = "$confdir/default";
     return $conf;
 }
+
+/* modified from drupal 7.31 */
+function _civicrm_drupal_conf_path($drupal_root, $require_settings = TRUE, $reset = FALSE) {
+  $confdir = 'sites';
+
+  $sites = array();
+  if (file_exists($drupal_root . '/' . $confdir . '/sites.php')) {
+    // This will overwrite $sites with the desired mappings.
+    include($drupal_root . '/' . $confdir . '/sites.php');
+  }
+
+  $uri = explode('/', $_SERVER['SCRIPT_NAME'] ? $_SERVER['SCRIPT_NAME'] : $_SERVER['SCRIPT_FILENAME']);
+  $server = explode('.', implode('.', array_reverse(explode(':', rtrim($_SERVER['HTTP_HOST'], '.')))));
+  for ($i = count($uri) - 1; $i > 0; $i--) {
+    for ($j = count($server); $j > 0; $j--) {
+      $dir = implode('.', array_slice($server, -$j)) . implode('.', array_slice($uri, 0, $i));
+      if (isset($sites[$dir]) && file_exists($drupal_root . '/' . $confdir . '/' . $sites[$dir])) {
+        $dir = $sites[$dir];
+      }
+      if (file_exists($drupal_root . '/' . $confdir . '/' . $dir . '/settings.php') || (!$require_settings && file_exists($drupal_root . '/' . $confdir . '/' . $dir))) {
+        $conf = "$confdir/$dir";
+        return $conf;
+      }
+    }
+  }
+  $conf = "$confdir/default";
+  return $conf;
+}
+
 
 $settingsFile = civicrm_conf_init( ) . '/civicrm.settings.php';
 define('CIVICRM_SETTINGS_PATH', $settingsFile);
