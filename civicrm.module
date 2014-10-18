@@ -99,10 +99,6 @@ function civicrm_help($section) {
     $output .= '<p>' . t('For more information please refer to the <a href="!1">CiviCRM web-site</a> which includes project information, documentation and support resources and more.', array(
       '!1' => 'http://civicrm.org')) . '</p>';
     return $output;
-
-    case 'admin/modules#description':
-      // This description is shown in the listing at admin/modules.
-      return t('Constituent Relationship Management (CiviCRM !1). Allows sites to manage contacts, relationships and groups, and track contact activities, contributions, memberships and events. For more information please refer to the <a href="!2">CiviCRM web-site</a> which includes project information, documentation and support resources and more.', array('!1' => '2.2', '!2' => 'http://civicrm.org/'));
   }
 }
 
