@@ -50,28 +50,28 @@ class civicrm_plugin_argument_default_civicrm_id extends views_plugin_argument_d
       '#title' => t('CiviCRM ID type'),
       '#description' => t('Select the entity type of the ID to extract from the URL'),
       '#options' => array(
-				'Contact' => t('Contact'),
-			),
+        'Contact' => t('Contact'),
+      ),
       '#default_value' => $this->options['id_type'],
       '#required' => TRUE,
     );
-	}
+  }
 
   /**
    * Get the default argument.
    */
   function get_argument() {
-		
-		// Contact ID is set using the URL parameter 'cid'
-		if ( $this->options['id_type'] == 'Contact' ) {
-			// Check that we are on a Contact entity
-			if (!empty($_GET['cid']) ) {
-				if (is_numeric($_GET['cid'])) {				
-					return $_GET['cid'];
-				}
-			}	
-		}
+    
+    // Contact ID is set using the URL parameter 'cid'
+    if ($this->options['id_type'] == 'Contact') {
+      // Check that we are on a Contact entity
+      if (!empty($_GET['cid']) ) {
+        if (is_numeric($_GET['cid'])) {        
+          return $_GET['cid'];
+        }
+      }  
+    }
 
   }
-	
+  
 }
