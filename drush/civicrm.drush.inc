@@ -1114,12 +1114,22 @@ function drush_civicrm_rest() {
   echo $rest->run($config);
 }
 
+/**
+ * Implements drush_hook_pre_COMMAND().
+ *
+ * this function is called when using drush 6.
+ */
+function drush_civicrm_pre_civicrm_sql_dump() {
+  _civicrm_dsn_init();
+}
 
 /**
- * Implementation of drush_hook_COMMAND_validate for command 'civicrm-sql-dump'
+ * Implements drush_hook_pre_COMMAND().
+ *
+ * this function is called when using drush 5.
  */
-function drush_civicrm_sqldump_validate() {
-  return _civicrm_dsn_init();
+function drush_civicrm_pre_civicrm_sqldump() {
+  _civicrm_dsn_init();
 }
 
 /**
@@ -1127,29 +1137,90 @@ function drush_civicrm_sqldump_validate() {
  */
 function drush_civicrm_sqldump() {
   drush_sql_dump_execute();
+}
+
+/**
+ * Implements drush_hook_post_COMMAND().
+ *
+ * this function is called when using drush 6.
+ */
+function drush_civicrm_post_civicrm_sql_dump() {
   _civicrm_dsn_close();
 }
 
 /**
- * Implementation of drush_hook_COMMAND_validate for command 'civicrm-sql-conf'
+ * Implements drush_hook_post_COMMAND().
+ *
+ * this function is called when using drush 5.
  */
-function drush_civicrm_sqlconf_validate() {
-  return _civicrm_dsn_init();
+function drush_civicrm_post_civicrm_sqldump() {
+  _civicrm_dsn_close();
+}
+
+/**
+ * Implements drush_hook_pre_COMMAND().
+ *
+ * this function is called when using drush 6.
+ */
+function drush_civicrm_pre_civicrm_sql_conf() {
+  _civicrm_dsn_init();
+}
+
+/**
+ * Implements drush_hook_post_COMMAND().
+ *
+ * this function is called when using drush 5.
+ */
+function drush_civicrm_pre_civicrm_sqlconf() {
+  _civicrm_dsn_init();
 }
 
 /**
  * Implementation of command 'civicrm-sql-conf'
  */
 function drush_civicrm_sqlconf() {
-  drush_sql_conf();
+  $conf = drush_sql_conf();
+  // Before drush 6 drush_sql_conf already does drush_print_r, so it shouldn't
+  // be called again.
+  if (version_compare(DRUSH_VERSION, 6, '>=')) {
+    drush_print_r($conf);
+  }
+}
+
+/**
+ * Implements drush_hook_post_COMMAND().
+ *
+ * this function is called when using drush 6.
+ */
+function drush_civicrm_post_civicrm_sql_conf() {
   _civicrm_dsn_close();
 }
 
 /**
- * Implementation of drush_hook_COMMAND_validate for command 'civicrm-sql-connect'
+ * Implements drush_hook_post_COMMAND().
+ *
+ * this function is called when using drush 5.
  */
-function drush_civicrm_sqlconnect_validate() {
-  return _civicrm_dsn_init();
+function drush_civicrm_post_civicrm_sqlconf() {
+  _civicrm_dsn_close();
+}
+
+/**
+ * Implements drush_hook_pre_COMMAND().
+ *
+ * this function is called when using drush 6.
+ */
+function drush_civicrm_pre_civicrm_sql_connect() {
+  _civicrm_dsn_init();
+}
+
+/**
+ * Implements drush_hook_pre_COMMAND().
+ *
+ * this function is called when using drush 5.
+ */
+function drush_civicrm_pre_civicrm_sqlconnect() {
+  _civicrm_dsn_init();
 }
 
 /**
@@ -1160,16 +1231,38 @@ function drush_civicrm_sqlconnect() {
 }
 
 /**
- * Implements drush_post_COMMAND hook
+ * Implements drush_hook_post_COMMAND().
+ *
+ * this function is called when using drush 6.
  */
 function drush_civicrm_post_civicrm_sql_connect() {
   _civicrm_dsn_close();
 }
 
 /**
- * Implementation of drush_hook_pre_COMMAND for command 'civicrm-sql-query'
+ * Implements drush_hook_post_COMMAND().
+ *
+ * this function is called when using drush 5.
+ */
+function drush_civicrm_post_civicrm_sqlconnect() {
+  _civicrm_dsn_close();
+}
+
+/**
+ * Implements drush_hook_pre_COMMAND().
+ *
+ * this function is called when using drush 6.
  */
 function drush_civicrm_pre_civicrm_sql_query() {
+  _civicrm_dsn_init();
+}
+
+/**
+ * Implements drush_hook_pre_COMMAND().
+ *
+ * this function is called when using drush 5.
+ */
+function drush_civicrm_pre_civicrm_sqlquery() {
   _civicrm_dsn_init();
 }
 
@@ -1180,15 +1273,40 @@ function drush_civicrm_sqlquery($query) {
   return drush_sql_query($query);
 }
 
+/**
+ * Implements drush_hook_post_COMMAND().
+ *
+ * this function is called when using drush 6.
+ */
 function drush_civicrm_post_civicrm_sql_query() {
   _civicrm_dsn_close();
 }
 
 /**
- * Implementation of drush_hook_COMMAND_validate for command 'civicrm-sql-cli'
+ * Implements drush_hook_post_COMMAND().
+ *
+ * this function is called when using drush 5.
  */
-function drush_civicrm_sqlcli_validate() {
-  return _civicrm_dsn_init();
+function drush_civicrm_post_civicrm_sqlquery() {
+  _civicrm_dsn_close();
+}
+
+/**
+ * Implements drush_hook_pre_COMMAND().
+ *
+ * this function is called when using drush 6.
+ */
+function drush_civicrm_pre_civicrm_sql_cli() {
+  _civicrm_dsn_init();
+}
+
+/**
+ * Implements drush_hook_pre_COMMAND().
+ *
+ * this function is called when using drush 5.
+ */
+function drush_civicrm_pre_civicrm_sqlcli() {
+  _civicrm_dsn_init();
 }
 
 /**
@@ -1196,6 +1314,23 @@ function drush_civicrm_sqlcli_validate() {
  */
 function drush_civicrm_sqlcli() {
   drush_sql_cli();
+}
+
+/**
+ * Implements drush_hook_post_COMMAND().
+ *
+ * this function is called when using drush 6.
+ */
+function drush_civicrm_post_civicrm_sql_cli() {
+  _civicrm_dsn_close();
+}
+
+/**
+ * Implements drush_hook_post_COMMAND().
+ *
+ * this function is called when using drush 5.
+ */
+function drush_civicrm_post_civicrm_sqlcli() {
   _civicrm_dsn_close();
 }
 
