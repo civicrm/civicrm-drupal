@@ -44,9 +44,16 @@ function civicrm_rules_civicrm_pre($op, $objectName, $objectId, &$objectRef) {
   if (!module_exists('rules') || $op != 'delete') {
     return;
   }
-  $validObjects = variable_get('civicrm_rules_post_entities', array('Contact'));
 
-  if (!in_array(strtolower($objectName), $validObjects)) {
+  if (in_array($objectName,
+      array('Individual', 'Household', 'Organization')
+    )) {
+    $objectName = 'Contact';
+  }
+
+  $validObjects = array_merge(variable_get('civicrm_rules_post_entities', array()), array('contact' => 'contact'));
+
+  if (!in_array(strtolower($objectName), $validObjects, true)) {
     return;
   }
 
@@ -104,9 +111,9 @@ function civicrm_rules_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   }
 
   // process only contacts for now
-  $validObjects = variable_get('civicrm_rules_post_entities', array('Contact'));
+  $validObjects = array_merge(variable_get('civicrm_rules_post_entities', array()), array('contact' => 'contact'));
 
-  if (!in_array(strtolower($objectName), $validObjects)) {
+  if (!in_array(strtolower($objectName), $validObjects, true)) {
     return;
   }
 
