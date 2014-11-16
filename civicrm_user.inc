@@ -170,7 +170,7 @@ function civicrm_user_view($user, $view_mode) {
     if (CRM_Core_Permission::check('access CiviCRM') && $civiPerm) {
       $contactURL =
   '<span class="user-page-link" id="user-page-contact" ><span class="user-page-bullet">&raquo;</span> ' .
-  l(ts("View Contact Record"),
+  l(ts("View contact record"),
     'civicrm/contact/view',
     array('query' => array('reset' => 1, 'cid' => $userID ))
     ) .
