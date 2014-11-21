@@ -877,7 +877,6 @@ function drush_civicrm_upgrade() {
   $backup_dir  = drush_get_option('backup-dir', $drupal_root . '/../backup');
   $backup_dir  = rtrim($backup_dir, '/');
 
-  $backup_dir  = drush_get_option('backup-dir', $drupal_root . '/../backup');
   drush_print(dt("\nThe upgrade process involves - "));
   drush_print(dt("1. Backing up current CiviCRM code as => !path",
       array('!path' => "$backup_dir/modules/$date/$backup_file")
