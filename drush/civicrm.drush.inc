@@ -646,6 +646,7 @@ function drush_civicrm_upgrade_db_validate() {
   if (!_civicrm_init()) {
     return FALSE;
   }
+
   $_POST['upgrade'] = 1;
   $_GET['q'] = 'civicrm/upgrade';
   require_once 'CRM/Core/Config.php';
@@ -863,6 +864,7 @@ function drush_civicrm_upgrade_validate() {
  */
 function drush_civicrm_upgrade() {
   global $civicrm_root;
+
   $tarfile     = drush_get_option('tarfile', FALSE);
   $date        = date('YmdHis');
   $backup_file = "civicrm";
@@ -874,6 +876,7 @@ function drush_civicrm_upgrade() {
   $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
   $backup_dir  = drush_get_option('backup-dir', $drupal_root . '/../backup');
   $backup_dir  = rtrim($backup_dir, '/');
+
   $backup_dir  = drush_get_option('backup-dir', $drupal_root . '/../backup');
   drush_print(dt("\nThe upgrade process involves - "));
   drush_print(dt("1. Backing up current CiviCRM code as => !path",
@@ -1030,8 +1033,14 @@ function drush_civicrm_restore() {
   }
   drush_log(dt('Database created.'), 'ok');
 
+  if (version_compare(DRUSH_VERSION, 7, '>=')) {
+    $dbDriver = $db_spec['driver'];
+  }
+  else {
+    $dbDriver = _drush_sql_get_scheme();
+  }
   // 3. restore database
-  switch ($db_spec['driver']) {
+  switch ($dbDriver) {
     case 'mysql':
       if (version_compare(DRUSH_VERSION, 7, '>=')) {
         $send = 'mysql ' . $sql->creds();
