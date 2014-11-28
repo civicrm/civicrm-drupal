@@ -448,7 +448,7 @@ function civicrm_views_get_field($data_type, $html_type = NULL) {
       );
     case "Int":
       return array(
-        'handler' => 'views_handler_field_numeric',
+        'handler' => 'civicrm_handler_field_custom',
         'click sortable' => TRUE,
       );
     case "Date":
