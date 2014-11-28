@@ -1035,6 +1035,47 @@ function _civicrm_core_data(&$data, $enabled) {
 
   civicrm_views_add_fields($fields, $data['civicrm_address'], 'civicrm_address');
 
+  // CIVICRM_NOTE table
+
+  $data['civicrm_note']['table']['group'] = t('CiviCRM Note');
+
+  // Explain how this table joins to others.
+  $data['civicrm_note']['table']['join'] = array(
+    // Directly links to contact table.
+    'civicrm_contact' => array(
+      'left_field' => 'id',
+      'field' => 'entity_id',
+      'extra' => array(
+        array(
+          'field' => 'entity_table',
+          'value' => 'civicrm_contact',
+          'numeric' => FALSE,
+        ),
+      ),
+    ),
+  );
+
+  // NOTE TEXT
+  $data['civicrm_note']['note'] = array(
+    'title' => t('Note'),
+    'help' => t('Note'),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_markup',
+      'click sortable' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+      'allow empty' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
+
   // CHILLING OUT AT THE CIVICRM_EMAIL TABLE
 
   $data['civicrm_email']['table']['group'] = t('CiviCRM Email');
