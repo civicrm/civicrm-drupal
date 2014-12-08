@@ -656,16 +656,18 @@ function civicrm_group_roles_add_remove_groups($roles, $user, $op) {
 
         // Find the group(s) for the role, excluding smart groups as we don't
         // want to add contacts statically to a smart group (CRM-11161).
-        $query = db_select('civicrm_group_roles_rules', 'cgr');
-        $query->join('civicrm_group', 'cg', 'cg.id = cgr.group_id');
-        $query->fields('cgr', array('group_id'));
-        $query->condition('cgr.role_id', $rid);
-        $query->isNull('cg.saved_search_id');
-        $groups = $query->execute()->fetchAll();
+        $groups = db_select('civicrm_group_roles_rules', 'cgr' )->fields( 'cgr', array('group_id') )->condition('role_id', $rid)->execute( )->fetchAll( );
         foreach ( $groups as $group ) {
+          $groupId = $group->group_id;
+          // Exclude smart groups as we don't want to add contacts statically to a smart group (CRM-11161).
+          $group_params = array('version' => 3, 'group_id' => $groupId, 'return' => 'saved_search_id');
+          $group_result = civicrm_api('Group', 'getvalue', $group_params);
+          if (!empty($group_result)) {
+            // We found a saved_search_id, so this is a smart group. Skip it.
+            continue;
+          }
 
           //add the contact
-          $groupId = $group->group_id;
           $contacts = array($contact);
           $gparams = array('version' => 3, 'group_id' => $groupId, 'contact_id' => $contact_id);
           if ($op == 'add') {
