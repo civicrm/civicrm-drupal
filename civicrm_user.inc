@@ -167,6 +167,7 @@ function civicrm_user_view($user, $view_mode) {
     // make sure user has permission to view the record
     $contactURL = NULL;
     $civiPerm = CRM_Contact_BAO_Contact_Permission::allow($userID);
+    
     if (CRM_Core_Permission::check('access CiviCRM') && $civiPerm) {
       $contactURL =
   '<span class="user-page-link" id="user-page-contact" ><span class="user-page-bullet">&raquo;</span> ' .
@@ -177,7 +178,7 @@ function civicrm_user_view($user, $view_mode) {
   '</span>';
     }
 
-    if (CRM_Core_Permission::check('access Contact Dashboard') && $civiPerm) {
+    if (CRM_Core_Permission::check('access Contact Dashboard')) {
       if (!empty($contactURL)) {
         $contactURL .= '<br/>';
       }
