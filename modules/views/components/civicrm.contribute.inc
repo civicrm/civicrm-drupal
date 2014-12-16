@@ -605,7 +605,8 @@ function _civicrm_contribute_data(&$data, $enabled) {
     ),
     'relationship' => array(
       'base' => 'civicrm_contact',
-      'field' => 'id',
+      'left_field' => 'id',
+      'field' => 'contact_id',
       'handler' => 'views_handler_relationship',
       'label' => t('Soft Contribution -> Contact Record'),
     ),
