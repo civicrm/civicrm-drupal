@@ -193,7 +193,6 @@ function civicrm_user_view($user, $view_mode) {
 
     $ctype = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $userID, 'contact_type');
 
-
     $ufGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active'));
     $weight = 100;
     foreach ($ufGroups as $id => $ufGroup) {
