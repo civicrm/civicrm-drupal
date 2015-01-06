@@ -1,7 +1,8 @@
 <?php
+
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -23,49 +24,54 @@
  +--------------------------------------------------------------------+
 */
 
-
-/*
- * Heavily based on anonymous code contribution. No claim.
- * CiviCRM Views Integration
- *
- * civicrm_handler_filter_relationship_type.inc
- * Filters Relationship Types, and is configured using the labels from the database
- *
+/**
+ * @file
+ * Contains a plugin to extract CiviCRM IDs from the URL.
  */
-class civicrm_handler_filter_relationship_type extends views_handler_filter_in_operator {
-  static $_relationshipType;
-  function construct() {
-    parent::construct();
-    if (!self::$_relationshipType) {
-      if (!civicrm_initialize()) {
-        return;
-      }
-      require_once 'CRM/Core/PseudoConstant.php';
-      $relationshipType_array = CRM_Core_PseudoConstant::relationshipType($columnName = 'name');
 
-      // relationshipType() returns information about relations as array with fields
-      // 'label_a_b', 'label_b_a', 'contact_type_a' and 'contact_type_b'.
-      // We keep just 'label_a_b' for simplicity.
+class civicrm_plugin_argument_default_civicrm_id extends views_plugin_argument_default {
 
-      $options = array();
-      foreach ($relationshipType_array as $id => $value_array) {
-        $options[$id] = $value_array['name_a_b'];
-      }
-
-      self::$_relationshipType = $options;
-    }
+  /**
+   * List the options relevant for this plugin.
+   */
+  function option_definition() {
+    $options = parent::option_definition();
+    $options['id_type'] = array('default' => 'Contact');
+    return $options;
   }
 
-  function get_value_options() {
-    if (!isset($this->value_options)) {
-      $this->value_title = t('Relationship Type');
-      $options = array();
-      foreach (self::$_relationshipType as $id => $name) {
-        $options[$id] = $name;
-      }
-      $this->value_options = $options;
-    }
+  /**
+   * Provide the default form for setting options.
+   */
+  function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+    $form['id_type'] = array(
+      '#type' => 'select',
+      '#title' => t('CiviCRM ID type'),
+      '#description' => t('Select the entity type of the ID to extract from the URL'),
+      '#options' => array(
+        'Contact' => t('Contact'),
+      ),
+      '#default_value' => $this->options['id_type'],
+      '#required' => TRUE,
+    );
   }
+
+  /**
+   * Get the default argument.
+   */
+  function get_argument() {
+    
+    // Contact ID is set using the URL parameter 'cid'
+    if ($this->options['id_type'] == 'Contact') {
+      // Check that we are on a Contact entity
+      if (!empty($_GET['cid']) ) {
+        if (is_numeric($_GET['cid'])) {        
+          return $_GET['cid'];
+        }
+      }  
+    }
+
+  }
+  
 }
-
-

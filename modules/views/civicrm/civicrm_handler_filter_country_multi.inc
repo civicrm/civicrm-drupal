@@ -1,7 +1,7 @@
 <?php
 /*
    +--------------------------------------------------------------------+
-   | CiviCRM version 4.4                                                |
+   | CiviCRM version 4.5                                                |
    +--------------------------------------------------------------------+
    | This file is a part of CiviCRM.                                    |
    |                                                                    |
@@ -87,7 +87,7 @@ class civicrm_handler_filter_country_multi extends views_handler_filter_in_opera
     }
 
     if ($op) {
-      foreach ($this->value[0] as $value) {
+      foreach ($this->value as $value) {
         $clauses[] = "$this->table_alias.$this->real_field " . $op . $value;
       }
       $clause = implode($glue, $clauses);

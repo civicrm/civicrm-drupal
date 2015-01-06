@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.4                                                |
+ | CiviCRM version 4.5                                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -448,7 +448,7 @@ function civicrm_views_get_field($data_type, $html_type = NULL) {
       );
     case "Int":
       return array(
-        'handler' => 'views_handler_field_numeric',
+        'handler' => 'civicrm_handler_field_custom',
         'click sortable' => TRUE,
       );
     case "Date":
@@ -744,81 +744,88 @@ function civicrm_date_views_tables() {
 }
 
 /**
- * Implements hook_views_plugins
+ * Implements hook_views_plugins().
  */
 function civicrm_views_plugins() {
   $data = array();
+  
+  // This just tells us that the themes are elsewhere
+  $data['module'] = 'civicrm';
+  
+  // Default argument to pull CiviCRM IDs from the URL
+  $data['argument default']['civicrm_id'] = array(
+    'title' => t('CiviCRM ID from URL'),
+    'handler' => 'civicrm_plugin_argument_default_civicrm_id'
+  );
+  
+  // Calendar module integration
   if (module_exists('calendar')) {
     $civicrm_module_path = drupal_get_path('module', 'civicrm');
-
-    $data = array(
-      // This just tells our themes are elsewhere.
-      'module' => 'civicrm',
-      'row' => array(
-        'civicrm_event_calendar' => array(
-          'title' => t('Calendar Items'),
-          'help' => t('Displays each selected event as a Calendar item.'),
-          'handler' => 'calendar_plugin_row_civicrm',
-          'path' => "$civicrm_module_path/modules/views/plugins",
-          'base' => array('civicrm_event'),
-          'uses options' => TRUE,
-          'uses fields' => TRUE,
-          'type' => 'normal',
-          'dao class' => 'CRM_Event_DAO_Event',
-          'title field' => 'title',
-        ),
-        'civicrm_activity_calendar' => array(
-          'title' => t('Calendar Items'),
-          'help' => t('Displays each selected activity as a Calendar item.'),
-          'handler' => 'calendar_plugin_row_civicrm',
-          'path' => "$civicrm_module_path/modules/views/plugins",
-          'base' => array('civicrm_activity'),
-          'uses options' => TRUE,
-          'uses fields' => TRUE,
-          'type' => 'normal',
-          'dao class' => 'CRM_Activity_DAO_Activity',
-          'title field' => 'subject',
-        ),
-	'civicrm_case_calendar' => array(
-          'title' => t('Case Items'),
-          'help' => t('Displays each selected case as a Calendar item.'),
-          'handler' => 'calendar_plugin_row_civicrm',
-          'path' => "$civicrm_module_path/modules/views/plugins",
-          'base' => array('civicrm_case'),
-          'uses options' => TRUE,
-          'uses fields' => TRUE,
-          'type' => 'normal',
-          'dao class' => 'CRM_Case_DAO_Case',
-          'title field' => 'subject',
-        ),
-        'civicrm_mail_calendar' => array(
-          'title' => t('Calendar Items'),
-          'help' => t('Displays each selected mailing as a Calendar item.'),
-          'handler' => 'calendar_plugin_row_civicrm',
-          'path' => "$civicrm_module_path/modules/views/plugins",
-          'base' => array('civicrm_mail'),
-          'uses options' => TRUE,
-          'uses fields' => TRUE,
-          'type' => 'normal',
-          'dao class' => 'CRM_Mailing_DAO_MailingJob',
-          // @TODO come up with a better title field
-          'title field' => 'mailing_id',
-        ),
-        'civicrm_campaign_calendar' => array(
-          'title' => t('Calendar Items'),
-          'help' => t('Displays each selected campaign as a Calendar item.'),
-          'handler' => 'calendar_plugin_row_civicrm',
-          'path' => "$civicrm_module_path/modules/views/plugins",
-          'base' => array('civicrm_campaign'),
-          'uses options' => TRUE,
-          'uses fields' => TRUE,
-          'type' => 'normal',
-          'dao class' => 'CRM_Campaign_DAO_Campaign',
-          'title field' => 'title',
-        ),
+    $data['row'] = array(
+      'civicrm_event_calendar' => array(
+      	'title' => t('Calendar Items'),
+        'help' => t('Displays each selected event as a Calendar item.'),
+        'handler' => 'calendar_plugin_row_civicrm',
+        'path' => "$civicrm_module_path/modules/views/plugins",
+        'base' => array('civicrm_event'),
+        'uses options' => TRUE,
+        'uses fields' => TRUE,
+        'type' => 'normal',
+        'dao class' => 'CRM_Event_DAO_Event',
+        'title field' => 'title',
+      ),
+      'civicrm_activity_calendar' => array(
+        'title' => t('Calendar Items'),
+        'help' => t('Displays each selected activity as a Calendar item.'),
+        'handler' => 'calendar_plugin_row_civicrm',
+        'path' => "$civicrm_module_path/modules/views/plugins",
+        'base' => array('civicrm_activity'),
+        'uses options' => TRUE,
+        'uses fields' => TRUE,
+        'type' => 'normal',
+        'dao class' => 'CRM_Activity_DAO_Activity',
+        'title field' => 'subject',
+      ),
+			'civicrm_case_calendar' => array(
+        'title' => t('Case Items'),
+        'help' => t('Displays each selected case as a Calendar item.'),
+        'handler' => 'calendar_plugin_row_civicrm',
+        'path' => "$civicrm_module_path/modules/views/plugins",
+        'base' => array('civicrm_case'),
+        'uses options' => TRUE,
+        'uses fields' => TRUE,
+        'type' => 'normal',
+        'dao class' => 'CRM_Case_DAO_Case',
+        'title field' => 'subject',
+      ),
+      'civicrm_mail_calendar' => array(
+        'title' => t('Calendar Items'),
+        'help' => t('Displays each selected mailing as a Calendar item.'),
+        'handler' => 'calendar_plugin_row_civicrm',
+        'path' => "$civicrm_module_path/modules/views/plugins",
+        'base' => array('civicrm_mail'),
+        'uses options' => TRUE,
+        'uses fields' => TRUE,
+        'type' => 'normal',
+        'dao class' => 'CRM_Mailing_DAO_MailingJob',
+        // @TODO come up with a better title field
+        'title field' => 'mailing_id',
+      ),
+      'civicrm_campaign_calendar' => array(
+        'title' => t('Calendar Items'),
+        'help' => t('Displays each selected campaign as a Calendar item.'),
+        'handler' => 'calendar_plugin_row_civicrm',
+        'path' => "$civicrm_module_path/modules/views/plugins",
+        'base' => array('civicrm_campaign'),
+        'uses options' => TRUE,
+        'uses fields' => TRUE,
+        'type' => 'normal',
+        'dao class' => 'CRM_Campaign_DAO_Campaign',
+        'title field' => 'title',
       ),
     );
   }
+	
   return $data;
 }
 
