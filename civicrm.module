@@ -677,6 +677,12 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
       '#value' => $html,
       '#weight' => 1,
     );
+    $output[$index][] = array(
+      '#title' => $title,
+      '#type' => 'item',
+      '#markup' => $html,
+      '#weight' => 1,
+    );
   }
 
   return $output;
