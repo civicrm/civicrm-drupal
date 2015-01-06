@@ -677,12 +677,12 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
     $html = civicrm_add_jquery($html);
     $index = empty($category) ? 'civicrm-profile-my-account' : $category;
     $output[$index][] = array(
-      '#title' => $category,
+      '#title' => $title,
       '#value' => $html,
       '#weight' => 1,
     );
     $output[$index][] = array(
-      '#title' => $category,
+      '#title' => $title,
       '#type' => 'item',
       '#markup' => $html,
       '#weight' => 1,
