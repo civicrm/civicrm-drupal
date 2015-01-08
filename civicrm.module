@@ -559,6 +559,27 @@ function _civicrm_categories_access($profile_id) {
   }
 }
 
+/*
+ * Translating profile menu title dynamicaly to overide caching
+ */
+function civicrm_menu_alter(&$items) {
+  $categories = civicrm_user_categories();
+  foreach ($categories as $cat) {
+    $path = 'user/%user_category/edit/' . $cat['name'];
+    $items[$path]['title callback'] = 'civicrm_profile_title_callback';
+    $items[$path]['title arguments'] = array((string)$cat['id'], $cat['title']);
+  }
+}
+
+function civicrm_profile_title_callback($profile_id, $fallback) {
+  if (!civicrm_initialize() || empty($profile_id)) {
+    return $fallback;
+  }
+
+  return CRM_Core_BAO_UFGroup::getTitle($profile_id);
+}
+
+
 function civicrm_register_data($edit, &$user, $category, $reset, $doNotProcess = FALSE) {
   // lets suppress key generation for all registration forms
   civicrm_key_disable();
