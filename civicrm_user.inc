@@ -139,6 +139,7 @@ function civicrm_user_categories() {
   foreach ($allUFGroups as $key => $value) {
     if ($value['is_active']) {
       $ufGroups[] = array(
+        'id' => $key,
         'name' => $value['name'],
         'title' => $value['title'],
         'weight' => $weight,
