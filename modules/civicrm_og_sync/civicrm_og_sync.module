@@ -208,7 +208,7 @@ function civicrm_og_sync_enable() {
   // $subscribers = og_get_group_ids('user');
 
   foreach ($ogGroupIds as $nid => $gid) {
-    $node = node_load($nid);
+    $node = node_load($gid);
     $title = trim($node->title);
     // length of 49 so that the admin group can fit ': administrator' afterwards within 64 char field
     $params = array('name' => substr(trim($title), 0, 49),
