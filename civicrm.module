@@ -431,6 +431,27 @@ function _civicrm_categories_access($profile_id) {
   }
 }
 
+/*
+ * Translating profile menu title dynamicaly to overide caching
+ */
+function civicrm_menu_alter(&$items) {
+  $categories = civicrm_user_categories();
+  foreach ($categories as $cat) {
+    $path = 'user/%user_category/edit/' . $cat['name'];
+    $items[$path]['title callback'] = 'civicrm_profile_title_callback';
+    $items[$path]['title arguments'] = array((string)$cat['id'], $cat['title']);
+  }
+}
+
+function civicrm_profile_title_callback($profile_id, $fallback) {
+  if (!civicrm_initialize() || empty($profile_id)) {
+    return $fallback;
+  }
+
+  return CRM_Core_BAO_UFGroup::getTitle($profile_id);
+}
+
+
 function civicrm_register_data($edit, &$user, $category, $reset, $doNotProcess = FALSE) {
   // lets suppress key generation for all registration forms
   civicrm_key_disable();
@@ -520,12 +541,12 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
   $ctype = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $userID, 'contact_type');
 
   //to allow Edit any profile if user have permission
-  $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'title');
+  $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'name');
   $ufGroupIDs = CRM_Core_Permission::ufGroupClause(CRM_Core_Permission::EDIT, NULL, TRUE);
 
   if (in_array($profileID, $ufGroupIDs)) {
     // get all the data for this specific category
-    $html = CRM_Core_BAO_UFGroup::getEditHTML($userID, $category, NULL, FALSE, $reset, NULL, $doNotProcess, $ctype);
+    $html = CRM_Core_BAO_UFGroup::getEditHTML($userID, $category, NULL, FALSE, $reset, $profileID, $doNotProcess, $ctype);
   }
   else {
     CRM_Core_Error::fatal(ts('The requested Profile (gid=%1) is disabled OR it is not configured to be used for \'Profile\' listings in its Settings OR there is no Profile with that ID OR you do not have permission to access this profile. Please contact the site administrator if you need assistance.',
@@ -534,15 +555,16 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
   }
 
   if ($html) {
+    $title = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $profileID, 'title', 'id');
     $html = civicrm_add_jquery($html);
     $index = empty($category) ? 'civicrm-profile-my-account' : $category;
     $output[$index][] = array(
-      '#title' => $category,
+      '#title' => $title,
       '#value' => $html,
       '#weight' => 1,
     );
     $output[$index][] = array(
-      '#title' => $category,
+      '#title' => $title,
       '#type' => 'item',
       '#markup' => $html,
       '#weight' => 1,
