@@ -1,6 +1,9 @@
 <?php
 
 /**
+ * @file
+ * CiviCRM file for integrating with Drupal.
+ *
  * Project:     CiviCRM: Constituent Relationship Management for NP's
  * File:        civicrm.module
  *
@@ -17,7 +20,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
  */
 
 /**
@@ -31,14 +33,7 @@ require_once 'civicrm_user.inc';
 define('CIVICRM_UF_HEAD', TRUE);
 
 /**
- * Utilities
- */
-
-/**
- * Provides a link to the CSS stylesheet associated with this module.
- * and the javascript files needed by this module
- *
- * @return a &lt;style&gt; tag that indicates what file browsers should import
+ * Adds CiviCRM CSS and JS resources into the header.
  */
 function civicrm_html_head() {
   if (!civicrm_initialize()) {
@@ -48,7 +43,8 @@ function civicrm_html_head() {
   if (arg(0) == 'civicrm') {
     // Add our standard css & js
     CRM_Core_Resources::singleton()->addCoreResources();
-  } else {
+  }
+  else {
     CRM_Core_Resources::singleton()->addCoreStyles();
   }
 }
@@ -287,7 +283,7 @@ function _civicrm_registerClassLoader() {
  *
  * @param string $default contact type
  *
- * @return $ctype contact type
+ * @return string $ctype contact type
  */
 function civicrm_get_ctype($default = NULL) {
   // here we are creating a new contact
@@ -843,9 +839,12 @@ function civicrm_theme_registry_alter(&$theme_registry) {
 
 /**
  * Implements moduleName_preprocess_hook().
+ *
  * Based on the jquery_update module functions.
  *
  * Strips out JS and CSS for a path.
+ *
+ * @param array $variables
  */
 function civicrm_preprocess_page(&$variables) {
   // to increase it's flexibility.
