@@ -258,7 +258,82 @@ function civicrm_initialize() {
 }
 
 /**
- * Find & register classloader and store location in Drupal variable.
+ * Get CiviCRM query parameters from the url.
+ *
+ * This is useful for re-adding them to generated urls as drupal tends to drop
+ * them and we need them for language switching and generating urls for metadata.
+ */
+function _civicrm_get_url_parameters() {
+  $query = $_REQUEST;
+  unset($query['IDS_request_uri']);
+  unset($query['IDS_user_agent']);
+  return $query;
+}
+
+/**
+ * Get CiviCRM query parameters from the url as a string for url output.
+ *
+ * Drupal tends to strip CiviCRM parameters from urls and we sometimes want to put them back.
+ * For example drupal will output civicrm/contribution/transact as the metadata url whereas
+ * we want civicrm/contribution/transact?reset=1&id=2
+ *
+ * @return string
+ *   String of url parameters e.g '?reset=1&id=2'.
+ */
+function _civicrm_get_url_parameters_as_url_string() {
+  $string = '';
+  foreach (_civicrm_get_url_parameters() as $key => $value) {
+    if (empty($string)) {
+      $string = '?' . $key . '=' . $value;
+    }
+    else {
+      $string .= '&' . $key . '=' . $value;
+    }
+  }
+  return $string;
+}
+
+/**
+ * Alter metatags before being cached.
+ *
+ * This hook is invoked prior to the meta tags for a given page are cached.
+ *
+ * @param array $output
+ *   Metatags to be displayed.
+ * @param string $instance
+ *  Context.
+ */
+function civicrm_metatag_metatags_view_alter(&$output, $instance) {
+  $linkUrls = array('og:url', 'canonical', 'shortlink');
+  foreach ($linkUrls as $url) {
+    if (isset($output[$url]['#attached']['drupal_add_html_head'][0][0]['#value'])) {
+      $output[$url]['#attached']['drupal_add_html_head'][0][0]['#value'] .= _civicrm_get_url_parameters_as_url_string();
+    }
+  }
+}
+
+/**
+ * Make the language switcher work with civicrm.
+ *
+ * We override theme_links__locale_block() so that civicrm language switcher
+ * links hold the relevant civicrm parameters.
+ *
+ * @param array $variables
+ *
+ * @return array
+ */
+function civicrm_links__locale_block($variables) {
+  if (arg(0) == 'civicrm') {
+    foreach ($variables['links'] as $lang => $attr) {
+      $variables['links'][$lang]['query'] = _civicrm_get_url_parameters();
+    }
+  }
+  return theme('links', $variables);
+}
+
+/**
+ * Find & register class loader and store location in Drupal variable.
+ *
  * Per CRM-13737 this allows for drupal code to be outside the core directory
  * which makes it easier for sites managing their own installation methods that
  * may need to cover different drupal versions
@@ -852,10 +927,17 @@ function civicrm_user_admin_permissions_submit($form, &$form_state) {
 /*
  *
  * Implements hook_theme_registry_alter().
+ *
  * Based on the jquery_update module.
  *
  * Make sure this page preprocess function runs last
  * so that a theme can't call drupal_get_js().
+ *
+ * Also, add civicrm parameters to links so they are not truncated by the
+ * language switcher.
+ *
+ * @param array $theme_registry
+ *   Registry theme metadata.
  */
 function civicrm_theme_registry_alter(&$theme_registry) {
   if (isset($theme_registry['page'])) {
@@ -866,6 +948,9 @@ function civicrm_theme_registry_alter(&$theme_registry) {
     // Now add it on at the end of the array so that it runs last.
     $theme_registry['page']['preprocess functions'][] = 'civicrm_preprocess_page';
   }
+  // Rewrite the links in order to add back CiviCRM parameters for the language switcher.
+  $theme_registry['links__locale_block']['theme path'] = drupal_get_path('module', 'civicrm');
+  $theme_registry['links__locale_block']['function'] = 'civicrm_links__locale_block';
 }
 
 /**
