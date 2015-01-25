@@ -58,7 +58,7 @@ function civicrm_permission() {
     return;
   }
 
-  $config = CRM_Core_Config::singleton();
+  CRM_Core_Config::singleton();
 
   $permissions = CRM_Core_Permission::basicPermissions();
   $perms_array = array();
@@ -70,7 +70,7 @@ function civicrm_permission() {
 }
 
 /**
- * Implements hook_block_info
+ * Implements hook_block_info().
  */
 function civicrm_block_info() {
   if (!civicrm_initialize()) {
@@ -81,11 +81,11 @@ function civicrm_block_info() {
 }
 
 /**
- * Implements hook_block_view
+ * Implements hook_block_view().
  */
 function civicrm_block_view($delta = '0') {
   if (!civicrm_initialize()) {
-    return;
+    return array();
   }
   $block = CRM_Core_Block::getContent($delta);
   return $block;
@@ -122,10 +122,12 @@ function civicrm_menu() {
 }
 
 /**
- * Implementation of hook_page_build
+ * Implements hook_page_build().
+ *
+ * CRM-11823 - If Civi bootstrapped, then merge its HTML header with the CMS's header.
+ * This hook is intended for page modification, here we are using it to add a header.
  */
 function civicrm_page_build($page) {
-  // CRM-11823 - If Civi bootstrapped, then merge its HTML header with the CMS's header
   global $civicrm_root;
   if (empty($civicrm_root)) {
     return;
@@ -136,8 +138,9 @@ function civicrm_page_build($page) {
 }
 
 /**
- * Initialize CiviCRM. Call this function from other modules too if
- * they use the CiviCRM API.
+ * Initialize CiviCRM.
+ *
+ * Call this function from other modules too if they use the CiviCRM API.
  */
 function civicrm_initialize() {
   // Check for php version and ensure its greater than minPhpVersion
@@ -261,10 +264,9 @@ function _civicrm_registerClassLoader() {
   $path = variable_get('civicrm_class_loader', NULL);
   if (empty($path) || !file_exists($home . $path)) {
     $candidates = array(
-        '/../CRM/Core/ClassLoader.php',
-        '/../civicrm-core/CRM/Core/ClassLoader.php',
-        '/../core/CRM/Core/ClassLoader.php',
-        // ... ad nauseum ...
+      '/../CRM/Core/ClassLoader.php',
+      '/../civicrm-core/CRM/Core/ClassLoader.php',
+      '/../core/CRM/Core/ClassLoader.php',
     );
     foreach ($candidates as $candidate) {
       if (file_exists($home . $candidate)) {
@@ -279,11 +281,12 @@ function _civicrm_registerClassLoader() {
   CRM_Core_ClassLoader::singleton()->register();
 }
 /**
- * Function to get the contact type
+ * Function to get the contact type.
  *
  * @param string $default contact type
  *
- * @return string $ctype contact type
+ * @return string $ctype
+ *   Contact type
  */
 function civicrm_get_ctype($default = NULL) {
   // here we are creating a new contact
@@ -311,7 +314,7 @@ function civicrm_get_ctype($default = NULL) {
 }
 
 /**
- * This is the main function that is called on any civicrm page
+ * This is the main function that is called on any civicrm page.
  */
 function civicrm_invoke() {
   // check if this is a redirect and maybe a user login?
@@ -339,9 +342,11 @@ function civicrm_invoke() {
   // synchronize the drupal uid with the contacts db
   global $user;
 
-  /* FIXME: hack to bypass synchronize if running upgrade to avoid
-       any serious non-recoverable error which might hinder the
-       upgrade process. */
+  /*
+  * FIXME: hack to bypass synchronize if running upgrade to avoid
+  * any serious non-recoverable error which might hinder the
+  * upgrade process.
+  */
 
   if (!isset($args[1]) ||
     $args[1] != 'upgrade'
@@ -352,7 +357,7 @@ function civicrm_invoke() {
     );
   }
 
-  // fix the path for the url alias module
+  // Fix the path for the url alias module.
   $urlAlias = FALSE;
   foreach ($args as $index => $arg) {
     if (strpos($arg, '=') !== FALSE) {
@@ -409,7 +414,9 @@ function civicrm_invoke() {
 }
 
 /**
- * Determine if the user is on a CiviCRM generated page, i.e. the form has some civicrm unique token
+ * Determine if the user is on a CiviCRM generated page.
+ *
+ * i.e. does the form have some civicrm unique token?
  */
 function civicrm_on_user_page() {
   return isset($_POST['_qf_default']);
@@ -435,7 +442,7 @@ function civicrm_menu_alter(&$items) {
   foreach ($categories as $cat) {
     $path = 'user/%user_category/edit/' . $cat['name'];
     $items[$path]['title callback'] = 'civicrm_profile_title_callback';
-    $items[$path]['title arguments'] = array((string)$cat['id'], $cat['title']);
+    $items[$path]['title arguments'] = array((string) $cat['id'], $cat['title']);
   }
 }
 
@@ -602,17 +609,18 @@ function civicrm_user_form_validate($form, &$form_state) {
 }
 
 /**
- * Disable the drupal cache for all civicrm pages which should not be cached
+ * Disable the drupal cache for all civicrm pages which should not be cached.
  */
 function civicrm_cache_disable() {
   if (function_exists('drupal_page_is_cacheable')) {
-    //this is a Drupal 7 function only - using 'easy option' of checking function
+    // This is a Drupal 7 function only - using 'easy option' of checking function.
     drupal_page_is_cacheable(FALSE);
   }
 }
 
 /**
- * Disable civicrm key for all forms that interact with the CMS
+ * Disable civicrm key for all forms that interact with the CMS.
+ *
  * We do not control the CMS form generation and hence should suppress
  * qfKey
  */
@@ -654,9 +662,11 @@ function civicrm_enable() {
 }
 
 /**
- * An Implements hook_translated_menu_item_alter(). This is a hack
+ * Implements hook_translated_menu_item_alter().
+ *
+ * This is a hack
  * to hide the CiviCRM menu from the drupal navigation block for folks
- * who dont have access CiviCRM permissions
+ * who don't have access CiviCRM permissions
  */
 function civicrm_translated_menu_link_alter(&$item) {
   if ($item['router_path'] == 'civicrm' &&
@@ -700,14 +710,14 @@ function civicrm_views_api() {
 
 function civicrm_views_query_alter(&$view, &$query) {
 
-  if ( ! civicrm_initialize( ) ) {
+  if (!civicrm_initialize()) {
     return;
   }
 
   // check if we are in multilingual mode, otherwise return
   // TODO: should be a simple call - is_multiligual ?
   $domain = new CRM_Core_DAO_Domain();
-  $domain->find(true);
+  $domain->find(TRUE);
 
   $multilingual = (bool) $domain->locales;
 
@@ -956,7 +966,7 @@ function civicrm_drupal_wysiwyg_update_value($element, $caller) {
 }
 
 /**
- * Implements hook_filter_tips
+ * Implements hook_filter_tips().
  */
 function civicrm_filter_info() {
   $filters = array();
@@ -1010,7 +1020,7 @@ function _civicrm_filter_process($text, $filter, $format, $langcode, $cache, $ca
 }
 
 /**
- * Implements hook_civicrm_postProcess
+ * Implements hook_civicrm_postProcess().
  */
 function civicrm_civicrm_postProcess($formName, $form) {
   // Reset Views Cache when CiviCRM components page is saved
