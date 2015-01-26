@@ -177,7 +177,11 @@ function civicrm_initialize() {
     $forumLink      = "http://forum.civicrm.org/index.php/board,6.0.html";
 
     $errorMsgAdd = t("Please review the <a href='!1'>Drupal Installation Guide</a> and the <a href='!2'>Trouble-shooting page</a> for assistance. If you still need help installing, you can often find solutions to your issue by searching for the error message in the <a href='!3'>installation support section of the community forum</a>.</strong></p>",
-      array('!1' => $docLinkInstall, '!2' => $docLinkTrouble, '!3' => $forumLink)
+      array(
+        '!1' => $docLinkInstall,
+        '!2' => $docLinkTrouble,
+        '!3' => $forumLink,
+      )
     );
 
     if ($error == FALSE) {
@@ -451,11 +455,20 @@ function civicrm_profile_title_callback($profile_id, $fallback) {
   return CRM_Core_BAO_UFGroup::getTitle($profile_id);
 }
 
-
+/**
+ * Function needing explanation.
+ *
+ * @param $edit
+ * @param $user
+ * @param $category
+ * @param $reset
+ * @param bool $doNotProcess
+ *
+ * @return array
+ */
 function civicrm_register_data($edit, &$user, $category, $reset, $doNotProcess = FALSE) {
   // lets suppress key generation for all registration forms
   civicrm_key_disable();
-
 
   $ctype = civicrm_get_ctype('Individual');
   if ($user->uid) {
@@ -625,10 +638,12 @@ function civicrm_key_disable() {
     return FALSE;
   }
 
-  $config = CRM_Core_Config::singleton();
-  $config->keyDisable = TRUE;
+  CRM_Core_Config::singleton()->keyDisable = TRUE;
 }
 
+/**
+ * Enable CiviCRM.
+ */
 function civicrm_enable() {
   db_query("UPDATE {system} SET weight = 100 WHERE name = 'civicrm'");
 
@@ -792,11 +807,13 @@ function civicrm_form_alter(&$form, $formValues, $formID) {
     default:
       break;
   }
-  return;
 }
 
 /**
  * Custom submit handler for CiviCRM to warn about unsafe permission configs.
+ *
+ * @param $form
+ * @param $form_state
  */
 function civicrm_user_admin_permissions_submit($form, &$form_state) {
   $rid = array_search('anonymous user', $form_state['values']['role_names']);
@@ -818,7 +835,10 @@ function civicrm_user_admin_permissions_submit($form, &$form_state) {
     }
   }
   if (!empty($warning_permission_names)) {
-    drupal_set_message(t('The %1 role was assigned one or more permissions that may prove dangerous for users of that role to have. Please reconsider assigning %2 to them.', array( '%1' => $roles[$rid], '%2' => implode(', ', $warning_permission_names))), 'warning');
+    drupal_set_message(t('The %1 role was assigned one or more permissions that may prove dangerous for users of that role to have. Please reconsider assigning %2 to them.', array(
+      '%1' => $roles[$rid],
+      '%2' => implode(', ', $warning_permission_names)),
+      ), 'warning');
   }
 }
 
@@ -876,9 +896,17 @@ function civicrm_preprocess_page(&$variables) {
 }
 
 /**
+ * Get drupal WYSIWIG html.
+ *
  * Supporting functions to allow using drupal input formats and WYSIWYG API
  * as a CiviCRM rich text editor. This code is in the Drupal module because it's
  * Drupal-version dependent.
+ *
+ * @param $attributes
+ * @param string $value
+ * @param null $format
+ *
+ * @return string
  */
 function civicrm_drupal_get_wysiwyg_html($attributes, $value = '', $format = NULL) {
   $form = drupal_get_form('civicrm_drupal_wysiwyg_form', $attributes, $value, $format);
@@ -973,7 +1001,15 @@ function civicrm_filter_info() {
 }
 
 /**
- * Implements hook_filter_FILTER_tips
+ * Filter tips callback.
+ *
+ * More explanation required.
+ *
+ * @param $filter
+ * @param $format
+ * @param bool $long
+ *
+ * @return array
  */
 function _civicrm_filter_tips($filter, $format, $long = FALSE) {
   return t('Evaluate <a target="_blank" href="@smarty">Smarty</a> and <a target="_blank" href="@civiapi">CiviCRM API</a> codes',
@@ -985,7 +1021,18 @@ function _civicrm_filter_tips($filter, $format, $long = FALSE) {
 }
 
 /**
- * Implements hook_filter_FILTER_process
+ * Filter process callback.
+ *
+ * More explanation required.
+ *
+ * @param $text
+ * @param $filter
+ * @param $format
+ * @param $langcode
+ * @param $cache
+ * @param $cache_id
+ *
+ * @return bool|mixed|string
  */
 function _civicrm_filter_process($text, $filter, $format, $langcode, $cache, $cache_id) {
   civicrm_initialize();
@@ -1023,7 +1070,7 @@ function civicrm_civicrm_postProcess($formName, $form) {
 }
 
 /**
- * Implements hook_civicrm_merge
+ * Implements hook_civicrm_merge().
  */
 function civicrm_civicrm_merge($type, &$data, $mainId, $otherId, $tables) {
   if ($mainId == 2311 && $otherId == 5686 && $type == 'batch') {
@@ -1035,6 +1082,7 @@ function civicrm_civicrm_merge($type, &$data, $mainId, $otherId, $tables) {
 
 /**
  * Implements hook_reviews().
+ *
  * This implementation is invoked by coder_review module, and defines
  * specific checks for the CiviCRM Coding Standard.
  */
@@ -1188,7 +1236,9 @@ function civicrm_reviews() {
 }
 
 /**
- * Implementation of hook_modules_installed
+ * Implements hook_modules_installed().
+ *
+ * @param array $modules
  */
 function civicrm_modules_installed($modules) {
   civicrm_initialize();
@@ -1196,7 +1246,7 @@ function civicrm_modules_installed($modules) {
 }
 
 /**
- * Implementation of hook_modules_enabled
+ * Implements hook_modules_enabled().
  */
 function civicrm_modules_enabled($modules) {
   civicrm_initialize();
@@ -1204,7 +1254,7 @@ function civicrm_modules_enabled($modules) {
 }
 
 /**
- * Implementation of hook_modules_disabled
+ * Implementation of hook_modules_disabled().
  */
 function civicrm_modules_disabled($modules) {
   civicrm_initialize();
@@ -1212,7 +1262,7 @@ function civicrm_modules_disabled($modules) {
 }
 
 /**
- * Implementation of hook_modules_uninstalled
+ * Implements hook_modules_uninstalled().
  */
 function civicrm_modules_uninstalled($modules) {
   civicrm_initialize();
@@ -1220,18 +1270,19 @@ function civicrm_modules_uninstalled($modules) {
 }
 
 /**
- * Implementation of hook civicrm_metatag_page_cache_cid_parts_alter
- * Append the query string to the key under which the page title is cached to prevent cross-contamination
- * from urls such as civicrm/contribute/transact
+ * Implements hook__metatag_page_cache_cid_parts_alter().
  *
- * If metadata module is not installed this function will not fire
+ * Append the query string to the key under which the page title is cached to prevent cross-contamination
+ * from urls such as civicrm/contribute/transact.
+ *
+ * If metadata module is not installed this function will not fire.
+ *
  * @param array $cid_parts
  */
 function civicrm_metatag_page_cache_cid_parts_alter(&$cid_parts) {
   if (!empty($cid_parts['path']) && substr($cid_parts['path'], 0, 7) == 'civicrm') {
     $get = $_GET;
     ksort($get);
-    $cid_parts['path'] .= '/' . md5(print_r($get, true));
+    $cid_parts['path'] .= '/' . md5(print_r($get, TRUE));
   }
 }
-
