@@ -315,8 +315,7 @@ function civicrm_initialize() {
  */
 function _civicrm_get_url_parameters() {
   $query = $_REQUEST;
-  unset($query['IDS_request_uri']);
-  unset($query['IDS_user_agent']);
+  unset($query['IDS_request_uri'], $query['IDS_user_agent'], $query['q']);
   return $query;
 }
 
