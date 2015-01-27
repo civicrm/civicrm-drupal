@@ -841,10 +841,11 @@ function civicrm_user_admin_permissions_submit($form, &$form_state) {
     }
   }
   if (!empty($warning_permission_names)) {
-    drupal_set_message(t('The %1 role was assigned one or more permissions that may prove dangerous for users of that role to have. Please reconsider assigning %2 to them.', array(
-      '%1' => $roles[$rid],
-      '%2' => implode(', ', $warning_permission_names)),
-      ), 'warning');
+    drupal_set_message(t('The %1 role was assigned one or more permissions that may prove dangerous for users of that role to have. Please reconsider assigning %2 to them.',
+      array(
+        '%1' => $roles[$rid],
+        '%2' => implode(', ', $warning_permission_names),
+      )), 'warning');
   }
 }
 
