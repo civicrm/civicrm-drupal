@@ -862,18 +862,17 @@ ORDER BY c.sort_name ";
  *     params after the processor code has translated them into its own key/value pairs
  * @return void
  */
-function civitest_civicrm_alterPaymentProcessorParams( $paymentObj,
+function civitest_civicrm_alterPaymentProcessorParams($paymentObj,
   &$rawParams,
-  &$cookedParams ) {
-  $mode = $paymentObj->getVar('_mode');
-  $type = $paymentObj->getVar('_paymentProcessor');
-  $processorType = $type['payment_processor_type'];
-  if ( $paymentObj instanceof CRM_Core_Payment_Dummy ) {
+  &$cookedParams) {
+
+  if ($paymentObj->class_name == Payment_Dummy ) {
     $employer   = empty($rawParams['custom_1']) ? '' : $rawParams['custom_1'];
     $occupation = empty($rawParams['custom_2']) ? '' : $rawParams['custom_2'];
     $cookedParams['custom'] = "$employer|$occupation";
 
-  } else if ( $paymentObj instanceof CRM_Core_Payment_AuthorizeNet ) {
+  }
+  else if ($paymentObj->class_name == Payment_AuthorizeNet) {
     //Actual translation for one application:
     //Employer > Ship to Country (x_ship_to_country)
     //Occupation > Company (x_company)
@@ -886,19 +885,8 @@ function civitest_civicrm_alterPaymentProcessorParams( $paymentObj,
     $cookedParams['x_ship_to_last_name'] = $rawParams['accountingCode']; //for now
     $country_info = da_core_fetch_country_data_by_crm_id($rawParams['country-1']);
     $cookedParams['x_ship_to_company']   = $country_info['iso_code'];
-  } else if( $paymentObj instanceof CRM_Core_Payment_PayPalImpl && $processorType == 'PayPal' ) {
-    // Website Pro  Checkout
-    $obj   = $paymentObj->getVar('_paymentForm');
-    $value = $obj->getVar('_values');
-    $id    = $value['id'];
-    if ( $value['event']['id'] ) {
-      $id =  $value['event']['id'];
-    }
-
-    $cookedParams['desc'] = $rawParams['description'];
-    $cookedParams['custom'] = $id;
-
-  } elseif ( $paymentObj instanceof CRM_Core_Payment_PayPalImpl && $processorType == 'PayPal_Express' ) {
+  }
+   elseif ($paymentObj->billing_mode == 2) {
 
     // Express  Checkout
     $cookedParams['desc']   = $rawParams['eventName'];
@@ -1276,8 +1264,8 @@ function civitest_civicrm_merge ( $type, &$data, $mainId = NULL, $otherId = NULL
       // resolve conflict & allow batch merge process to run without any problems / conflicts.
       break;
 
-    case 'flip':  
-      // implement complex biasing decisions on which contact to keep or merge into. 
+    case 'flip':
+      // implement complex biasing decisions on which contact to keep or merge into.
       // In example below we bias to contact with max contributions
       $doSwap = FALSE;
       $query  = "SELECT count(*) FROM civicrm_contribution WHERE contact_id = %1";
@@ -1599,19 +1587,19 @@ WHERE t1.contact_type = 'Individual'
       list($table, $col, $wt) = explode('.', $key);
       if ($table == 'civicrm_contact' && $col == 'custom_initial_last_email') {
         $data[$key] = "
-          SELECT t1.id id1, t2.id id2, $wt weight 
+          SELECT t1.id id1, t2.id id2, $wt weight
           FROM civicrm_contact t1
-          INNER JOIN civicrm_email em1 ON t1.id = em1.contact_id 
-          JOIN ( SELECT cc.id, cc.first_name, cc.last_name, cc.contact_type, em2.email 
+          INNER JOIN civicrm_email em1 ON t1.id = em1.contact_id
+          JOIN ( SELECT cc.id, cc.first_name, cc.last_name, cc.contact_type, em2.email
               FROM civicrm_contact cc
               INNER JOIN civicrm_email em2 ON cc.id = em2.contact_id ) t2 ON SUBSTR(t1.first_name, 1, 1) = SUBSTR(t2.first_name, 1, 1) AND
-          t1.last_name = t2.last_name AND 
+          t1.last_name = t2.last_name AND
           em1.email = t2.email
-          WHERE t1.contact_type = 'Individual' AND 
-          t2.contact_type = 'Individual' AND 
-          t1.id < t2.id AND 
-          t1.first_name IS NOT NULL AND 
-          t1.last_name  IS NOT NULL AND 
+          WHERE t1.contact_type = 'Individual' AND
+          t2.contact_type = 'Individual' AND
+          t1.id < t2.id AND
+          t1.first_name IS NOT NULL AND
+          t1.last_name  IS NOT NULL AND
           em1.email IS NOT NULL";
       }
     }
@@ -2031,9 +2019,9 @@ function civitest_civicrm_tabset($tabsetName, &$tabs, $context) {
         'url' => 'civicrm/event/manage/volunteer',
       );
     }
- 
-  //Insert this tab into position 4 
- 
+
+  //Insert this tab into position 4
+
   $tabs = array_merge(
       array_slice($tabs, 0, 4),
       $tab,
