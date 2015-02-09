@@ -499,7 +499,9 @@ function civicrm_categories(&$user) {
   foreach ($allUFGroups as $key => $value) {
     if ($value['is_active']) {
       $ufGroups[] = array('name' => $value['name'],
-        'title' => $value['name'],
+        'id' => $key,
+        'name' => $value['name'],
+        'title' => $value['title'],
         'weight' => $weight,
         'access callback' => '_civicrm_categories_access',
         'access arguments' => array("$key"),
