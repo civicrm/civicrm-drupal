@@ -583,10 +583,13 @@ function _civicrm_categories_access($profile_id) {
 }
 
 /*
- * Translating profile menu title dynamicaly to overide caching
+ * Translating profile menu title dynamically to override caching.
  */
 function civicrm_menu_alter(&$items) {
-  $categories = civicrm_user_categories();
+  // We need to pass a dummy object
+  $user = new stdClass();
+  $categories = civicrm_categories($user);
+
   foreach ($categories as $cat) {
     $path = 'user/%user_category/edit/' . $cat['name'];
     $items[$path]['title callback'] = 'civicrm_profile_title_callback';
