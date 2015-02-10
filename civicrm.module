@@ -649,6 +649,13 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
 
   //to allow Edit any profile if user have permission
   $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'title');
+  if (empty($profileID)) {
+    // CRM-15330 The urls have changed to the non-translated name version but we should
+    // add a fallback to title to support sites that are using urls they have
+    // coded elsewhere into their site.
+    $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'title');
+  }
+
   $ufGroupIDs = CRM_Core_Permission::ufGroupClause(CRM_Core_Permission::EDIT, NULL, TRUE);
 
   if (in_array($profileID, $ufGroupIDs)) {

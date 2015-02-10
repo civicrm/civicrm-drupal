@@ -131,6 +131,7 @@ function civicrm_user_categories() {
   if (!civicrm_initialize()) {
     return;
   }
+  $urlParts = explode('/', $_REQUEST['q']);
 
   $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active'));
   $ufGroups = array();
@@ -138,9 +139,15 @@ function civicrm_user_categories() {
   $weight = 100;
   foreach ($allUFGroups as $key => $value) {
     if ($value['is_active']) {
-      $ufGroups[] = array(
-        'name' => $value['name'],
-        'title' => $value['name'],
+      $name = $value['name'];
+      if ($urlParts[3] != $name && $urlParts[3] == $value['title']) {
+        $name = $value['title'];
+      }
+
+      $ufGroups[] = array('name' => $name,
+        'id' => $key,
+        'name' => $name,
+        'title' => $value['title'],
         'weight' => $weight,
         'access callback' => '_civicrm_categories_access',
         'access arguments' => array("$key"),
