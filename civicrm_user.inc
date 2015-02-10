@@ -199,9 +199,9 @@ function civicrm_user_view($user, $view_mode) {
 
     $ctype = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $userID, 'contact_type');
 
-    $ufGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE);
+    $ufGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active'));
     $weight = 100;
-    foreach ($ufGroups as $id => $title) {
+    foreach ($ufGroups as $id => $ufGroup) {
 
       $fieldType = CRM_Core_BAO_UFField::getProfileType($id);
       if (CRM_Contact_BAO_ContactType::isaSubType($fieldType)) {
@@ -216,18 +216,17 @@ function civicrm_user_view($user, $view_mode) {
       // CRM-3537: profile edit link
       $editURL = '';
       if (user_edit_access($user)) {
-        $editURL = '<span class="user-page-link" id="user-page-profile-' . substr($title['title'], 0, 3) . '" ><span class="user-page-bullet">&raquo;</span> ' . l(ts("Edit %1", array(1 => $title['title'])),
-          "user/{$user->uid}/edit/" . $title['title']
-        ) . '</span>';
+        $editURL = '<span class="user-page-link" id="user-page-profile-' . substr($ufGroup['title'], 0, 3) . '" ><span class="user-page-bullet">&raquo;</span> '
+          . l(ts("Edit %1", array(1 => $ufGroup['title'])), "user/{$user->uid}/edit/" . $ufGroup['name']) . '</span>';
       }
 
       if ($pageContent) {
-        $user->content[$title['title']] = array(
-          '#title' => $title['title'],
+        $user->content[$ufGroup['name']] = array(
+          '#title' => $ufGroup['title'],
           '#type' => 'user_profile_category',
           '#weight' => $weight,
         );
-        $user->content[$title['title']][$title['title']] = array(
+        $user->content[$ufGroup['name']][$ufGroup['name']] = array(
           '#type' => 'user_profile_item',
           '#title' => NULL,
           '#value' => $pageContent . $editURL,
