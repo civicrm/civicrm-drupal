@@ -669,8 +669,7 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
   $ctype = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $userID, 'contact_type');
 
   //to allow Edit any profile if user have permission
-<<<<<<< HEAD
-  $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'title');
+  $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'name');
   if (empty($profileID)) {
     // CRM-15330 The urls have changed to the non-translated name version but we should
     // add a fallback to title to support sites that are using urls they have
@@ -678,9 +677,6 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
     $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'title');
   }
 
-=======
-  $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'name');
->>>>>>> Use UFGroup name instead of title in Drupal profile url
   $ufGroupIDs = CRM_Core_Permission::ufGroupClause(CRM_Core_Permission::EDIT, NULL, TRUE);
 
   if (in_array($profileID, $ufGroupIDs)) {
