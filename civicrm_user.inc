@@ -138,9 +138,14 @@ function civicrm_user_categories() {
   $weight = 100;
   foreach ($allUFGroups as $key => $value) {
     if ($value['is_active']) {
-      $ufGroups[] = array(
+      $name = $value['name'];
+      if ($urlParts[3] != $name && $urlParts[3] == $value['title']) {
+        $name = $value['title'];
+      }
+
+      $ufGroups[] = array('name' => $name,
         'id' => $key,
-        'name' => $value['name'],
+        'name' => $name,
         'title' => $value['title'],
         'weight' => $weight,
         'access callback' => '_civicrm_categories_access',
