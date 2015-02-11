@@ -118,6 +118,12 @@ function civicrm_views_data_alter(&$data) {
     include_once 'components/civicrm.case.inc';
     _civicrm_case_data($data, $enabled);
   }
+  if (isset($enabled['CiviContribute']) ||
+      isset($enabled['CiviEvent']) ||
+      isset($enabled['CiviMember'])) {
+    include_once 'components/civicrm.price_set.inc';
+    _civicrm_price_set_data($data, $enabled);
+  }
 
   return $data;
 }
