@@ -16,6 +16,7 @@ files[] = modules/views/civicrm.views_default.inc
 files[] = modules/views/civicrm/civicrm_handler_field.inc
 files[] = modules/views/civicrm/civicrm_handler_field_pseudo_constant.inc
 files[] = modules/views/civicrm/civicrm_handler_field_address.inc
+files[] = modules/views/civicrm/civicrm_handler_field_component.inc
 files[] = modules/views/civicrm/civicrm_handler_field_contact_link.inc
 files[] = modules/views/civicrm/civicrm_handler_field_county.inc
 files[] = modules/views/civicrm/civicrm_handler_field_country.inc
