@@ -683,29 +683,16 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
       CRM_Contact_BAO_Contact_Permission::validateChecksumContact($userID, $this);
     }
   }
-
   $ctype = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $userID, 'contact_type');
-
-  //to allow Edit any profile if user have permission
-  $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'name');
-  if (empty($profileID)) {
-    // The urls have changed to the non-translated name version but we should
-    // add a fallback to title to support sites that are using urls they have
-    // coded elsewhere into their site.
-    $profileID = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $category, 'id', 'title');
+  try {
+    $profileID = _civicrm_get_user_profile_id($category, $userID, $ctype);
+  }
+  catch (Exception $e) {
+    CRM_Core_Error::fatal($e->getMessage());
   }
 
-  $ufGroupIDs = CRM_Core_Permission::ufGroupClause(CRM_Core_Permission::EDIT, NULL, TRUE);
+  $html = CRM_Core_BAO_UFGroup::getEditHTML($userID, $category, NULL, FALSE, $reset, $profileID, $doNotProcess, $ctype);
 
-  if (in_array($profileID, $ufGroupIDs)) {
-    // get all the data for this specific category
-    $html = CRM_Core_BAO_UFGroup::getEditHTML($userID, $category, NULL, FALSE, $reset, $profileID, $doNotProcess, $ctype);
-  }
-  else {
-    CRM_Core_Error::fatal(ts('The requested Profile (gid=%1) is disabled OR it is not configured to be used for \'Profile\' listings in its Settings OR there is no Profile with that ID OR you do not have permission to access this profile. Please contact the site administrator if you need assistance.',
-        array(1 => $profileID)
-      ));
-  }
 
   if ($html) {
     $title = CRM_Core_DAO::getFieldValue("CRM_Core_DAO_UFGroup", $profileID, 'title', 'id');
@@ -726,6 +713,7 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
 
   return $output;
 }
+
 
 function civicrm_view_data(&$user) {
   if (!civicrm_initialize()) {
@@ -808,6 +796,50 @@ function civicrm_view_data(&$user) {
     }
   }
   return;
+}
+
+/**
+ * Get appropriate profile ID for edit screen.
+ *
+ * @param $name
+ *
+ * @return int
+ *   Profile ID.
+ *
+ * @throws \CRM_Core_Exception
+ */
+function _civicrm_get_user_profile_id($name) {
+  $profiles = civicrm_api3('uf_group', 'get', array(
+    'name' => $name,
+    'is_active' => 1,
+    'options' => array('limit' => 1, 'sort' => array('is_cms_user DESC')),
+  ));
+
+
+  if (!$profiles['count']) {
+    $profiles = civicrm_api3('uf_group', 'get', array(
+      'title' => $name,
+      'is_active' => 1,
+      'options' => array('limit' => 1, 'sort' => array('is_cms_user DESC')),
+    ));
+  }
+
+  if (!$profiles['count']) {
+    // @todo I suspect the profile listing is not possible in both scenarios but need to understand what it
+    // means before removing from one warning.
+    throw new CRM_Core_Exception(ts('The requested Profile (%1) is disabled OR it is not configured to be used for \'Profile\' listings in its Settings OR there is no Profile with that ID. Please contact the site administrator if you need assistance.',
+      array(1 => $name)
+    ));
+  }
+
+  $ufGroupIDs = CRM_Core_Permission::ufGroupClause(CRM_Core_Permission::EDIT, NULL, TRUE);
+  $profileID = $profiles['id'];
+  if (!in_array($profileID, $ufGroupIDs)) {
+    throw new CRM_Core_Exception(ts('The requested Profile (id = %1) is not configured to be used for \'Profile\' listings in its Settings OR there is no Profile with that ID OR you do not have permission to access this profile. Please contact the site administrator if you need assistance.',
+      array(1 => $profileID)
+    ));
+  }
+  return $profileID;
 }
 
 function civicrm_validate_data($edit, &$user, $title) {
