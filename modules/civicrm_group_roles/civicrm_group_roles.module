@@ -109,9 +109,16 @@ function civicrm_group_roles_user_login(&$edit, $account) {
     );
     $contacts = civicrm_api('contact', 'get', $params);
     if ($contacts['count'] > 0) { // The user is in there
-      $msg = sprintf('Role %s (%d) should be held by user %s (%d) because they are part of group %d (contactID: %d)',
-             $group->name, $group->role_id, $account->name, $account->uid, $group->group_id, $contact);
-      watchdog('civicrm_group_roles', $msg);
+      $message = 'Role @role (@rid) should be held by user @user (@uid) because they are part of group @group (contactID: @cid)';
+      $params = array(
+        '@role' => $group->name,
+        '@rid' => $group->role_id,
+        '@user' => $account->name,
+        '@uid' => $account->uid,
+        '@group' => $group->group_id,
+        '@cid' => $contact,
+      );
+      watchdog('civicrm_group_roles', $message, $params, WATCHDOG_ERROR);
       $correctSyncedRoles[$group->role_id] = $group->name;
     }
   }
@@ -121,7 +128,13 @@ function civicrm_group_roles_user_login(&$edit, $account) {
 
   $finalRoles = $account->roles + $rolesToAdd;
   $finalRoles = array_diff($finalRoles, $rolesToRemove);
-  watchdog('civicrm_group_roles', "Initial roles: " . print_r($account->roles, TRUE) . ", roles to add: " . print_r($rolesToAdd, TRUE) . ", roles to remove: " . print_r($rolesToRemove, TRUE) . ", final roles: " . print_r($finalRoles, TRUE));
+  $params = array(
+    '@initial' => print_r($account->roles, TRUE),
+    '@add' => print_r($rolesToAdd, TRUE),
+    '@remove' => print_r($rolesToRemove, TRUE),
+    '@final' => print_r($finalRoles, TRUE),
+  );
+  watchdog('civicrm_group_roles', 'Initial roles: @roles, roles to add: @add, roles to remove: @remove, final roles: @final', $params, WATCHDOG_NOTICE);
   user_save($account, array('roles' => $finalRoles));
 }
 
@@ -641,9 +654,11 @@ function civicrm_group_roles_add_remove_groups($roles, $user, $op) {
 
     if ( empty($contact) || $contact['is_error'] == 1 || $contact['count'] < 1 ) {
       $msg = 'CiviCRM contact not found for @mail';
-      $variables = array( '@mail' => $user->mail );
-      watchdog( 'civicrm',  $msg, $variables );
-      if ( $debug_mode ) drupal_set_message( t( 'CiviCRM contact not found for %mail', array( '%mail' => $user->mail ) ) );
+      $variables = array('@mail' => $user->mail);
+      watchdog('civicrm', $msg, $variables, WATCHDOG_NOTICE);
+      if ($debug_mode) {
+        drupal_set_message(t( 'CiviCRM contact not found for %mail', array('%mail' => $user->mail)));
+      }
       return;
     }
 
@@ -680,9 +695,10 @@ function civicrm_group_roles_add_remove_groups($roles, $user, $op) {
           if ($result['is_error'] > 0) {
             $msg = 'Error: Unable to sync role @role';
             $variables = array('@role' => $role);
-            watchdog('civicrm_group_roles', $msg, $variables);
+            watchdog('civicrm_group_roles', $msg, $variables, WATCHDOG_NOTICE);
             if ( $debug_mode ) drupal_set_message( t( 'Error: Unable to sync role %role', array( '%role' => $role ) ) );
-          } elseif ( $debug_mode && $result['values'][$txt] > 0 ) {
+          }
+          elseif ( $debug_mode && $result['values'][$txt] > 0 ) {
             drupal_set_message("$txt user $user->name Group: $role");
             drupal_set_message(var_export($result, TRUE));
           }
