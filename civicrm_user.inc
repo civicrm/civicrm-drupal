@@ -131,6 +131,7 @@ function civicrm_user_categories() {
   if (!civicrm_initialize()) {
     return;
   }
+  $urlParts = explode('/', $_REQUEST['q']);
 
   $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active'));
   $ufGroups = array();
@@ -173,7 +174,7 @@ function civicrm_user_view($user, $view_mode) {
     // make sure user has permission to view the record
     $contactURL = NULL;
     $civiPerm = CRM_Contact_BAO_Contact_Permission::allow($userID);
-    
+
     if (CRM_Core_Permission::check('access CiviCRM') && $civiPerm) {
       $contactURL =
   '<span class="user-page-link" id="user-page-contact" ><span class="user-page-bullet">&raquo;</span> ' .
@@ -216,7 +217,7 @@ function civicrm_user_view($user, $view_mode) {
       // CRM-3537: profile edit link
       $editURL = '';
       if (user_edit_access($user)) {
-        $editURL = '<span class="user-page-link" id="user-page-profile-' . substr($ufGroup['title'], 0, 3) . '" ><span class="user-page-bullet">&raquo;</span> ' 
+        $editURL = '<span class="user-page-link" id="user-page-profile-' . substr($ufGroup['title'], 0, 3) . '" ><span class="user-page-bullet">&raquo;</span> '
           . l(ts("Edit %1", array(1 => $ufGroup['title'])), "user/{$user->uid}/edit/" . $ufGroup['name']) . '</span>';
       }
 
