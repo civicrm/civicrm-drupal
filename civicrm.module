@@ -710,15 +710,13 @@ function _civicrm_get_user_profile_id($name) {
   $profiles = civicrm_api3('uf_group', 'get', array(
     'name' => $name,
     'is_active' => 1,
-    'options' => array('limit' => 1, 'sort' => array('is_cms_user DESC')),
   ));
-
 
   if (!$profiles['count']) {
     $profiles = civicrm_api3('uf_group', 'get', array(
       'title' => $name,
       'is_active' => 1,
-      'options' => array('limit' => 1, 'sort' => array('is_cms_user DESC')),
+      'options' => array('limit' => 1,),
     ));
   }
 
@@ -728,6 +726,23 @@ function _civicrm_get_user_profile_id($name) {
     throw new CRM_Core_Exception(ts('The requested Profile (%1) is disabled OR it is not configured to be used for \'Profile\' listings in its Settings OR there is no Profile with that ID. Please contact the site administrator if you need assistance.',
       array(1 => $name)
     ));
+  }
+
+  // CRM-15952 we expected 'name' to be a unique field but the DB doesn't enforce that.
+  // Extra check if it is not unique here.
+  if ($profiles['count'] > 1) {
+    foreach ($profiles['values'] as $profile) {
+      try {
+        $profiles['id'] = civicrm_api3('uf_join', 'getvalue', array(
+          'uf_group_id' => $profile['id'],
+          'module' => 'User Account',
+          'return' => 'uf_group_id',
+        ));
+        continue;
+      }
+      catch (Exception $e){
+      }
+    }
   }
 
   $ufGroupIDs = CRM_Core_Permission::ufGroupClause(CRM_Core_Permission::EDIT, NULL, TRUE);
