@@ -102,9 +102,15 @@ function civicrm_group_roles_user_login(&$edit, $account) {
     );
     $contacts = civicrm_api('contact', 'get', $params);
     if ($contacts['count'] > 0) { // The user is in there
-      $msg = sprintf('assigning role %s (%d) to user %s because they are part of group %d (contactID: %d)',
-             $group->name, $group->role_id, $account->uid, $group->group_id, $contact);
-      watchdog('civicrm_group_roles', $msg);
+      $message = 'assigning role @role (@rid) to user @user because they are part of group @gid (contactID: @contact_id)';
+      $params = array(
+        '@role' => $group->name,
+        '@rid' => $group->role_id,
+        '@user' => $account->uid,
+        '@gid' => $group->group_id,
+        '@contact_id' => $contact,
+      );
+      watchdog('civicrm_group_roles', $message, $params);
       civicrm_group_roles_add_role($account->uid, $group->role_id, $group->name);
     }
   }
