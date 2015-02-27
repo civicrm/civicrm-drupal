@@ -3,7 +3,9 @@ description = Constituent relationship management system. Allows sites to manage
 version = 4.6
 package = CiviCRM
 core = 7.x
+project = civicrm
 php = 5.3
+
 files[] = civicrm.module
 files[] = civicrm.install
 files[] = civicrm_user.inc
