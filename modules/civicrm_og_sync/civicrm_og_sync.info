@@ -5,6 +5,5 @@ dependencies[] = civicrm
 dependencies[] = og
 package = CiviCRM
 core = 7.x
-php = 5.2
 
 files[] = civicrm_og_sync.module
