@@ -161,7 +161,7 @@ function _civicrm_core_data(&$data, $enabled) {
   $data['civicrm_contact']['drupal_id'] = array(
     'real field' => 'id',
     'title' => t('Drupal ID'),
-    'help' => t('Relates a CiviCRM Contact to the Druapl User Record'),
+    'help' => t('Relates a CiviCRM Contact to the Drupal User Record'),
     'field' => array(
       'handler' => 'civicrm_handler_field_drupalid',
       'click sortable' => TRUE,
