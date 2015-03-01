@@ -152,12 +152,8 @@ function civicrm_group_roles_add_groups_oncreate($account, $roles) {
 
   }
 
-  $groups = db_select('civicrm_group_roles_rules', 'cgr')->fields('cgr', array('group_id'))->condition('role_id', array_keys($roles))->execute()->fetchAll();
-  if (empty($groups)) {
-    return;
-  }
-
-  require_once 'CRM/Contact/BAO/GroupContact.php';
+  $result = db_select('civicrm_group_roles_rules', 'cgr')->fields('cgr', array('group_id'))->condition('role_id', array_keys($roles))->execute()->fetchAll();
+  $groups = _civicrm_group_roles_validate_groups($result);
   foreach ($groups as $group) {
     $groupContact = new CRM_Contact_DAO_GroupContact();
     $groupContact->group_id = $group->group_id;
@@ -669,22 +665,12 @@ function civicrm_group_roles_add_remove_groups($roles, $user, $op) {
       //loop over user's roles
       foreach ($roles as $rid => $role) {
 
-        // Find the group(s) for the role, excluding smart groups as we don't
-        // want to add contacts statically to a smart group (CRM-11161).
-        $groups = db_select('civicrm_group_roles_rules', 'cgr' )->fields( 'cgr', array('group_id') )->condition('role_id', $rid)->execute( )->fetchAll( );
-        foreach ( $groups as $group ) {
-          $groupId = $group->group_id;
-          // Exclude smart groups as we don't want to add contacts statically to a smart group (CRM-11161).
-          $group_params = array('version' => 3, 'group_id' => $groupId, 'return' => 'saved_search_id');
-          $group_result = civicrm_api('Group', 'getvalue', $group_params);
-          if (!empty($group_result)) {
-            // We found a saved_search_id, so this is a smart group. Skip it.
-            continue;
-          }
-
+        // Find the group(s) for the role
+        $result = db_select('civicrm_group_roles_rules', 'cgr' )->fields( 'cgr', array('group_id') )->condition('role_id', $rid)->execute( )->fetchAll( );
+        $groups = _civicrm_group_roles_validate_groups($result);
+        foreach ($groups as $group) {
           //add the contact
-          $contacts = array($contact);
-          $gparams = array('version' => 3, 'group_id' => $groupId, 'contact_id' => $contact_id);
+          $gparams = array('version' => 3, 'group_id' => $group->group_id, 'contact_id' => $contact_id);
           if ($op == 'add') {
             $result = civicrm_api('GroupContact', 'create', $gparams);
           }
@@ -800,4 +786,42 @@ function civicrm_group_roles_batch_finished($success, $results, $operations) {
   }
 
   drupal_set_message($message);
+}
+
+/**
+ * Filters invalid groups out of a civicrm_group_roles_rules query result
+ *
+ * @param array $groups Result of a Drupal Query::execute() against
+ *                      civicrm_group_roles_rules - An array of stdClass objects
+ *                      having a group_id property
+ * @return array
+ */
+function _civicrm_group_roles_validate_groups(array $groups) {
+  foreach ($groups as $key => $group) {
+    $groupId = $group->group_id;
+    $group_result = civicrm_api('Group', 'get', array(
+      'group_id' => $groupId,
+      'sequential' => 1,
+      'version' => 3,
+    ));
+
+    // CRM-16033: Ensure the group hasn't been deleted
+    if ($group_result['count'] === 0) {
+      $msg = 'Error: Cannot add contact to nonexistent group (ID @groupId)';
+      $variables = array('@groupId' => $groupId);
+      watchdog('civicrm_group_roles', $msg, $variables, WATCHDOG_ERROR);
+      unset($groups[$key]);
+      continue;
+    }
+
+    // CRM-11161: Exclude smart groups as we don't want to add contacts statically to a smart group
+    if (CRM_Utils_Array::value('saved_search_id', $group_result['values'][0])) {
+      $msg = 'Error: Cannot statically add contacts to a smart group (ID @groupId)';
+      $variables = array('@groupId' => $groupId);
+      watchdog('civicrm_group_roles', $msg, $variables, WATCHDOG_ERROR);
+      unset($groups[$key]);
+      continue;
+    }
+  }
+  return $groups;
 }
