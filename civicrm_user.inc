@@ -131,7 +131,7 @@ function civicrm_user_categories() {
   if (!civicrm_initialize()) {
     return;
   }
-  $urlParts = explode('/', $_REQUEST['q']);
+  $urlParts = explode('/', CRM_Utils_Array::value('q', $_GET, array()));
 
   $allUFGroups = CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, TRUE, CRM_Core_Permission::VIEW, array('id', 'name', 'title', 'is_active'));
   $ufGroups = array();
