@@ -150,8 +150,14 @@ function civicrm_user_categories() {
   foreach ($allUFGroups as $key => $value) {
     if ($value['is_active']) {
       $name = $value['name'];
-      if ($urlParts[3] != $name && $urlParts[3] == $value['title']) {
-        $name = $value['title'];
+      foreach (array_reverse($urlParts) as $urlPart) {
+        if($urlPart == $name) {
+          continue;
+        }
+        elseif ($urlPart == $value['title']) {
+          $name = $value['title'];
+          continue;
+        }
       }
 
       $ufGroups[] = array(
