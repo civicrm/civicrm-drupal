@@ -251,7 +251,7 @@ function _civicrm_og_sync_node_action($node) {
     return;
   }
 
-  $title = trim($node->title);
+  $title = substr(trim($node->title), 0, 49);
 
   $groupid = 0;
 
@@ -317,7 +317,7 @@ function _civicrm_og_sync_group_action($membership, $op = 'add') {
   if (function_exists('og_entity_query_alter')) {
     $createGroupParams = array(
       'og_id' => $group->nid,
-      'title' => $group->title,
+      'title' => substr(trim($group->title), 0, 49),
       // length of 49 so that the admin group can fit ': administrator' afterwards within 64 char field
       'name' => substr(trim($group->title), 0, 49),
       'is_active' => 1,
@@ -325,7 +325,7 @@ function _civicrm_og_sync_group_action($membership, $op = 'add') {
   } else {
     $createGroupParams = array(
       'og_id' => $group->gid,
-      'title' => $group->label,
+      'title' => substr(trim($group->label), 0, 49),
       // length of 49 so that the admin group can fit ': administrator' afterwards within 64 char field
       'name' => substr(trim($group->label), 0, 49),
       'is_active' => 1,
