@@ -61,6 +61,8 @@ class civicrm_handler_field_custom extends views_handler_field {
     $value = $values->{$this->field_alias};
     switch ($this->options['civicrm_custom_formatter']) {
       case 'value':
+        $value = trim($value, CRM_Core_DAO::VALUE_SEPARATOR);
+        $value = implode(', ', explode(CRM_Core_DAO::VALUE_SEPARATOR, $value));
         return $value;
 
       case 'label':
