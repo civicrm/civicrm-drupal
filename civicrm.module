@@ -60,11 +60,16 @@ function civicrm_permission() {
 
   CRM_Core_Config::singleton();
 
-  $permissions = CRM_Core_Permission::basicPermissions();
+  $permissions = CRM_Core_Permission::basicPermissions(FALSE, TRUE);
   $perms_array = array();
-  foreach ($permissions as $perm => $title) {
+  foreach ($permissions as $perm => $attr) {
+    $title = array_shift($attr);
+    $description = array_shift($attr);
     //order matters here, but we deal with that later
     $perms_array[$perm] = array('title' => $title);
+    if ($description) {
+      $perms_array[$perm]['description'] = $description;
+    }
   }
   return $perms_array;
 }
