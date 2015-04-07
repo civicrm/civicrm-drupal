@@ -116,6 +116,7 @@ function civicrm_rules_get_event() {
 
   if (is_array($validObjects)) {
     foreach ($validObjects as $entity => $enabled) {
+      $entity = strtolower($entity);
       if (!$enabled == 0) {
         //todo consider building the entity name into the argument rather than calling the same argument for each
         $events['civicrm_' . $entity . '_create'] = $defaults + array(
