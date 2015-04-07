@@ -249,6 +249,10 @@ function civicrm_drush_command() {
   $items['civicrm-member-records'] = array(
     'description' => "Run the CiviMember UpdateMembershipRecord cron (civicrm-member-records).",
   );
+  $items['civicrm-sync-users-contacts'] = array(
+    'description' => "Synchronize Users to Contacts: CiviCRM will check each user record for a contact record. A new contact record will be created for each user where one does not already exist.",
+    'callback' => 'drush_civicrm_sync_users_contacts',
+  );
 
   return $items;
 }
@@ -1546,3 +1550,11 @@ function drush_civicrm_api() {
   }
 }
 
+/**
+ * Implementation of command 'civicrm-sync-users-contacts'
+ */
+function drush_civicrm_sync_users_contacts() {
+  civicrm_initialize();
+
+  CRM_Core_BAO_CMSUser::synchronize(FALSE);
+}
