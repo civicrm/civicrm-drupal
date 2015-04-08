@@ -54,6 +54,7 @@ function civicrm_group_roles_schema() {
     'fields' => array(
       'id' => array(
         'type' => 'serial',
+        'not null' => TRUE,
       ),
       'role_id' => array(
         'type' => 'int',
