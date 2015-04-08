@@ -29,7 +29,6 @@ function civicrm_member_roles_schema() {
   $schema['civicrm_member_roles_rules'] = array(
     'fields' => array(
       'rule_id' => array(
-        'description' => 'Primary Key',
         'type' => 'serial',
         'not null' => TRUE,
       ),
