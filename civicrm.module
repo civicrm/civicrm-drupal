@@ -55,7 +55,7 @@ function civicrm_entity_extra_field_info() {
 }
 
 /**
- * Implements hook_user_view().
+ * Implements hook_ENTITY_TYPE_view().
  *
  * We use this hook to add the pseudo-fields we've added in civicrm_entity_extra_field_info()
  * to the user display.
@@ -69,44 +69,43 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
   $current_user = \Drupal::currentUser();
   $contact_id = \CRM_Core_BAO_UFMatch::getContactId($account->id());
   $current_contact_id = \CRM_Core_BAO_UFMatch::getContactId($current_user->id());
-  if (!$contact_id ||!$current_contact_id) {
+  if (!$contact_id || !$current_contact_id) {
     return;
   }
 
+
   // Contact record link.
   if (($conf = $display->getComponent('civicrm_record')) && $current_user->hasPermission('access CiviCRM') && \CRM_Contact_BAO_Contact_Permission::allow($current_contact_id)) {
-    $build['civicrm_record'] = array(
+    $build['civicrm_record'] = [
       '#type' => 'item',
       '#title' => t('Contact record'),
       '#weight' => $conf['weight'],
-      0 => array(
+      0 => [
         '#type' => 'link',
         '#title' => t('View contact record'),
-        '#route_name' => 'civicrm.civicrm_contact_view',
-        '#route_parameters' => array(
+        '#url' => \Drupal\core\Url::fromRoute('civicrm.civicrm_contact_view', [
           'reset' => 1,
           'cid' => $contact_id,
-        ),
-      ),
-    );
+        ]),
+      ],
+    ];
   }
 
   // Contact dashboard link.
   if (($conf = $display->getComponent('civicrm_dashboard')) && $current_user->hasPermission('access Contact Dashboard') && \CRM_Contact_BAO_Contact_Permission::allow($current_contact_id)) {
-    $build['civicrm_dashboard'] = array(
+    $build['civicrm_dashboard'] = [
       '#type' => 'item',
       '#title' => t('Contact dashboard'),
       '#weight' => $conf['weight'],
-      0 => array(
+      0 => [
         '#type' => 'link',
         '#title' => t('View contact dashboard'),
-        '#route_name' => 'civicrm.civicrm_user',
-        '#route_parameters' => array(
+        '#url' => \Drupal\core\url::fromRoute('civicrm.civicrm_user', [
           'reset' => 1,
           'id' => $contact_id,
-        ),
-      ),
-    );
+        ]),
+      ],
+    ];
   }
 
   // Add profile summaries.
@@ -118,24 +117,23 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
 
     foreach (_civicrm_get_profiles($contact_id) as $id => $profile) {
       $html = (new \CRM_Profile_Page_Dynamic($contact_id, $id, NULL))->run();
-      $build['civicrm_profiles']["civicrm_profile_{$id}"] = array(
+      $build['civicrm_profiles']["civicrm_profile_{$id}"] = [
         '#type' => 'item',
         '#title' => $profile['title'],
-        0 => array(
+        0 => [
           '#markup' => $html,
-        ),
+        ],
         // @Todo Check access to this route before displaying the link
-        1 => array(
+        1 => [
           '#type' => 'link',
-          '#options' => array('html' => TRUE),
-          '#title' => t('Edit %profile_name', array('%profile_name' => $profile['title'])),
-          '#route_name' => 'civicrm.user_profile',
-          '#route_parameters' => array(
+          '#options' => ['html' => TRUE],
+          '#title' => t('Edit %profile_name', ['%profile_name' => $profile['title']]),
+          '#url' => \Drupal\core\url::fromRoute('civicrm.user_profile', [
             'user' => $account->id(),
             'profile' => $id,
-          ),
-        ),
-      );
+          ]),
+        ],
+      ];
     }
   }
 }
