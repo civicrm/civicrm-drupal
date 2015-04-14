@@ -18,16 +18,16 @@ class CivicrmPageState {
     return $this->title;
   }
 
-  public function addCSS($url, array $options) {
-    $this->css[$url] = $options;
+  public function addCSS(array $css) {
+    $this->css[] = $css;
   }
 
   public function getCSS() {
     return $this->css;
   }
 
-  public function addJS($url, array $options) {
-    $this->js[$url] = $options;
+  public function addJS($script) {
+    $this->js[] = $script;
   }
 
   public function getJS() {
