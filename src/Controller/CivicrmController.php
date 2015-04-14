@@ -28,7 +28,19 @@ class CivicrmController extends ControllerBase {
     );
   }
 
-  public function main($args) {
+  public function main($args, $one, $two, $three, $four, $five) {
+    // $one, $two... $five are optional path components. These default to an empty
+    // string. We append any non-empty path components to the $args array before passing
+    // this to invoke().
+    foreach ([$one, $two, $three, $four, $five] as $optional_arg) {
+      if ($optional_arg) {
+        $args[] = $optional_arg;
+      }
+      else {
+        break;
+      }
+    }
+
     // @Todo: Enable CiviCRM's CRM_Core_TemporaryErrorScope::useException() and possibly catch exceptions.
     // At the moment, civicrm doesn't allow exceptions to bubble up to Drupal. See CRM-15022.
     $content = $this->civicrm->invoke($args);
