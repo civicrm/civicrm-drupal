@@ -5,20 +5,6 @@ define('CIVICRM_UF_HEAD', TRUE);
 require_once 'civicrm.user.inc';
 
 /**
- * Implements hook_permission().
- */
-function civicrm_permission() {
-  // Initialize civicrm.
-  \Drupal::service('civicrm');
-
-  $permissions = array();
-  foreach (CRM_Core_Permission::basicPermissions() as $permission => $title) {
-    $permissions[$permission] = array('title' => $title);
-  }
-  return $permissions;
-}
-
-/**
  * Implements hook_page_alter().
  *
  * The aim of this is to inject arbitrary html into the head region (but
