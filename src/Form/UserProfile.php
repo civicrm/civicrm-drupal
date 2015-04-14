@@ -3,7 +3,7 @@
 namespace Drupal\civicrm\Form;
 
 use Drupal\civicrm\Civicrm;
-use Drupal\Core\Access\AccessInterface;
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -87,8 +87,8 @@ class UserProfile extends FormBase  {
     $uf_groups = \CRM_Core_BAO_UFGroup::getModuleUFGroup('User Account', 0, FALSE, \CRM_Core_Permission::EDIT);
 
     if (isset($uf_groups[$profile])) {
-      return AccessInterface::ALLOW;
+      return AccessResult::allowed();
     }
-    return AccessInterface::DENY;
+    return AccessResult::forbidden();
   }
 }
