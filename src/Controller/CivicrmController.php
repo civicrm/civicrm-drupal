@@ -52,7 +52,6 @@ class CivicrmController extends ControllerBase {
     // Synchronize the Drupal user with the Contacts database (why?)
     $this->civicrm->synchronizeUser($this->currentUser());
 
-
     // Add CSS, JS, etc. that is required for this page.
     \CRM_Core_Resources::singleton()->addCoreResources();
     if ($region = \CRM_Core_Region::instance('html-header', FALSE)) {
@@ -75,6 +74,10 @@ class CivicrmController extends ControllerBase {
     // Override default title value if one has been set in the course
     // of calling \CRM_Core_Invoke::invoke().
     if ($title = $this->civicrmPageState->getTitle()) {
+      // Mark the pageTitle as safe so markup is not escaped by Drupal.
+      // This handles the case where, eg. the page title is surrounded by <span id="crm-remove-title" style=display: none">
+      // Todo: This is a naughty way to do this. Better to have CiviCRM passing us no markup whatsoever.
+      \Drupal\Component\Utility\SafeMarkup::set($title);
       $build['#title'] = $title;
     }
 
