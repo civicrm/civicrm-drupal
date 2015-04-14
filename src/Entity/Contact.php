@@ -34,7 +34,7 @@ class Contact extends ContentEntityBase {
   /**
    * {@inheritdoc}
    */
-  public function access($operation = 'view', AccountInterface $account = NULL) {
+  public function access($operation, AccountInterface $account = NULL, $return_as_object = FALSE) {
     $account = $account ? $account : \Drupal::currentUser();
     return $account && $account->hasPermission('view all contacts');
   }

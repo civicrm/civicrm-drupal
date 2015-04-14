@@ -19,6 +19,9 @@ function civicrm_user_insert(AccountInterface $account) {
   // As per CRM-7858, the email address in CiviCRM isn't always set
   // with a call to synchronize(). So we force this through.
   $contact_id = \CRM_Core_BAO_UFMatch::getContactId($account->id());
+  if (empty($contact_id)) {
+    return;
+  }
   \CRM_Core_BAO_UFMatch::updateContactEmail($contact_id, $account->getEmail());
 
   // Process any profile form fields that may have been submitted.
