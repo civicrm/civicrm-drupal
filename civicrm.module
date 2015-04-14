@@ -5,17 +5,21 @@ define('CIVICRM_UF_HEAD', TRUE);
 require_once 'civicrm.user.inc';
 
 /**
- * Implements hook_page_alter().
+ * Implements hook_page_top().
  *
- * The aim of this is to inject arbitrary html into the head region (but
- * we only manage to inject into the page_top region).
- * Normally this would be done via drupal_add_html_head() but presently
- * in Drupal 8, this only access link and meta elements. See
- * https://www.drupal.org/node/2296951
+ * The aim of this is to inject arbitrary html into the head region.
+ * This hook is used only as a convenient time in the page-load cycle
+ * to inject this html: we use the deprecated _drupal_add_html_head() for actually
+ * getting the markup on the page.
  */
-function civicrm_page_alter(&$page) {
+function civicrm_page_top(&$page_top) {
   $headers = \Drupal::service('civicrm.page_state')->getHtmlHeaders();
-  $page['page_top']['civicrm_headers']['#markup'] = $headers;
+
+   _drupal_add_html_head(array(
+     '#type' => 'markup',
+     '#weight' => -99,
+     '#markup' => $headers,
+   ), 'civicrm-headers');
 }
 
 /**
