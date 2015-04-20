@@ -16,9 +16,8 @@ use Drupal\Core\Session\AccountInterface;
  *   base_table = "civicrm_contact",
  *   fieldable = FALSE,
  *   translatable = FALSE,
- *   controllers = {
+ *   handlers = {
  *     "storage" = "Drupal\civicrm\Entity\CivicrmDatabaseStorage",
- *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *   },
  *   entity_keys = {
  *     "id" = "id",
@@ -26,7 +25,7 @@ use Drupal\Core\Session\AccountInterface;
  *     "label" = "display_name",
  *   },
  *   links = {
- *     "canonical" = "civicrm.civicrm_contact_view",
+ *     "canonical" = "/civicrm/contact/view",
  *   },
  * )
  */
