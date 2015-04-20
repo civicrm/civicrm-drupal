@@ -66,7 +66,7 @@ function civicrm_requirements($phase) {
   $civicrm_base = _civicrm_find_civicrm();
 
   if ($civicrm_base) {
-    require_once($civicrm_base . '/install/InstallRequirements.php');
+    require_once($civicrm_base . '/Civi/Install/Requirements.php');
     $requirements['civicrm.location'] = array(
       'title' => 'CiviCRM location',
       'value' => $civicrm_base,
@@ -88,7 +88,7 @@ function civicrm_requirements($phase) {
   $db_config = _civicrm_get_db_config()['info'];
   $db_config['host'] = "{$db_config['host']}:{$db_config['port']}";
 
-  $install_requirements = new InstallRequirements();
+  $install_requirements = new \Civi\Install\Requirements();
 
   // Gather directories that need to be writable
   $file_paths = array(
