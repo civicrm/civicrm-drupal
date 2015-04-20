@@ -79,7 +79,7 @@ function civicrm_requirements($phase) {
       'title' => 'CiviCRM location',
       'value' => NULL,
       'severity' => REQUIREMENT_ERROR,
-      'description' => 'CiviCRM must be downloaded alongside the CiviCRM module.',
+      'description' => 'CiviCRM must be downloaded into the libraries folder.',
     );
     return $requirements;
   }
@@ -116,16 +116,10 @@ function civicrm_requirements($phase) {
 }
 
 function _civicrm_find_civicrm() {
-  $candidates = array(
-    dirname(__FILE__) . '/../CRM',
-    dirname(__FILE__) . '/../civicrm-core',
-    dirname(__FILE__) . '/../core',
-    dirname(__FILE__) . '/../../libraries/civicrm',
-  );
-  foreach ($candidates as $candidate) {
-    if (file_exists($candidate . '/install/InstallRequirements.php')) {
-      return realpath($candidate);
-    }
+  // Only acceptable location for civicrm is in /libraries/civicrm
+  $path =  \Drupal::root() . '/libraries/civicrm';
+  if (file_exists($path . '/CRM/Core/ClassLoader.php')) {
+    return realpath($path);
   }
 }
 
