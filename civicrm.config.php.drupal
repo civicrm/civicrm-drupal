@@ -33,75 +33,75 @@
  *
  */
 
-function civicrm_conf_init() {
-    global $skipConfigError;
-
-    static $conf = '';
-
-    if ($conf) {
-        return $conf;
-    }
-
-    /**
-     * We are within the civicrm module, the drupal root is 2 links
-     * above us, so use that
-     */
-    $currentDir = dirname( __FILE__ ) . DIRECTORY_SEPARATOR;
-    if ( file_exists( $currentDir . 'settings_location.php' ) ) {
-        include $currentDir . 'settings_location.php';
-    }
-
-    if ( defined( 'CIVICRM_CONFDIR' ) && ! isset( $confdir ) ) {
-        $confdir = CIVICRM_CONFDIR;
-    } else {
-        // make it relative to civicrm.config.php, else php makes it relative
-        // to the script that invokes it
-        $moduleDir  = 'sites' . DIRECTORY_SEPARATOR . 'all' . DIRECTORY_SEPARATOR . 'modules';
-        $contribDir = $moduleDir . DIRECTORY_SEPARATOR . 'contrib';
-        // check to see if this is under sites/all/modules/contrib or subdir civicrm-core
-        if ( strpos( $currentDir, $contribDir ) !== false || strpos( $currentDir, 'civicrm-core' ) !== false) {
-            $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..';
-        // check to see if this is under sites/all/modules
-        } else if ( strpos( $currentDir, $moduleDir ) !== false ) {
-            $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..';
-        } else if ( strpos( $currentDir, 'plugins' . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR . 'civicrm' ) !== false ) {
-             //if its wordpress
-            $confdir = $currentDir . DIRECTORY_SEPARATOR . '..';
-        } else {
-            $confdir = $currentDir . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
+function get_drupal_path() {
+    if (!empty($_SERVER['SCRIPT_FILENAME'])) {
+        $drupal_path = dirname(dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME']))));
+        if (!file_exists($drupal_path . '/includes/bootstrap.inc')) {
+            $drupal_path = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
+            $depth = 2;
+            do {
+                $drupal_path = dirname($drupal_path);
+                $depth++;
+            } while (!($bootstrap_file_found = file_exists($drupal_path . '/includes/bootstrap.inc')) && $depth < 10);
         }
     }
 
-    if ( file_exists( $confdir . DIRECTORY_SEPARATOR . 'civicrm.settings.php' ) ) {
-        return $confdir;
-    }
-
-    if ( ! file_exists( $confdir ) && ! $skipConfigError ) {
-        echo "Could not find valid configuration dir, best guess: $confdir<br/><br/>\n";
-        exit( );
-    }
-
-    $phpSelf  = array_key_exists( 'PHP_SELF' , $_SERVER ) ? $_SERVER['PHP_SELF' ] : '';
-    $httpHost = array_key_exists( 'HTTP_HOST', $_SERVER ) ? $_SERVER['HTTP_HOST'] : '';
-
-    $uri    = explode('/', $phpSelf );
-    $server = explode('.', implode('.', array_reverse(explode(':', rtrim($httpHost, '.')))));
-    for ($i = count($uri) - 1; $i > 0; $i--) {
-        for ($j = count($server); $j > 0; $j--) {
-            $dir = implode('.', array_slice($server, -$j)) . implode('.', array_slice($uri, 0, $i));
-            if (file_exists("$confdir/$dir/civicrm.settings.php")) {
-                $conf = "$confdir/$dir";
-                return $conf;
-            }
+    if (!isset($bootstrap_file_found) || !$bootstrap_file_found) {
+        $drupal_path = '../../../../..';
+        if (!file_exists($drupal_path . '/includes/bootstrap.inc')) {
+            $drupal_path = '../..';
+            do {
+                $drupal_path .= '/..';
+                $depth = substr_count($drupal_path, '..');
+            } while (!($bootstrap_file_found = file_exists($drupal_path . '/includes/bootstrap.inc')) && $depth < 10);
         }
     }
-
-    // FIXME: problem spot for Drupal 5.1 config dir layout
-    $conf = "$confdir/default";
-    return $conf;
+    return $drupal_path;
 }
 
-$settingsFile = civicrm_conf_init( ) . '/civicrm.settings.php';
+
+function conf_path($require_settings = TRUE, $reset = FALSE) {
+  static $conf = ''; //&drupal_static(__FUNCTION__, '');
+
+  if ($conf && !$reset) {
+    return $conf;
+  }
+
+  $confdir = 'sites';
+   if (!defined('DRUPAL_ROOT')){
+                define('DRUPAL_ROOT', get_drupal_path());
+   }
+
+  $sites = array();
+  if (file_exists(DRUPAL_ROOT . '/' . $confdir . '/sites.php')) {
+    // This will overwrite $sites with the desired mappings.
+    include(DRUPAL_ROOT . '/' . $confdir . '/sites.php');
+  }
+
+  $uri = explode('/', $_SERVER['SCRIPT_NAME'] ? $_SERVER['SCRIPT_NAME'] : $_SERVER['SCRIPT_FILENAME']);
+  $server = explode('.', implode('.', array_reverse(explode(':', rtrim($_SERVER['HTTP_HOST'], '.')))));
+  for ($i = count($uri) - 1; $i > 0; $i--) {
+    for ($j = count($server); $j > 0; $j--) {
+      $dir = implode('.', array_slice($server, -$j)) . implode('.', array_slice($uri, 0, $i));
+      if (isset($sites[$dir]) && file_exists(DRUPAL_ROOT . '/' . $confdir . '/' . $sites[$dir])) {
+        $dir = $sites[$dir];
+      }
+      if (file_exists(DRUPAL_ROOT . '/' . $confdir . '/' . $dir . '/settings.php') || (!$require_settings && file_exists(DRUPAL_ROOT . '/' . $confdir . '/' . $dir))) {
+        $conf = DRUPAL_ROOT . '/' . "$confdir/$dir";
+
+        return $conf;
+      }
+    }
+  }
+  $conf = "$confdir/default";
+  return $conf;
+}
+
+
+
+
+$settingsFile =  conf_path( ) . '/civicrm.settings.php';
+
 define('CIVICRM_SETTINGS_PATH', $settingsFile);
 $error = @include_once( $settingsFile );
 if ( $error == false ) {
