@@ -66,72 +66,14 @@ function civicrm_group_roles_user_update(&$edit, $account, $category) {
   }
 }
 
+/**
+ * Implements hook_user_login().
+ *
+ * When a user logs in, update their roles depending on which Civi groups they
+ * are a member of.
+ */
 function civicrm_group_roles_user_login(&$edit, $account) {
-  if (!civicrm_initialize()) {
-    return;
-  }
-
-  require_once 'api/api.php';
-  require_once 'CRM/Core/BAO/UFMatch.php';
-
-  //find the contact record
-  $contact = CRM_Core_BAO_UFMatch::getContactId($account->uid);
-  if (!$contact) {
-    return;
-  }
-
-  // To account for the case of smart groups, we grab *all* the rules,
-  // and look for this contact in a list of group members
-  // CRM-11161
-  $query = db_select('civicrm_group_roles_rules', 'cgr');
-  $query->join('role', 'r', 'r.rid=cgr.role_id');
-  $query->fields('r', array('name'))->fields('cgr', array('role_id', 'group_id'));
-
-  // Determine which group-role-sync'd roles the user should have.
-  // Assemble a  list of sync'd roles that the user currently has, in $currentSyncedRoles
-  // and a list of sync'd roles that the user should have, in $correctSyncedRoles.
-  $allCurrentRoleIDs = array_keys($account->roles);
-  $currentSyncedRoles = array();
-  $correctSyncedRoles = array();
-  $result = $query->execute();
-  foreach ($result as $group) {
-    if (in_array($group->role_id, $allCurrentRoleIDs)) {
-      $currentSyncedRoles[$group->role_id] = $group->name;
-    }
-    $params = array(
-      'filter.group_id' => $group->group_id,
-      'id' => $contact,
-      'version'  => 3,
-    );
-    $contacts = civicrm_api('contact', 'get', $params);
-    if ($contacts['count'] > 0) { // The user is in there
-      $message = 'Role @role (@rid) should be held by user @user (@uid) because they are part of group @group (contactID: @cid)';
-      $params = array(
-        '@role' => $group->name,
-        '@rid' => $group->role_id,
-        '@user' => $account->name,
-        '@uid' => $account->uid,
-        '@group' => $group->group_id,
-        '@cid' => $contact,
-      );
-      watchdog('civicrm_group_roles', $message, $params, WATCHDOG_INFO);
-      $correctSyncedRoles[$group->role_id] = $group->name;
-    }
-  }
-
-  $rolesToAdd    = array_diff_key($correctSyncedRoles, $currentSyncedRoles);
-  $rolesToRemove = array_diff_key($currentSyncedRoles, $correctSyncedRoles);
-
-  $finalRoles = $account->roles + $rolesToAdd;
-  $finalRoles = array_diff($finalRoles, $rolesToRemove);
-  $params = array(
-    '@initial' => print_r($account->roles, TRUE),
-    '@add' => print_r($rolesToAdd, TRUE),
-    '@remove' => print_r($rolesToRemove, TRUE),
-    '@final' => print_r($finalRoles, TRUE),
-  );
-  watchdog('civicrm_group_roles', 'Initial roles: @initial, roles to add: @add, roles to remove: @remove, final roles: @final', $params, WATCHDOG_INFO);
-  user_save($account, array('roles' => $finalRoles));
+  civicrm_group_roles_sync_roles($account);
 }
 
 function civicrm_group_roles_add_groups_oncreate($account, $roles) {
@@ -755,22 +697,29 @@ function civicrm_group_roles_batch_init() {
 }
 
 function civicrm_group_roles_batch_worker($uid, &$context) {
-  if ( ! civicrm_initialize( ) ) {
+  if (!civicrm_initialize()) {
     return;
   }
+  
   $account = user_load($uid);
 
-  $roles = array_diff_key( $account->roles, array( 1 => 'anonymous user', 2 => 'authenticated user' ) );
-
-  if ($roles) {
-    civicrm_group_roles_add_remove_groups ( $roles, $account, 'add' );
+  if ($account !== FALSE) {
+    
+    $roles = array_diff_key( $account->roles, array( 1 => 'anonymous user', 2 => 'authenticated user' ) );
+    
+    // Add user to groups
+    if ($roles) {
+      civicrm_group_roles_add_remove_groups ( $roles, $account, 'add' );
+    }
+    
+    // Add roles to user
+    civicrm_group_roles_sync_roles($account);
   }
 
   if (empty($context['results'])) {
     $context['results']['processed'] = 0;
   }
   $context['results']['processed']++;
-  $context['message'] = 'Successfully synchronized ' . $context['results']['processed'] . ' users';
 }
 
 function civicrm_group_roles_batch_finished($success, $results, $operations) {
@@ -820,4 +769,81 @@ function _civicrm_group_roles_validate_groups(array $groups) {
     }
   }
   return $groups;
+}
+
+/**
+ * Helper function to add and remove roles from a user depending on the groups
+ * they are a member of
+ *
+ * @param $account object The user account being processed
+ */
+function civicrm_group_roles_sync_roles($account) {
+  if (!civicrm_initialize()) {
+    return;
+  }
+
+  require_once 'api/api.php';
+  require_once 'CRM/Core/BAO/UFMatch.php';
+
+  //find the contact record
+  $contact = CRM_Core_BAO_UFMatch::getContactId($account->uid);
+  if (!$contact) {
+    return;
+  }
+
+  // To account for the case of smart groups, we grab *all* the rules,
+  // and look for this contact in a list of group members
+  // CRM-11161
+  $query = db_select('civicrm_group_roles_rules', 'cgr');
+  $query->join('role', 'r', 'r.rid=cgr.role_id');
+  $query->fields('r', array('name'))->fields('cgr', array('role_id', 'group_id'));
+
+  // Determine which group-role-sync'd roles the user should have.
+  // Assemble a  list of sync'd roles that the user currently has, in $currentSyncedRoles
+  // and a list of sync'd roles that the user should have, in $correctSyncedRoles.
+  $allCurrentRoleIDs = array_keys($account->roles);
+  $currentSyncedRoles = array();
+  $correctSyncedRoles = array();
+  $result = $query->execute();
+  foreach ($result as $group) {
+    if (in_array($group->role_id, $allCurrentRoleIDs)) {
+      $currentSyncedRoles[$group->role_id] = $group->name;
+    }
+    $params = array(
+      'filter.group_id' => $group->group_id,
+      'id' => $contact,
+      'version'  => 3,
+    );
+    $contacts = civicrm_api('contact', 'get', $params);
+    if ($contacts['count'] > 0) { // The user is in there
+      $message = 'Role @role (@rid) should be held by user @user (@uid) because they are part of group @group (contactID: @cid)';
+      $params = array(
+        '@role' => $group->name,
+        '@rid' => $group->role_id,
+        '@user' => $account->name,
+        '@uid' => $account->uid,
+        '@group' => $group->group_id,
+        '@cid' => $contact,
+      );
+      watchdog('civicrm_group_roles', $message, $params, WATCHDOG_INFO);
+      $correctSyncedRoles[$group->role_id] = $group->name;
+    }
+  }
+
+  $rolesToAdd    = array_diff_key($correctSyncedRoles, $currentSyncedRoles);
+  $rolesToRemove = array_diff_key($currentSyncedRoles, $correctSyncedRoles);
+
+  $finalRoles = $account->roles + $rolesToAdd;
+  $finalRoles = array_diff($finalRoles, $rolesToRemove);
+  $params = array(
+    '@initial' => print_r($account->roles, TRUE),
+    '@add' => print_r($rolesToAdd, TRUE),
+    '@remove' => print_r($rolesToRemove, TRUE),
+    '@final' => print_r($finalRoles, TRUE),
+  );
+  watchdog('civicrm_group_roles', 'Initial roles: @initial, roles to add: @add, roles to remove: @remove, final roles: @final', $params, WATCHDOG_INFO);
+  
+  if ($account->roles !== $finalRoles) {
+    user_save($account, array('roles' => $finalRoles));
+  }
 }
