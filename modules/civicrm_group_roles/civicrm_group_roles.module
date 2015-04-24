@@ -762,10 +762,13 @@ function civicrm_group_roles_batch_worker($uid, &$context) {
 
   $roles = array_diff_key( $account->roles, array( 1 => 'anonymous user', 2 => 'authenticated user' ) );
 
-  if ( $roles ) {
+  if ($roles) {
     civicrm_group_roles_add_remove_groups ( $roles, $account, 'add' );
   }
 
+  if (empty($context['results'])) {
+    $context['results']['processed'] = 0;
+  }
   $context['results']['processed']++;
   $context['message'] = 'Successfully synchronized ' . $context['results']['processed'] . ' users';
 }
