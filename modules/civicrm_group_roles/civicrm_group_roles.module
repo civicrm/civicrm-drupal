@@ -23,9 +23,6 @@
   +--------------------------------------------------------------------+
 */
 
-// $Id: civicrm_group_roles.module,v 1.1.4.2 2008/10/14 00:20:36 matt2000 Exp $
-
-
 /* @file
  * A simple module that adds a user to groups based on Role.
  */
@@ -33,8 +30,7 @@
 /**
  * Implementation of hook_help()
  */
-function civicrm_group_roles_help($section, $args = array(
-  )) {
+function civicrm_group_roles_help($section, $args = array()) {
   switch ($section) {
     case 'admin/modules#description':
       return t('Adds users to a matching CiviCRM group on account creation, update, or login for each of their Drupal roles.');
@@ -420,15 +416,14 @@ function civicrm_group_roles_menu() {
     'access arguments' => array('access civicrm group role setting'),
     'type' => MENU_LOCAL_TASK,
   );
-  $items['admin/config/civicrm/civicrm_group_roles/manual_sync'] =
-    array(
-      'title' => t('Manually Synchronize'),
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('civicrm_group_roles_manual_sync'),
-      'access callback' => 'user_access',
-      'access arguments' => array('access civicrm group role setting'),
-      'type' => MENU_LOCAL_TASK,
-    );
+  $items['admin/config/civicrm/civicrm_group_roles/manual_sync'] = array(
+    'title' => t('Manually Synchronize'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('civicrm_group_roles_manual_sync'),
+    'access callback' => 'user_access',
+    'access arguments' => array('access civicrm group role setting'),
+    'type' => MENU_LOCAL_TASK,
+  );
   return $items;
 }
 
@@ -504,11 +499,10 @@ function civicrm_group_roles_show_rules($action = NULL, $id = NULL) {
  * Implementation of hook_form(). Add/edit association rules.
  *
  * @ingroup forms
- * @see civimember_roles_add_rule_validate()
+ * @see civicrm_group_roles_add_rule_validate()
  * @see civicrm_group_roles_add_rule_submit()
  */
-function civicrm_group_roles_add_rule_form($form, $form_state = array(
-  ), $edit_id = NULL) {
+function civicrm_group_roles_add_rule_form($form, $form_state = array(), $edit_id = NULL) {
   if (!civicrm_initialize()) {
     return;
   }
@@ -701,13 +695,12 @@ function civicrm_group_roles_add_remove_groups($roles, $user, $op) {
 
 
 /**
- * Manual sync form. Provides a sumbit button to manually sync memberships to roles.
+ * Manual sync form. Provides a submit button to manually sync groups to roles.
  *
  * @ingroup forms
- * @see civicrm_member_roles_manual_sync_submit()
+ * @see civicrm_group_roles_manual_sync_submit()
  */
-function civicrm_group_roles_manual_sync()
-{
+function civicrm_group_roles_manual_sync() {
   $form = array();
   $form['manual_sync'] = array(
     '#type' => 'fieldset',
