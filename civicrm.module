@@ -37,25 +37,22 @@ define('CIVICRM_UF_HEAD', TRUE);
  * Implements hook_permissions().
  */
 function civicrm_permission() {
-  // make sure the system is initialized
-  if (!civicrm_initialize()) {
-    return;
-  }
+  if (civicrm_initialize()) {
+    CRM_Core_Config::singleton();
 
-  CRM_Core_Config::singleton();
-
-  $permissions = CRM_Core_Permission::basicPermissions(FALSE, TRUE);
-  $perms_array = array();
-  foreach ($permissions as $perm => $attr) {
-    $title = array_shift($attr);
-    $description = array_shift($attr);
-    //order matters here, but we deal with that later
-    $perms_array[$perm] = array('title' => $title);
-    if ($description) {
-      $perms_array[$perm]['description'] = $description;
+    $permissions = CRM_Core_Permission::basicPermissions(FALSE, TRUE);
+    $perms_array = array();
+    foreach ($permissions as $perm => $attr) {
+      $title = array_shift($attr);
+      $description = array_shift($attr);
+      //order matters here, but we deal with that later
+      $perms_array[$perm] = array('title' => $title);
+      if ($description) {
+        $perms_array[$perm]['description'] = $description;
+      }
     }
+    return $perms_array;
   }
-  return $perms_array;
 }
 
 /**
@@ -141,7 +138,6 @@ function civicrm_initialize() {
     return;
   }
 
-
   static $initialized = FALSE;
   static $failure = FALSE;
 
@@ -185,7 +181,7 @@ function civicrm_initialize() {
     }
 
     // this does pretty much all of the civicrm initialization
-    $error = include_once ('CRM/Core/Config.php');
+    $error = include_once('CRM/Core/Config.php');
     if ($error == FALSE) {
       $failure = TRUE;
       drupal_set_message("<strong><p class='error'>" .
@@ -248,8 +244,6 @@ function civicrm_initialize() {
   return TRUE;
 }
 
-
-
 /**
  * Alter metatags before being cached.
  *
@@ -293,7 +287,8 @@ function civicrm_links__locale_block($variables) {
  */
 function civicrm_invoke() {
   module_load_include('inc', 'civicrm');
-  if (!module_exists('libraries') || $path = libraries_get_path('civicrm')) {
+  $path = libraries_get_path('civicrm');
+  if (!module_exists('libraries') || !is_dir($path)) {
     return _civicrm_library_warning();
   }
   // check if this is a redirect and maybe a user login?
@@ -314,23 +309,17 @@ function civicrm_invoke() {
     return drupal_not_found();
   }
 
-  civicrm_cache_disable();
+  // Disable Drupal caching of CiviCRM pages.
+  _civicrm_disable_drupal_cache();
 
   $args = explode('/', $_GET['q']);
 
-  // synchronize the drupal uid with the contacts db
+  // Synchronize the drupal uid with the contacts db.
   global $user;
-
-  /*
-  * FIXME: hack to bypass synchronize if running upgrade to avoid
-  * any serious non-recoverable error which might hinder the
-  * upgrade process.
-  */
-
-  if (!isset($args[1]) ||
-    $args[1] != 'upgrade'
-  ) {
-
+  // FIXME: Hack to bypass synchronize if running upgrade to avoid
+  // any serious non-recoverable error which might hinder the
+  // upgrade process.
+  if (!isset($args[1]) || $args[1] != 'upgrade') {
     CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal',
       civicrm_get_ctype('Individual')
     );

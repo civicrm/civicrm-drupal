@@ -68,7 +68,6 @@ function _civicrm_get_url_parameters_as_url_string() {
  * may need to cover different drupal versions
  */
 function _civicrm_registerClassLoader() {
-  variable_del('civicrm_class_loader');
   $library_path = libraries_get_path('civicrm');
   $classloader_path = variable_get('civicrm_class_loader');
   if (empty($classloader_path) || !file_exists($classloader_path)) {
@@ -80,18 +79,17 @@ function _civicrm_registerClassLoader() {
       'core/CRM/Core/ClassLoader.php',
     );
     foreach ($candidates as $candidate) {
-      $path = $library_path . $classloader_path;
-      watchdog('civicrm', 'Looking for %classloader_path', array('%classloader_path' => $classloader_path), WATCHDOG_NOTICE);
-      if (file_exists($library_path . $candidate)) {
-        watchdog('civicrm', 'Found %classloader_path', array('%classloader_path' => $classloader_path), WATCHDOG_NOTICE);
-        require_once $library_path . $candidate;
+      $path = $library_path . '/' . $candidate;
+      watchdog('civicrm', 'Looking for %classloader_path', array('%classloader_path' => $path), WATCHDOG_NOTICE);
+      if (file_exists($path)) {
+        watchdog('civicrm', 'Found %classloader_path', array('%classloader_path' => $path), WATCHDOG_NOTICE);
+        require_once $path;
         CRM_Core_ClassLoader::singleton()->register();
-        variable_set('civicrm_class_loader', $library_path . $candidate);
+        variable_set('civicrm_class_loader', $path);
       }
     }
   }
   else {
-    print 'cp: ' . $classloader_path;
     require_once $classloader_path;
     CRM_Core_ClassLoader::singleton()->register();
   }
@@ -235,7 +233,7 @@ function _civicrm_get_user_profile_id($name) {
 /**
  * Disable the drupal cache for all civicrm pages which should not be cached.
  */
-function civicrm_cache_disable() {
+function _civicrm_disable_drupal_cache() {
   if (function_exists('drupal_page_is_cacheable')) {
     // This is a Drupal 7 function only - using 'easy option' of checking function.
     drupal_page_is_cacheable(FALSE);
@@ -262,7 +260,7 @@ function civicrm_key_disable() {
  * @TODO Rename to _civicrm_html_head() to indicate
  * that this is not a hook implementation.
  */
-function civicrm_html_head() {
+function _civicrm_html_head() {
   if (civicrm_initialize()) {
     if (arg(0) == 'civicrm') {
       // Add our standard css & js
