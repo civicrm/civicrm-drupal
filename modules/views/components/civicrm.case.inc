@@ -93,7 +93,7 @@ function _civicrm_case_data(&$data, $enabled) {
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Case_PseudoConstant',
       'pseudo method' => 'caseType',
-      'pseudo args' => array('Label', FALSE),
+      'pseudo args' => array('Title', FALSE),
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -102,7 +102,7 @@ function _civicrm_case_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_filter_pseudo_constant',
       'pseudo class' => 'CRM_Case_PseudoConstant',
       'pseudo method' => 'caseType',
-      'pseudo args' => array('Label', FALSE),
+      'pseudo args' => array('Title', FALSE),
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
