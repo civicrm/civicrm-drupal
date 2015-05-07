@@ -134,18 +134,16 @@ class civicrm_handler_field_contact_image extends views_handler_field {
    * */
   function pre_render(&$values) {
     parent::pre_render($values);
-    /* Break the url to the contact image into it's parts, find the point in the array
-     * that is the files directory, slice out the remaining path elements, glue them back
-     * up into a path and make a public file uri out of that.  Then turn the uri into a
-     * Drupal file object and replace the result so the render function can style the image.
-     * */
+    $config = CRM_Core_Config::singleton();
     foreach ($values as $key => $row) {
       $file = array();
+      // This is the public url (which gets routed through civi)
       $img_url = $this->get_value($row);
-      $url_parts = explode('/', $img_url);
-      $files_key = array_search('files', $url_parts);
-      $url_parts = array_slice($url_parts, $files_key + 1);
-      $file_path = 'public://' . implode('/', $url_parts);
+      if (!$img_url) {
+        continue;
+      }
+      // This is the internal file path
+      $file_path = $config->customFileUploadDir . substr(strstr($img_url, 'photo='), 6);
       $image_info = image_get_info($file_path);
       if ($image_info) {
         $file['width'] = $image_info['width'];
@@ -163,7 +161,7 @@ class civicrm_handler_field_contact_image extends views_handler_field {
         }
         else {
           if (!empty($this->options['picture_group'])) {
-            $file['uri'] = $file_path;
+            $file['uri'] = $img_url;
             $mappings = picture_mapping_load($this->options['picture_group']);
             $file['breakpoints'] = picture_get_mapping_breakpoints($mappings, $this->options['fallback_image_style']);
           }
@@ -187,14 +185,14 @@ class civicrm_handler_field_contact_image extends views_handler_field {
         elseif (!empty($this->options['image_style'])) {
           $file['style_name'] = $this->options['image_style'];
         }
-        $file['path'] = $file_path;
+        $file['path'] = $img_url;
         $file['title'] = $this->options['title'];
       }
       /* if file['uri'] was not set in the Picture module conditional, and $file['path] is not set
        * in the image style conditional just completed, then set the path and so we have something to theme
        * */
       if ((!isset($file['uri'])) && (!isset($file['path']))) {
-        $file['path'] = $file_path;
+        $file['path'] = $img_url;
         $file['title'] = $this->options['title'];
       }
       $values[$key]->{$this->field_alias} = $file;
@@ -213,7 +211,7 @@ class civicrm_handler_field_contact_image extends views_handler_field {
     elseif (!empty($file['style_name'])) {
       return theme('image_style', $file);
     }
-    else {
+    elseif ($file) {
       return theme('image', $file);
     }
   }
