@@ -684,5 +684,25 @@ function _civicrm_event_data(&$data, $enabled) {
         'handler' => 'views_handler_sort',
       ),
     );
+    //Get Volunteer Project Id of the event
+    $data['civicrm_volunteer_project']['id'] =  array(
+      'title' => t('Volunteer Project ID'),
+      'help' => t('The numeric ID of Volunteer Project for the Event'),
+      'field' => array(
+        'handler' => 'views_handler_field_numeric',
+        'click sortable' => TRUE,
+      ),
+      'argument' => array(
+        'handler' => 'views_handler_argument_numeric',
+        'numeric' => TRUE,
+      ),
+      'filter' => array(
+        'handler' => 'views_handler_filter_numeric',
+        'allow empty' => TRUE,
+      ),
+      'sort' => array(
+        'handler' => 'views_handler_sort',
+      ),
+    );
   }
 }
