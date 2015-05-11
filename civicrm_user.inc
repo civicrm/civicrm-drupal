@@ -294,3 +294,4 @@ function civicrm_validate_user_forms($form, &$form_state) {
     civicrm_validate_data($edit, $user, $category);
   }
 }
+

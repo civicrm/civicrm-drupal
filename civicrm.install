@@ -67,8 +67,7 @@ function civicrm_requirements($phase) {
   $url = $base_url . '/' . $civicrm_path . 'install/index.php';
   $requirements = array();
 
-  // Any old site is configurated.
-  // @TODO Really??!
+  // @TODO Use conf_path(TRUE) here instead of glob().
   $settings = glob('sites/*/civicrm.settings.php');
 
   // Settings is configurated.
