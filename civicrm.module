@@ -622,6 +622,7 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
   // CRM-7509
   $session = CRM_Core_Session::singleton();
   $sessionUserID = $session->get('userID');
+  $session->replaceUserContext(url(current_path(), array('absolute' => TRUE)));
 
   if ($sessionUserID != $userID) {
     // do not allow edit for anon users in joomla frontend, CRM-4668, unless u have checksum CRM-5228
