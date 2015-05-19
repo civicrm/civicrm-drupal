@@ -3,6 +3,7 @@ description = Walklist and Phone-banking support for CiviCRM
 version = 4.4
 dependencies[] = civicrm
 package = CiviCRM
+project = civicrm
 core = 7.x
 php = 5.2
 

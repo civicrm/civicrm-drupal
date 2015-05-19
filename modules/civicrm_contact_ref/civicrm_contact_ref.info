@@ -2,6 +2,7 @@
 name = CiviCRM Contact Reference Field
 description = Makes a CiviCRM Contact Reference Field
 package = CiviCRM
+project = civicrm
 core = 7.x
 version = 4.4
 php = 5.2
