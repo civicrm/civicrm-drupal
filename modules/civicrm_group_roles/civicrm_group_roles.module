@@ -240,7 +240,7 @@ function civicrm_role_granted_by_other_group($contact_id, $rid, $group_id) {
   if (!civicrm_initialize()) {
     return;
   }
-  require_once 'api/v2/GroupContact.php';
+
   //get all the groups this contact belongs to
   $params = array('version' => '3', 'contact_id' => $contact_id);
   $result =  civicrm_api('group_contact','get',$params);
