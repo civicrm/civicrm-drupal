@@ -3,5 +3,6 @@ description = "Integrate CiviCRM and Drupal Rules Module. Expose Contact, Contri
 dependencies[] = civicrm
 dependencies[] = rules
 package = CiviCRM
+project = civicrm
 core = 7.x
 version = 4.4

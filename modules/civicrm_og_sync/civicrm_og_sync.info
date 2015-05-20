@@ -4,6 +4,7 @@ version = 4.4
 dependencies[] = civicrm
 dependencies[] = og
 package = CiviCRM
+project = civicrm
 core = 7.x
 php = 5.2
 
