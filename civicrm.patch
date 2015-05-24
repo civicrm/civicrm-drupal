@@ -1,0 +1,210 @@
+diff --git a/CRM/Core/BAO/Navigation.php b/CRM/Core/BAO/Navigation.php
+index d02f1ec..6233cc8 100644
+--- a/CRM/Core/BAO/Navigation.php
++++ b/CRM/Core/BAO/Navigation.php
+@@ -617,20 +617,7 @@ ORDER BY parent_id, weight";
+         $homeLabel = ts('CiviCRM Home');
+       }
+       // Link to hide the menubar
+-      if (
+-        ($config->userSystem->is_drupal) &&
+-        ((module_exists('toolbar') && user_access('access toolbar')) ||
+-          module_exists('admin_menu') && user_access('access administration menu')
+-        )
+-      ) {
+-        $hideLabel = ts('Drupal Menu');
+-      }
+-      elseif ($config->userSystem->is_wordpress) {
+-        $hideLabel = ts('WordPress Menu');
+-      }
+-      else {
+-        $hideLabel = ts('Hide Menu');
+-      }
++      $hideLabel = ts('Hide Menu');
+ 
+       $prepandString = "
+         <li class='menumain crm-link-home'>$homeIcon
+diff --git a/CRM/Utils/System/Drupal8.php b/CRM/Utils/System/Drupal8.php
+index e7a2803..4f1676e 100644
+--- a/CRM/Utils/System/Drupal8.php
++++ b/CRM/Utils/System/Drupal8.php
+@@ -109,7 +109,7 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
+    * @inheritDoc
+    */
+   public function updateCMSName($ufID, $email) {
+-    $user = user_load($ufID);
++    $user = entity_load('user', $ufID);
+     if ($user && $user->getEmail() != $email) {
+       $user->setEmail($email);
+ 
+@@ -185,7 +185,6 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
+     if (!$pageTitle) {
+       $pageTitle = $title;
+     }
+-
+     \Drupal::service('civicrm.page_state')->setTitle($pageTitle);
+   }
+ 
+@@ -217,19 +216,25 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
+    * @inheritDoc
+    */
+   public function addScriptUrl($url, $region) {
+-    $options = array('group' => JS_LIBRARY, 'weight' => 10);
++    static $weight = 0;
++
+     switch ($region) {
+       case 'html-header':
+       case 'page-footer':
+-        $options['scope'] = substr($region, 5);
+         break;
+-
+       default:
+         return FALSE;
+     }
+-    // If the path is within the drupal directory we can use the more efficient 'file' setting
+-    $options['type'] = $this->formatResourceUrl($url) ? 'file' : 'external';
+-    \Drupal::service('civicrm.page_state')->addJS($url, $options);
++
++    $script = array(
++      '#tag' => 'script',
++      '#attributes' => array(
++        'src' => $url,
++      ),
++      '#weight' => $weight,
++    );
++    $weight++;
++    \Drupal::service('civicrm.page_state')->addJS($script);
+     return TRUE;
+   }
+ 
+@@ -237,17 +242,19 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
+    * @inheritDoc
+    */
+   public function addScript($code, $region) {
+-    $options = array('type' => 'inline', 'group' => JS_LIBRARY, 'weight' => 10);
+     switch ($region) {
+       case 'html-header':
+       case 'page-footer':
+-        $options['scope'] = substr($region, 5);
+         break;
+-
+       default:
+         return FALSE;
+     }
+-    \Drupal::service('civicrm.page_state')->addJS($code, $options);
++
++    $script = array(
++      '#tag' => 'script',
++      '#value' => $code,
++    );
++    \Drupal::service('civicrm.page_state')->addJS($script);
+     return TRUE;
+   }
+ 
+@@ -258,10 +265,14 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
+     if ($region != 'html-header') {
+       return FALSE;
+     }
+-    $options = array();
+-    // If the path is within the drupal directory we can use the more efficient 'file' setting
+-    $options['type'] = $this->formatResourceUrl($url) ? 'file' : 'external';
+-    \Drupal::service('civicrm.page_state')->addCSS($url, $options);
++    $css = array(
++      '#tag' => 'link',
++      '#attributes' => array(
++        'href' => $url,
++        'rel' => 'stylesheet',
++      ),
++    );
++    \Drupal::service('civicrm.page_state')->addCSS($css);
+     return TRUE;
+   }
+ 
+@@ -272,8 +283,11 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
+     if ($region != 'html-header') {
+       return FALSE;
+     }
+-    $options = array('type' => 'inline');
+-    \Drupal::service('civicrm.page_state')->addCSS($code, $options);
++    $css = array(
++      '#tag' => 'style',
++      '#value' => $code,
++    );
++    \Drupal::service('civicrm.page_state')->addCSS($css);
+     return TRUE;
+   }
+ 
+@@ -317,24 +331,35 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
+     $query = '',
+     $absolute = FALSE,
+     $fragment = NULL,
+-    $htmlize = TRUE,
++    $htmlize = FALSE,
+     $frontend = FALSE,
+     $forceBackend = FALSE
+   ) {
+     $query = html_entity_decode($query);
++
+     $url = \Drupal\civicrm\CivicrmHelper::parseURL("{$path}?{$query}");
+ 
++    // Not all links that CiviCRM generates are Drupal routes, so we use the weaker ::fromUri method.
+     try {
+-      $url = \Drupal::url($url['route_name'], array(), array(
++      $url = \Drupal\Core\Url::fromUri("base:{$url['path']}", [
+         'query' => $url['query'],
+-        'absolute' => $absolute,
+         'fragment' => $fragment,
+-      ));
++        'absolute' => $absolute,
++      ])->toString();
+     }
+     catch (Exception $e) {
++      // @Todo: log to watchdog
+       $url = '';
+     }
+ 
++    // Special case: CiviCRM passes us "*path*?*query*" as a skeleton, but asterisks
++    // are invalid and Drupal will attempt to escape them. We unescape them here:
++    if ($path == '*path*') {
++      // First remove trailing equals sign that has been added since the key '?*query*' has no value.
++      $url = rtrim($url, '=');
++      $url = urldecode($url);
++    }
++
+     if ($htmlize) {
+       $url = htmlentities($url);
+     }
+@@ -515,4 +540,4 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
+     return 'sidebar_first';
+   }
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/install/civicrm.php b/install/civicrm.php
+index 8438e85..30b696a 100644
+--- a/install/civicrm.php
++++ b/install/civicrm.php
+@@ -208,7 +208,7 @@ function civicrm_config(&$config) {
+   );
+ 
+   $params['baseURL'] = isset($config['base_url']) ? $config['base_url'] : civicrm_cms_base();
+-  if ($installType == 'drupal') {
++  if ($installType == 'drupal' && defined('VERSION')) {
+     if (version_compare(VERSION, '7.0-rc1') >= 0) {
+       $params['cms'] = 'Drupal';
+       $params['CMSdbUser'] = addslashes($config['drupal']['username']);
+@@ -224,6 +224,13 @@ function civicrm_config(&$config) {
+       $params['CMSdbName'] = addslashes($config['drupal']['database']);
+     }
+   }
++  else if ($installType == 'drupal') {
++    $params['cms'] = $config['cms'];
++    $params['CMSdbUser'] = addslashes($config['cmsdb']['username']);
++    $params['CMSdbPass'] = addslashes($config['cmsdb']['password']);
++    $params['CMSdbHost'] = $config['cmsdb']['server'];
++    $params['CMSdbName'] = addslashes($config['cmsdb']['database']);
++  }
+   else {
+     $params['cms'] = 'WordPress';
+     $params['CMSdbUser'] = addslashes(DB_USER);
