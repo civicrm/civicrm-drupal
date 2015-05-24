@@ -83,7 +83,7 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
       0 => [
         '#type' => 'link',
         '#title' => t('View contact record'),
-        '#url' => \Drupal\core\Url::fromRoute('civicrm.civicrm_contact_view', [
+        '#url' => \Drupal\Core\Url::fromRoute('civicrm.civicrm_contact_view', [
           'reset' => 1,
           'cid' => $contact_id,
         ]),
@@ -100,7 +100,7 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
       0 => [
         '#type' => 'link',
         '#title' => t('View contact dashboard'),
-        '#url' => \Drupal\core\url::fromRoute('civicrm.civicrm_user', [
+        '#url' => \Drupal\Core\Url::fromRoute('civicrm.civicrm_user', [
           'reset' => 1,
           'id' => $contact_id,
         ]),
@@ -128,7 +128,7 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
           '#type' => 'link',
           '#options' => ['html' => TRUE],
           '#title' => t('Edit %profile_name', ['%profile_name' => $profile['title']]),
-          '#url' => \Drupal\core\url::fromRoute('civicrm.user_profile', [
+          '#url' => \Drupal\Core\Url::fromRoute('civicrm.user_profile', [
             'user' => $account->id(),
             'profile' => $id,
           ]),
