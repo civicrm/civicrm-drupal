@@ -100,7 +100,7 @@ function civicrm_requirements($phase) {
   // We don't bother checking if these attempts are actually successful as
   // that will be checked by checkAll().
   foreach ($file_paths as $path) {
-    chmod($path, 0755);
+    @chmod($path, 0755);
   }
 
   foreach ($install_requirements->checkAll(array('db_config' => $db_config, 'file_paths' => $file_paths)) as $key => $result) {
