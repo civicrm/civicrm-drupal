@@ -22,7 +22,6 @@ function civicrm_install() {
   $crmPath = $civicrm_base;
   $cmsPath = \Drupal::root();
   $installType = 'drupal';
-  define('VERSION', '8');
 
   // Get database connection details.
   // We attempt to get a separate set of details for a civicrm database, but
