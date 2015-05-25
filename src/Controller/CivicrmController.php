@@ -41,6 +41,11 @@ class CivicrmController extends ControllerBase {
       }
     }
 
+    // CiviCRM's Invoke.php has hardwired in the expectation that the query parameter 'q' is being used.
+    // We recreate that parameter. Ideally in the future, this data should be passed in explicitly and not tied
+    // to an environment variable.
+    $_GET['q'] = implode('/', $args);
+
     // @Todo: Enable CiviCRM's CRM_Core_TemporaryErrorScope::useException() and possibly catch exceptions.
     // At the moment, civicrm doesn't allow exceptions to bubble up to Drupal. See CRM-15022.
     $content = $this->civicrm->invoke($args);
