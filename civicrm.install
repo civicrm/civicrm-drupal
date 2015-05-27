@@ -52,6 +52,8 @@ function civicrm_uninstall() {
 }
 
 function civicrm_requirements($phase) {
+  $t = get_t();
+  module_load_include('inc', 'civicrm');
   global $base_url;
   $civicrm_path = drupal_get_path('module', 'civicrm');
 
@@ -63,20 +65,60 @@ function civicrm_requirements($phase) {
   }
 
   $url = $base_url . '/' . $civicrm_path . 'install/index.php';
+  $requirements = array();
 
+  // @TODO Use conf_path(TRUE) here instead of glob().
   $settings = glob('sites/*/civicrm.settings.php');
-  $problems = array();
+
+  // Settings is configurated.
+  $requirement_settings = array(
+    'title' => $t('CiviCRM Settings'),
+    'value' => $t('CiviCRM has been configured.'),
+    'severity' => REQUIREMENT_OK,
+  );
   if (empty($settings) && $phase == 'install') {
-    $problems[] = array(
-      'title' => t('CiviCRM settings does not exist'),
-      'value' =>
-      t('CiviCRM settings file does not exist. It should be created by CiviCRM <a href="!link">install</a>',
+    $requirement_settings = array_merge($requirement_settings, array(
+      'value' => $t('CiviCRM settings file does not exist. It should be created by CiviCRM <a href="!link">install</a>',
         array('!link' => $url)),
       'severity' => REQUIREMENT_ERROR,
-    );
+    ));
   }
+  $requirements['settings'] = $requirement_settings;
 
-  return $problems;
+  // Libraries API must be present.
+  $requirement_libraries = array(
+    'title' => $t('CiviCRM Libraries API module'),
+    'value' => $t('CiviCRM was able to find Libraries module.'),
+  );
+  if (!module_exists('libraries')) {
+    $requirement_libraries = array_merge($requirement_libraries, array(
+      'value' => $t('Please install and enable the !libraries module', array('!link' => l('Libraries', 'https://drupal.org/project/libraries'))),
+      'severity' => REQUIREMENT_ERROR,
+    ));
+  }
+  $requirements[] = $requirement_libraries;
+
+  // Checking module_exists() means we don't fire when in the act
+  // of enabling a module.
+  $civicrm_path = libraries_get_path('civicrm');
+  if (module_exists('civicrm')) {
+    $requirement_core = array(
+      'title' => $t('CiviCRM Core'),
+      'value' => $t('CiviCRM Core is installed in %civicrm_path.', array('%civicrm_path' => $civicrm_path)),
+      'severity' => REQUIREMENT_OK,
+    );
+    if (!_civicrm_library_installed()) {
+      $requirement_core = array_merge($requirement_core, array(
+        'title' => $t('CiviCRM Core'),
+        'value' => $t('Not found at %civicrm_path', array('%civicrm_path' => $civicrm_path)),
+        'description' => _civicrm_library_warning(),
+        'severity' => REQUIREMENT_ERROR,
+      ));
+    }
+  }
+  $requirements['civicrm_core'] = $requirement_core;
+
+  return $requirements;
 }
 
 /**
@@ -85,4 +127,3 @@ function civicrm_requirements($phase) {
 function civicrm_update_7400(&$sandbox) {
   db_query("UPDATE {system} SET weight = 100 WHERE name = 'civicrm'");
 }
-
