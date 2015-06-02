@@ -64,6 +64,7 @@
  *   An associative array describing your command(s).
  */
 function civicrm_drush_command() {
+
   $items = array();
 
   // the key in the $items array is the name of the command.
@@ -1453,6 +1454,9 @@ function _civicrm_init($fail = TRUE) {
   }
   // include settings file
   define('CIVICRM_SETTINGS_PATH', $civicrmSettingsFile);
+  if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {//override the templates_c to avoid conflict
+    define('CIVICRM_TEMPLATE_COMPILEDIR',drush_tempdir());
+  }
   include_once $civicrmSettingsFile;
   global $civicrm_root;
   if (!is_dir($civicrm_root)) {
