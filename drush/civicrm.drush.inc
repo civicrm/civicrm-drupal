@@ -1454,7 +1454,8 @@ function _civicrm_init($fail = TRUE) {
   }
   // include settings file
   define('CIVICRM_SETTINGS_PATH', $civicrmSettingsFile);
-  if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {//override the templates_c to avoid conflict
+  //override the templates_c to avoid conflict. It also means system.flush is going to clear drush cache, not the "real" one
+  if (!defined('CIVICRM_TEMPLATE_COMPILEDIR')) {
     define('CIVICRM_TEMPLATE_COMPILEDIR',drush_tempdir());
   }
   include_once $civicrmSettingsFile;
