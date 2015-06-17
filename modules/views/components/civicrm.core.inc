@@ -2489,6 +2489,11 @@ function _civicrm_core_data(&$data, $enabled) {
     'left_field' => 'tag_id',
     'field' => 'id',
   );
+  $data['civicrm_tag']['table']['join']['civicrm_case'] = array(
+    'left_table' => 'civicrm_entity_tag',
+    'left_field' => 'tag_id',
+    'field' => 'id',
+  );
 
   $data['civicrm_entity_tag']['table']['join']['civicrm_contact'] = array(
     // Directly links to tag table
@@ -2510,6 +2515,18 @@ function _civicrm_core_data(&$data, $enabled) {
       array(
         'field' => 'entity_table',
         'value' => 'civicrm_activity',
+        'numeric' => FALSE,
+      ),
+    ),
+  );
+  $data['civicrm_entity_tag']['table']['join']['civicrm_case'] = array(
+    // Directly links to tag table
+    'left_field' => 'id',
+    'field' => 'entity_id',
+    'extra' => array(
+      array(
+        'field' => 'entity_table',
+        'value' => 'civicrm_case',
         'numeric' => FALSE,
       ),
     ),
