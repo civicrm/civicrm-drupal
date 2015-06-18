@@ -97,6 +97,8 @@ function civicrm_views_data_alter(&$data) {
   ) {
     include_once 'components/civicrm.contribute.inc';
     _civicrm_contribute_data($data, $enabled);
+    include_once 'components/civicrm.lineitem.inc';
+    _civicrm_lineitem_data($data, $enabled);
   }
   if (isset($enabled['CiviEvent'])) {
     include_once 'components/civicrm.event.inc';
