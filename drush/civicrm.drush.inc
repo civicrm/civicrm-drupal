@@ -542,7 +542,7 @@ function civicrm_drush_help($section) {
       return dt('Prints the whole CiviCRM database to STDOUT or save to a file.');
 
     case 'drush:civicrm-sql-query':
-      return dt("Usage: drush [options] civicrm-sql-query <query>...\n<query> is a SQL statement, which can alternatively be passed via STDIN. Any additional arguments are passed to the mysql command directly.");
+      return dt("Usage: drush [options] civicrm-sql-query <query>...\n<query> is a SQL statement. Any additional arguments are passed to the mysql command directly.");
   }
 }
 
@@ -582,7 +582,7 @@ function drush_civicrm_ext_install($extension_name) {
     if($result['values'] && $result['values'] == 1) {
       drush_print(dt("Extension !ename installed.", array('!ename' => $extension_name)));
     } else {
-      drush_log(t('Extension !ename could not be installed.', array('!ename' => $extension_name)), 'error');    
+      drush_log(t('Extension !ename could not be installed.', array('!ename' => $extension_name)), 'error');
     }
   }
   catch (CiviCRM_API3_Exception $e) {
@@ -626,7 +626,7 @@ function drush_civicrm_ext_uninstall($extension_name) {
     if($result['values'] && $result['values'] == 1) {
       drush_print(dt("Extension !ename uninstalled.", array('!ename' => $extension_name)));
     } else {
-      drush_log(t('Extension !ename could not be uninstalled.', array('!ename' => $extension_name)), 'error');    
+      drush_log(t('Extension !ename could not be uninstalled.', array('!ename' => $extension_name)), 'error');
     }
   }
   catch (CiviCRM_API3_Exception $e) {
@@ -1545,4 +1545,3 @@ function drush_civicrm_api() {
       return drush_set_error('CIVICRM_UNKNOWN_FORMAT', dt('Unknown format: @format', array('@format' => $format)));
   }
 }
-
