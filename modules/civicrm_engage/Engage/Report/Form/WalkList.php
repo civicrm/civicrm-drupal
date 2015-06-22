@@ -461,7 +461,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
       if (!empty($value['civicrm_contact_gender_id'])){
         $sex  = $gender[CRM_Utils_Array::value('civicrm_contact_gender_id', $value)];
       }
-      $sex  = is_null($sex) ? '' : $sex;
+      $sex  = empty($sex) ? '' : $sex;
       $lang = strtoupper(substr($value[$this->_demoTable . '_' . $this->_demoLangCol], 0, 2
         ));
       $party       = substr($value["{$this->_voterInfoTable}_{$this->_partyCol}"], 0, 1);
