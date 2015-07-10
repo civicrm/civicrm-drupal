@@ -1,4 +1,3 @@
-uuid: 66c036e1-ae18-4809-8900-b7d238580198
 langcode: en
 status: true
 dependencies:
@@ -18,28 +17,21 @@ display:
     id: default
     display_title: Master
     position: 0
-    provider: views
     display_options:
       access:
         type: none
         options: {  }
-        provider: views
-        dependencies: {  }
       cache:
         type: none
         options: {  }
-        provider: views
-        dependencies: {  }
       query:
         type: views_query
         options:
           disable_sql_rewrite: false
           distinct: false
           replica: false
-          query_comment: false
+          query_comment: ''
           query_tags: {  }
-        provider: views
-        dependencies: {  }
       exposed_form:
         type: basic
         options:
@@ -50,8 +42,6 @@ display:
           expose_sort_order: true
           sort_asc_label: Asc
           sort_desc_label: Desc
-        provider: views
-        dependencies: {  }
       pager:
         type: full
         options:
@@ -62,7 +52,7 @@ display:
           expose:
             items_per_page: false
             items_per_page_label: 'Items per page'
-            items_per_page_options: '5, 10, 20, 40, 60'
+            items_per_page_options: '5, 10, 25, 50'
             items_per_page_options_all: false
             items_per_page_options_all_label: '- All -'
             offset: false
@@ -73,8 +63,6 @@ display:
             first: '« first'
             last: 'last »'
           quantity: 9
-        provider: views
-        dependencies: {  }
       style:
         type: table
         options:
@@ -88,6 +76,11 @@ display:
           description: ''
           columns:
             id: id
+            display_name: display_name
+            email: email
+            street_address: street_address
+            tag_id: tag_id
+            display_name_1: display_name_1
           info:
             id:
               sortable: false
@@ -96,29 +89,53 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
+            display_name:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            email:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            street_address:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            tag_id:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            display_name_1:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
           default: '-1'
           empty_table: false
-        provider: views
       row:
         type: fields
-        options:
-          inline: {  }
-          separator: ''
-          hide_empty: false
-          default_field_elements: true
-        provider: views
-        dependencies: {  }
       fields:
         id:
+          id: id
           table: civicrm_contact
           field: id
-          id: id
-          plugin_id: numeric
-          provider: views
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies: {  }
           label: 'Internal Contact ID'
           exclude: false
           alter:
@@ -138,7 +155,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -163,12 +180,12 @@ display:
           set_precision: false
           precision: 0
           decimal: .
-          separator: ','
+          separator: ''
           format_plural: false
-          format_plural_singular: '1'
-          format_plural_plural: '@count'
+          format_plural_string: "1\x03@count"
           prefix: ''
           suffix: ''
+          plugin_id: numeric
         display_name:
           id: display_name
           table: civicrm_contact
@@ -176,9 +193,6 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - views
           label: 'Display Name'
           exclude: false
           alter:
@@ -198,7 +212,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -221,7 +235,6 @@ display:
           empty_zero: false
           hide_alter_empty: true
           plugin_id: standard
-          provider: views
         email:
           id: email
           table: civicrm_email
@@ -229,9 +242,6 @@ display:
           relationship: id_email
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - views
           label: Email
           exclude: false
           alter:
@@ -251,7 +261,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -274,7 +284,6 @@ display:
           empty_zero: false
           hide_alter_empty: true
           plugin_id: standard
-          provider: views
         street_address:
           id: street_address
           table: civicrm_address
@@ -282,9 +291,6 @@ display:
           relationship: id_address
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - views
           label: 'Street Address'
           exclude: false
           alter:
@@ -304,7 +310,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -327,7 +333,6 @@ display:
           empty_zero: false
           hide_alter_empty: true
           plugin_id: standard
-          provider: views
         tag_id:
           id: tag_id
           table: civicrm_entity_tag
@@ -335,10 +340,7 @@ display:
           relationship: id_entity_tag
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - civicrm_views
-          label: 'Tag ID'
+          label: ''
           exclude: false
           alter:
             alter_text: false
@@ -357,7 +359,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -371,7 +373,7 @@ display:
           element_class: ''
           element_label_type: ''
           element_label_class: ''
-          element_label_colon: true
+          element_label_colon: false
           element_wrapper_type: ''
           element_wrapper_class: ''
           element_default_classes: true
@@ -381,7 +383,6 @@ display:
           hide_alter_empty: true
           pseudoconstant_format: pseudoconstant
           plugin_id: civicrm_pseudoconstant
-          provider: civicrm_views
         display_name_1:
           id: display_name_1
           table: civicrm_contact
@@ -389,10 +390,6 @@ display:
           relationship: contact_id_b_contact
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - views
-              - views
           label: Employer
           exclude: false
           alter:
@@ -412,7 +409,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -435,7 +432,6 @@ display:
           empty_zero: false
           hide_alter_empty: true
           plugin_id: standard
-          provider: views
       filters: {  }
       sorts:
         id:
@@ -445,15 +441,12 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          dependencies:
-            module:
-              - views
           order: ASC
           exposed: false
           expose:
             label: ''
           plugin_id: standard
-          provider: views
+      title: Contacts
       header: {  }
       footer: {  }
       empty: {  }
@@ -465,15 +458,11 @@ display:
           relationship: none
           group_type: group
           admin_label: 'CiviCRM Emails (from Contact.id)'
-          dependencies:
-            module:
-              - civicrm_views
           required: false
           location_type: '0'
           is_billing: 0
           is_primary: 1
           plugin_id: civicrm_location
-          provider: civicrm_views
         id_address:
           id: id_address
           table: civicrm_contact
@@ -481,15 +470,11 @@ display:
           relationship: none
           group_type: group
           admin_label: 'CiviCRM Addresses (from Contact.id)'
-          dependencies:
-            module:
-              - civicrm_views
           required: false
           location_type: '0'
           is_billing: 0
           is_primary: 1
           plugin_id: civicrm_location
-          provider: civicrm_views
         id_entity_tag:
           id: id_entity_tag
           table: civicrm_contact
@@ -497,12 +482,8 @@ display:
           relationship: none
           group_type: group
           admin_label: 'CiviCRM Tags (from Contact.id)'
-          dependencies:
-            module:
-              - views
           required: false
           plugin_id: standard
-          provider: views
         id_relationship_a:
           id: id_relationship_a
           table: civicrm_contact
@@ -510,15 +491,11 @@ display:
           relationship: none
           group_type: group
           admin_label: 'CiviCRM Relationship as Contact A (from Contact.id)'
-          dependencies:
-            module:
-              - civicrm_views
           required: false
           is_active: 1
           relationship_type:
             5: '5'
           plugin_id: civicrm_relationship
-          provider: civicrm_views
         contact_id_b_contact:
           id: contact_id_b_contact
           table: civicrm_relationship
@@ -526,12 +503,11 @@ display:
           relationship: id_relationship_a
           group_type: group
           admin_label: 'CiviCRM Contact B (from Relationship.contact_id_b)'
-          dependencies:
-            module:
-              - views
           required: false
           plugin_id: standard
-          provider: views
       arguments: {  }
-      field_langcode: '***CURRENT_LANGUAGE***'
-      field_langcode_add_to_query: null
+      display_extenders: {  }
+    cache_metadata:
+      contexts:
+        - 'languages:language_interface'
+      cacheable: false

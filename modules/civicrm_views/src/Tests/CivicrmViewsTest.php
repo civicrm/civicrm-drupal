@@ -12,6 +12,8 @@ use Drupal\views\Views;
  */
 class CivicrmViewsTest extends CivicrmTestBase {
   public static $modules = array('civicrm_views', 'civicrm_views_config');
+  // @Todo: Provide schema declaraction
+  protected $strictConfigSchema = FALSE;
 
   protected $contact_data = array(
     array(
@@ -84,6 +86,7 @@ class CivicrmViewsTest extends CivicrmTestBase {
       'options' => array('limit' => 100),
       'api.email.get' => 1,
       'api.entity_tag.get' => 1,
+      'api.address.get' => 1,
     ));
 
     $this->assertTrue(empty($result['is_error']), "api.contact.get result OK.");
@@ -109,14 +112,14 @@ class CivicrmViewsTest extends CivicrmTestBase {
     $this->assertTrue(is_object($view), "View object loaded.");
     $this->dieOnFail = FALSE;
 
-    $view->setDisplay();
+    $output = $view->preview();
+    $output = \Drupal::service('renderer')->render($output, TRUE);
+    $this->setRawContent($output);
 
-    $this->drupalSetContent(drupal_render($render));
+    $xpath = $this->xpath('//div[@class="view-content"]');
+    $this->assertTrue($xpath, 'View content has been found in the rendered output.');
 
-    $xpath = $this->xpath('//div[@class="views-element-container"]');
-    $this->assertTrue($xpath, 'The view container has been found in the rendered output.');
-
-    $this->verbose($this->drupalGetContent());
+    $this->verbose($this->getRawContent());
 
     $xpath = $this->xpath('//tbody/tr');
     $this->assertEqual(3, count($xpath), "There are 3 rows in the table.");
