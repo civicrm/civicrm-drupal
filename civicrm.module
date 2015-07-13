@@ -213,24 +213,6 @@ function civicrm_initialize() {
       drupal_set_html_head($header);
     }
 
-    $args = explode('/', $_GET['q']);
-    if (
-      (!isset($args[1]) || $args[1] != 'upgrade') &&
-      CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
-        // drupal wysiwyg
-        'editor_id'
-      ) == 4
-    ) {
-      //we have to ensure that wysiwyg is loaded since
-      //pages load only with ajax callbacks
-      $formats = filter_formats();
-      foreach ($formats as $id => $format) {
-        wysiwyg_get_profile($id);
-      }
-      $path = drupal_get_path('module', 'filter');
-      drupal_add_js($path . '/filter.js');
-      drupal_add_css($path . '/filter.css');
-    }
   }
   setMySQLTimeZone();
   return TRUE;
