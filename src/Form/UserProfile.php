@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Drupal\Core\Cache\Cache;
 
 class UserProfile extends FormBase  {
   protected $user;
@@ -80,6 +81,8 @@ class UserProfile extends FormBase  {
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Somehow, somewhere, CiviCRM is processing our form. I have no idea how.
+    // Invalidate caches for user, so that latest profile information shows.
+    Cache::invalidateTags(array('user:' . $this->user->id()));
     drupal_set_message($this->t("Profile successfully updated."));
   }
 
