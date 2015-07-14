@@ -2,7 +2,7 @@
 
 namespace Drupal\civicrm\Plugin\Block;
 
-use Drupal\block\BlockBase;
+use Drupal\Core\Block\BlockBase;
 use Drupal\civicrm\Civicrm;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "civicrm_block",
  *   admin_label = @Translation("Civicrm block"),
  *   category = @Translation("Civicrm"),
- *   derivative = "Drupal\civicrm\Plugin\Derivative\CivicrmBlock",
+ *   deriver = "Drupal\civicrm\Plugin\Derivative\CivicrmBlock",
  * )
  */
 class CivicrmBlock extends BlockBase implements ContainerFactoryPluginInterface {
