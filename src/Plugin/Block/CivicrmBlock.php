@@ -6,6 +6,7 @@ use Drupal\Core\Block\BlockBase;
 use Drupal\civicrm\Civicrm;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Provides the core Civicrm blocks.
@@ -40,9 +41,10 @@ class CivicrmBlock extends BlockBase implements ContainerFactoryPluginInterface 
     $block_id = $this->getDerivativeId();
     $content = \CRM_Core_Block::getContent($block_id)['content'];
 
+    // Bypass Drupal SafeString escaping by setting output as already escaped.
     if ($content) {
       return array(
-        '#markup' => $content,
+        '#markup' => SafeMarkup::set($content, 'all'),
       );
     }
     return array();
