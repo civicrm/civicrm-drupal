@@ -11,6 +11,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\civicrm\CivicrmPageState;
 use Drupal\civicrm\Civicrm;
+use Drupal\Component\Utility\SafeMarkup;
 
 class CivicrmController extends ControllerBase {
   protected $civicrm;
@@ -63,8 +64,11 @@ class CivicrmController extends ControllerBase {
       \CRM_Utils_System::addHTMLHead($region->render(''));
     }
 
+    // We set the CiviCRM markup as safe and assume all XSS (an other) issues have already
+    // been taken care of. The SafeMarkup::set() function is stated to be used for
+    // internal use only, so this is a cludge.
     $build = array(
-      '#markup' => $content,
+      '#markup' => SafeMarkup::set($content, 'all'),
     );
     $counter = 0;
     foreach ($this->civicrmPageState->getCSS() as $css) {
