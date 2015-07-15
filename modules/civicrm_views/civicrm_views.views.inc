@@ -515,7 +515,7 @@ function _civicrm_views_field_to_field_plugin($entity, $field) {
     case CRM_Utils_Type::T_LONGTEXT:
       // @Todo: Override markup to allow configurable text formats
       return array(
-        'id' => 'markup',
+        'id' => 'civicrm_markup',
       );
     case CRM_Utils_Type::T_BOOLEAN:
       return array(
