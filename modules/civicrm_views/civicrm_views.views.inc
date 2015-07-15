@@ -40,6 +40,7 @@ function civicrm_views_views_data() {
         'field' => _civicrm_views_field_to_field_plugin($civicrm_entity, $field),
         'sort' => _civicrm_views_field_to_sort_plugin($civicrm_entity, $field),
         'filter' => _civicrm_views_field_to_filter_plugin($civicrm_entity, $field),
+        'argument' => _civicrm_views_field_to_argument_plugin($civicrm_entity, $field),
         'relationship' => array(),
       );
     }
@@ -73,6 +74,7 @@ function civicrm_views_views_data() {
       'field' => _civicrm_views_field_to_field_plugin($civicrm_entities[$field['join']], $field),
       'sort' => _civicrm_views_field_to_sort_plugin($civicrm_entities[$field['join']], $field),
       'filter' => _civicrm_views_field_to_filter_plugin($civicrm_entities[$field['join']], $field),
+      'argument' => _civicrm_views_field_to_argument_plugin($civicrm_entity, $field),
       'relationship' => array(),
     );
   }
@@ -624,6 +626,29 @@ function _civicrm_views_field_to_filter_plugin($entity, $field) {
     default:
       return array(
         'id' => 'standard',
+      );
+  }
+}
+
+/**
+ * For the meantime, only provide contextual filters for a limited
+ * number of numeric and text fields.
+ */
+function _civicrm_views_field_to_argument_plugin($entity, $field) {
+  $type = !empty($field['pseudoconstant']) ? 'pseudoconstant' : $field['type'];
+
+  switch ($type) {
+    case CRM_Utils_Type::T_INT:
+    case CRM_Utils_Type::T_FLOAT:
+      return array(
+        'id' => 'numeric',
+      );
+    case CRM_Utils_Type::T_ENUM:
+    case CRM_Utils_Type::T_STRING:
+    case CRM_Utils_Type::T_URL:
+    case CRM_Utils_Type::T_EMAIL:
+      return array(
+        'id' => 'string',
       );
   }
 }
