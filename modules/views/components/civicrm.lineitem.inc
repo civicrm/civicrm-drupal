@@ -199,7 +199,7 @@ function _civicrm_lineitem_data(&$data, $enabled) {
   // Line-item financial type
   $data['civicrm_line_item']['financial_type'] = array(
       'title' => t('Line item Financial Type'),
-      'help' => t('The Type of Line Item, ie Member Dues, Event Fees etc'),
+      'help' => t('Financial type for Line Item, ie Member Dues, Event Fees etc'),
       'real field' => 'financial_type_id',
       'field' => array(
           'handler' => 'civicrm_handler_field_pseudo_constant',
