@@ -41,8 +41,7 @@ function _civicrm_lineitem_data(&$data, $enabled) {
     'title' => t('CiviCRM Line-items'),
     'help' => t("View displays CiviCRM Line-items."),
   );
-  
-  
+
   //CiviCRM Line-items - FIELDS
 
   // Link to contribution table
@@ -58,7 +57,7 @@ function _civicrm_lineitem_data(&$data, $enabled) {
       ),
     );
   }
-  
+
   // Line-item ID field
   $data['civicrm_line_item']['id'] = array(
       'title' => t('ID'),
@@ -77,7 +76,7 @@ function _civicrm_lineitem_data(&$data, $enabled) {
           'handler' => 'views_handler_sort',
       ),
   );
-  
+
   // Line-item label
   $data['civicrm_line_item']['label'] = array(
       'title' => t('Label'),
@@ -110,7 +109,7 @@ function _civicrm_lineitem_data(&$data, $enabled) {
       'label' => t('Price Field'),
     ),
   );
-  
+
   // Line-item - price field value relationship
   $data['civicrm_line_item']['price_field_value_id'] = array(
     'title' => t('Price Field Value'),
@@ -123,7 +122,7 @@ function _civicrm_lineitem_data(&$data, $enabled) {
       'label' => t('Price Field Value'),
     ),
   );
-  
+
   // Line-item - contribution relationship
   $data['civicrm_line_item']['entity_id'] = array(
       'title' => t('Contribution Record ID'),
@@ -136,7 +135,7 @@ function _civicrm_lineitem_data(&$data, $enabled) {
           'label' => t('CiviCRM Contribution, with custom fields'),
       ),
   );
-    
+
   // Line-Item Total amount
   $data['civicrm_line_item']['line_total'] = array(
       'title' => t('Total Line Item'),
@@ -176,7 +175,7 @@ function _civicrm_lineitem_data(&$data, $enabled) {
           'handler' => 'views_handler_sort',
       ),
   );
-  
+
   // Line-Item quantity
   $data['civicrm_line_item']['qty'] = array(
       'title' => t('Item quantity'),
@@ -196,10 +195,11 @@ function _civicrm_lineitem_data(&$data, $enabled) {
           'handler' => 'views_handler_sort',
       ),
   );
-  
+
   // Line-item financial type
   $data['civicrm_line_item']['financial_type'] = array(
       'title' => t('Line item Financial Type'),
+      'help' => t('Financial type for Line Item, ie Member Dues, Event Fees etc'),
       'real field' => 'financial_type_id',
       'field' => array(
           'handler' => 'civicrm_handler_field_pseudo_constant',
