@@ -634,6 +634,23 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
+  //Deceased Date
+  $data['civicrm_contact']['deceased_date'] = array(
+    'title' => t('Deceased Date'),
+    'help' => t('The contact\'s deceased date.'),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_datetime',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'civicrm_handler_filter_datetime',
+      'is date' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'civicrm_handler_sort_date',
+    ),
+  );
+
   // Last modified date
   $data['civicrm_contact']['modified_date'] = array(
     'title' => t('Modified date'),
