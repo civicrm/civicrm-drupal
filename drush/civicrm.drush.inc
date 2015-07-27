@@ -582,7 +582,7 @@ function drush_civicrm_ext_install($extension_name) {
     if($result['values'] && $result['values'] == 1) {
       drush_print(dt("Extension !ename installed.", array('!ename' => $extension_name)));
     } else {
-      drush_log(t('Extension !ename could not be installed.', array('!ename' => $extension_name)), 'error');    
+      drush_log(t('Extension !ename could not be installed.', array('!ename' => $extension_name)), 'error');
     }
   }
   catch (CiviCRM_API3_Exception $e) {
@@ -626,7 +626,7 @@ function drush_civicrm_ext_uninstall($extension_name) {
     if($result['values'] && $result['values'] == 1) {
       drush_print(dt("Extension !ename uninstalled.", array('!ename' => $extension_name)));
     } else {
-      drush_log(t('Extension !ename could not be uninstalled.', array('!ename' => $extension_name)), 'error');    
+      drush_log(t('Extension !ename could not be uninstalled.', array('!ename' => $extension_name)), 'error');
     }
   }
   catch (CiviCRM_API3_Exception $e) {
@@ -1459,18 +1459,10 @@ function _civicrm_init($fail = TRUE) {
     return drush_set_error('CIVICRM_INIT_CODEBASE_NOT_FOUND', dt('Could not locate CiviCRM codebase. Make sure CiviCRM settings file has correct information.'));
   }
 
-  // Autoload was added in 4.2
-  require_once 'CRM/Utils/System.php';
-  $codeVer = CRM_Utils_System::version();
-
-  if (substr($codeVer, 0, 3) >= '4.2') {
-    require_once $civicrm_root . '/CRM/Core/ClassLoader.php';
-    CRM_Core_ClassLoader::singleton()->register();
-  }
-
+  require_once $civicrm_root . '/CRM/Core/ClassLoader.php';
+  CRM_Core_ClassLoader::singleton()->register();
   // also initialize config object
-  require_once 'CRM/Core/Config.php';
-  $config = CRM_Core_Config::singleton();
+  CRM_Core_Config::singleton();
 
   $init = TRUE;
   return $init;
