@@ -23,6 +23,13 @@ function civicrm_page_top(&$page_top) {
 }
 
 /**
+ * Implements hook_initialize().
+ */
+function civicrm_initialize() {
+  return \Drupal::service('civicrm');
+}
+
+/**
  * Implements hook_entity_extra_field_info().
  *
  * Add additional pseudo-fields to the user display. This allows the UI
