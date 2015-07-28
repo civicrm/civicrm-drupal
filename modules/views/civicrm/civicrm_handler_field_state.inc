@@ -52,10 +52,12 @@ class civicrm_handler_field_state extends civicrm_handler_field_address {
     }
 
     if ($this->options['prov_display'] == 1) {
-      return self::$_states[$values->{$this->field_alias}];
+      return  isset(self::$_states[$values->{$this->field_alias}])
+        ? self::$_states[$values->{$this->field_alias}]: NULL;
     }
     else {
-      return self::$_states_full[$values->{$this->field_alias}];
+      return isset(self::$_states_full[$values->{$this->field_alias}])
+        ? self::$_states_full[$values->{$this->field_alias}]: NULL;
     }
   }
 

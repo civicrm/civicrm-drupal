@@ -52,7 +52,8 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
      */
 
     // get the country filter
-    foreach ($this->view->filter as $name => $handler) {
+    $filters = is_array($this->view->filter) ? $this->view->filter : array();
+    foreach ($filters as $name => $handler) {
       if ($handler->definition['handler'] == 'civicrm_handler_filter_country_multi') {
         $country_field = $handler->field;
         $selected_countries = $loaded_list = array();
@@ -69,6 +70,7 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
           array(':countries' => $allowedCountries))
         ->fetchAllAssoc('id');
 
+        $state_html = array();
         foreach ($result as $state_id => $state) {
           $state_html[$state->country_id] .= '<option value="' . $state_id . '">' . $state->name . '</option>';
           if(in_array($state->country_id, $selected_countries)) {
