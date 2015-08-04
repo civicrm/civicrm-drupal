@@ -23,6 +23,39 @@ function civicrm_page_top(&$page_top) {
 }
 
 /**
+ * Implements hook_toolbar().
+ *
+ * Injects a link into the Drupal toolbar to /civicrm for users with
+ * 'access civicrm' permission.
+ */
+function civicrm_toolbar() {
+  $items = [];
+
+  $user = \Drupal::currentUser();
+  if ($user->hasPermission('access civicrm')) {
+    $items['civicrm'] = [
+      '#type' => 'toolbar_item',
+      '#cache' => [
+        'contexts' => ['user'],
+      ],
+      'tab' => [
+        '#type' => 'link',
+        '#title' => t('CiviCRM'),
+        '#url' => \Drupal\Core\Url::fromRoute('civicrm.civicrm'),
+        '#options' => [
+          'attributes' => [
+            'title' => t('CiviCRM'),
+            'class' => ['toolbar-item'],
+          ],
+        ],
+      ],
+    ];
+  }
+
+  return $items;
+}
+
+/**
  * Implements hook_entity_extra_field_info().
  *
  * Add additional pseudo-fields to the user display. This allows the UI
