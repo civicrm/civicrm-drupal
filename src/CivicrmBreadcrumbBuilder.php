@@ -10,14 +10,21 @@ namespace Drupal\civicrm;
 use Drupal\civicrm\CivicrmPageState;
 use Drupal\Core\Breadcrumb\BreadcrumbBuilderInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Link;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\Core\Url;
 
 /**
  * Provides a custom taxonomy breadcrumb builder that uses the term hierarchy.
  */
 class CivicrmBreadcrumbBuilder implements BreadcrumbBuilderInterface {
+  use StringTranslationTrait;
+
   protected $civicrmPageState;
 
-  public function __construct(CivicrmPageState $civicrmPageState) {
+  public function __construct(TranslationInterface $stringTranslation, CivicrmPageState $civicrmPageState) {
+    $this->stringTranslation = $stringTranslation;
     $this->civicrmPageState = $civicrmPageState;
   }
 
@@ -27,8 +34,8 @@ class CivicrmBreadcrumbBuilder implements BreadcrumbBuilderInterface {
   public function applies(RouteMatchInterface $route_match) {
     $route_object = $route_match->getRouteObject();
     if ($route_object) {
-      $content = $route_object->getDefault('_content');
-      if (isset($content) && $content == 'Drupal\civicrm\Controller\CivicrmController::main') {
+      $controller = $route_object->getDefault('_controller');
+      if (isset($controller) && $controller == 'Drupal\civicrm\Controller\CivicrmController::main') {
         return TRUE;
       }
     }
@@ -39,13 +46,15 @@ class CivicrmBreadcrumbBuilder implements BreadcrumbBuilderInterface {
    * {@inheritdoc}
    */
   public function build(RouteMatchInterface $route_match) {
-    $breadcrumbs = array();
-    $breadcrumbs[] = l(t('Home'), '<front>');
+    $breadcrumbs = [Link::createFromRoute($this->t('Home'), '<front>')];
 
     foreach ($this->civicrmPageState->getBreadcrumbs() as $name => $url) {
-      // We expect all urls to have already been passed through the url helper, and therefore
-      // be valid Drupal urls.
-      $breadcrumbs[] = "<a href=\"{$url}\">{$name}</a>";
+      // Unfortunately, all urls have been passed through CRM_Utils_System::url,
+      // so we need to unpack the url to construct it as a Drupal Url object.
+      // Additionally, for some reason that I cannot fathom, CiviCRM is htmlentity
+      // encoding the urls — so we have to decode this first.
+      $url = Url::fromUserInput(html_entity_decode($url));
+      $breadcrumbs[] = new Link($name, $url);
     }
     return $breadcrumbs;
   }

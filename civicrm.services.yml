@@ -5,6 +5,6 @@ services:
     class: Drupal\civicrm\CivicrmPageState
   civicrm.breadcrumb:
     class: Drupal\civicrm\CivicrmBreadcrumbBuilder
-    arguments: [@civicrm.page_state]
+    arguments: [@string_translation, @civicrm.page_state]
     tags:
       - { name: breadcrumb_builder, priority: 1002 }
