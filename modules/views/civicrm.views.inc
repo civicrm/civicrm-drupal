@@ -709,7 +709,7 @@ function civicrm_date_views_fields($field) {
     // The type of date: DATE_UNIX, DATE_ISO, DATE_DATETIME.
     'sql_type' => DATE_DATETIME,
     // Timezone handling options: 'none', 'site', 'date', 'utc'.
-    'tz_handling' => 'site',
+    'tz_handling' => 'none',
     // Needed only for dates that use 'date' tz_handling.
     'timezone_field' => '',
     // Needed only for dates that use 'date' tz_handling.
