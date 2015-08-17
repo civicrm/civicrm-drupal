@@ -404,7 +404,7 @@ function _civicrm_core_data(&$data, $enabled) {
 
   //BOOLEAN : IS Deceased
   $data['civicrm_contact']['is_deceased'] = array(
-    'title' => t('Is Deceased'),
+    'title' => t('Deceased'),
     'help' => t('Is the contact deceased?'),
     'field' => array(
       'handler' => 'views_handler_field_boolean',
@@ -932,7 +932,7 @@ function _civicrm_core_data(&$data, $enabled) {
 
   //ZIP / POSTAL CODE
   $data['civicrm_address']['postal_code'] = array(
-    'title' => t('ZIP / Postal Code'),
+    'title' => t('Postal Code'),
     'help' => t('ZIP / Postal Code of the Address'),
     'field' => array(
       'handler' => 'civicrm_handler_field_address',
@@ -1373,7 +1373,7 @@ function _civicrm_core_data(&$data, $enabled) {
 
   //FULL PHONE NUMBER
   $data['civicrm_phone']['phone'] = array(
-    'title' => t('Phone Number'),
+    'title' => t('Phone'),
     'help' => t('Full Phone Number'),
     'field' => array(
       'handler' => 'civicrm_handler_field_phone',
