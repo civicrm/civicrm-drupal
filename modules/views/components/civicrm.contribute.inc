@@ -164,7 +164,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
 
   //Payment Instrument Used
   $data['civicrm_contribution']['payment_instrument'] = array(
-    'title' => t('Payment Instrument'),
+    'title' => t('Payment Method'),
     'real field' => 'payment_instrument_id',
     'help' => t('The Payment Instrument Used for the Contribution'),
     'field' => array(
@@ -191,7 +191,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
 
   //Contribution Receive Date
   $data['civicrm_contribution']['receive_date'] = array(
-    'title' => t('Receive Date'),
+    'title' => t('Date Received'),
     'help' => t('The Date the Contribution was received / paid'),
     'field' => array(
       'handler' => 'civicrm_handler_field_datetime',
@@ -207,7 +207,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
   );
 
   civicrm_views_add_date_arguments($data['civicrm_contribution'], array(
-    'title' => 'Receive Date',
+    'title' => t('Date Received'),
       'name' => 'receive_date',
     ));
   //Non Deductible Amount of Contribution
