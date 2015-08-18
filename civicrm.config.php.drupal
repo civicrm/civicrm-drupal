@@ -46,7 +46,7 @@ function civicrm_conf_init() {
     $candidates[] = "../../sites/default";
     $candidates[] = "../../../sites/default";
 
-    foreach ($candidate as $candidate) {
+    foreach ($candidates as $candidate) {
       if (folder_exists($candidate)) {
         return $candidate;
       }
