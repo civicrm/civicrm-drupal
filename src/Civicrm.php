@@ -61,14 +61,7 @@ class Civicrm {
    * @param string $contact_type
    */
   public function synchronizeUser(AccountInterface $account, $contact_type = 'Individual') {
-    // CiviCRM is probing Drupal user object based on the CMS type, and for Drupal it is expecting a Drupal 6/7 user object.
-    // It really should be using an standardised interface and requiring the CMS's to offer an implementation.
-    // Alas, we'll mock an object for it to use.
-    $user = new \stdClass();
-    $user->uid = $account->id();
-    $user->name = $account->getUsername();
-    $user->mail = $account->getEmail();
-    \CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal', $this->getCtype($contact_type));
+    \CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Drupal', $this->getCtype($contact_type));
   }
 
   /**
