@@ -10,6 +10,7 @@ use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Drupal\Core\Cache\Cache;
+use Drupal\Component\Utility\SafeMarkup;
 
 class UserProfile extends FormBase  {
   protected $user;
@@ -54,7 +55,7 @@ class UserProfile extends FormBase  {
       '#type' => 'fieldset',
       '#title' => $this->uf_group['title'],
       'html' => array(
-        '#markup' => $html,
+        '#markup' => SafeMarkup::set($html, 'all'),
       ),
     );
     $form['actions'] = array(

@@ -206,7 +206,7 @@ function civicrm_form_user_register_form_alter(&$form, &$form_state, $form_id) {
   $html = \CRM_Core_BAO_UFGroup::getEditHTML(NULL, '', 1, TRUE, FALSE, NULL, FALSE, $civicrm->getCtype());
 
   $form['civicrm_profile_register'] = array(
-    '#markup' => $html,
+    '#markup' => Drupal\Component\Utility\SafeMarkup::set($html, 'all'),
   );
   $form['#validate'][] = '_civicrm_user_register_form_validate';
 }
