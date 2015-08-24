@@ -9,6 +9,7 @@ namespace Drupal\civicrm;
 
 use Drupal\civicrm\CivicrmPageState;
 use Drupal\Core\Breadcrumb\BreadcrumbBuilderInterface;
+use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Link;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -46,7 +47,8 @@ class CivicrmBreadcrumbBuilder implements BreadcrumbBuilderInterface {
    * {@inheritdoc}
    */
   public function build(RouteMatchInterface $route_match) {
-    $breadcrumbs = [Link::createFromRoute($this->t('Home'), '<front>')];
+    $breadcrumb = new Breadcrumb();
+    $breadcrumb->addLink(Link::createFromRoute($this->t('Home'), '<front>'));
 
     foreach ($this->civicrmPageState->getBreadcrumbs() as $name => $url) {
       // Unfortunately, all urls have been passed through CRM_Utils_System::url,
@@ -54,8 +56,8 @@ class CivicrmBreadcrumbBuilder implements BreadcrumbBuilderInterface {
       // Additionally, for some reason that I cannot fathom, CiviCRM is htmlentity
       // encoding the urls — so we have to decode this first.
       $url = Url::fromUserInput(html_entity_decode($url));
-      $breadcrumbs[] = new Link($name, $url);
+      $breadcrumb->addLink(new Link($name, $url));
     }
-    return $breadcrumbs;
+    return $breadcrumb;
   }
 }
