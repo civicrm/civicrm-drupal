@@ -90,10 +90,11 @@ function civicrm_requirements($phase) {
   $install_requirements = new \Civi\Install\Requirements();
 
   // Gather directories that need to be writable
-  $file_paths = array(
-    realpath(\Drupal::service('kernel')->getSitePath()), // eg. sites/default folder
-    realpath(\Drupal\Core\StreamWrapper\PublicStream::basePath()), // eg. sites/default/files folder
-  );
+  $file_paths = [];
+  if (!file_exists(\Drupal::service('kernel')->getSitePath() . '/civicrm.settings.php')) {
+    $file_paths[] =  realpath(\Drupal::service('kernel')->getSitePath()); // eg. sites/default folder
+  }
+  $file_paths[] = realpath(\Drupal\Core\StreamWrapper\PublicStream::basePath()); // eg. sites/default/files folder
 
   // Attempt to make directories writable
   // We don't bother checking if these attempts are actually successful as
