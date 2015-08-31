@@ -848,8 +848,11 @@ function civicrm_views_data_alter(&$data) {
     'real field' => 'website_type_id',
     'help' => t('The type of website for the contact'),
     'field' => array(
-      'handler' => 'civicrm_handler_field_website_type',
+      'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Core_DAO_Website',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
