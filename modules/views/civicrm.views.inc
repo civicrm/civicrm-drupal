@@ -858,8 +858,11 @@ function civicrm_views_data_alter(&$data) {
       'handler' => 'views_handler_argument',
     ),
     'filter' => array(
-      'handler' => 'civicrm_handler_filter_website_type',
+      'handler' => 'civicrm_handler_filter_pseudo_constant',
       'allow empty' => TRUE,
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'get',
+      'dao class' => 'CRM_Core_DAO_Website',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
