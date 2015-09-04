@@ -148,6 +148,8 @@ function civicrm_initialize() {
     echo "CiviCRM requires PHP Version 5.2 or greater. You are running PHP Version " . PHP_VERSION . "<p>";
     exit();
   }
+  
+  drupal_add_js();
 
   _civicrm_registerClassLoader();
 
