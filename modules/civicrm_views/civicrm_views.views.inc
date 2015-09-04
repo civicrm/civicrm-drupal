@@ -408,6 +408,10 @@ function _civicrm_views_add_implicit_joins(&$data) {
       'left_field' => 'address_id',
       'field' => 'id',
     ),
+    'civicrm_event' => array( 
+      'left_field' => 'loc_block_id', 
+      'field' => 'id', 
+    ),
   );
   $data['civicrm_contact']['table']['join'] = array(
     'civicrm_activity_contact' => array(
