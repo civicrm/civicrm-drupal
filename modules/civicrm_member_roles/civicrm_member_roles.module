@@ -518,31 +518,49 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL) {
       'contact_id' => $cid,
       'options' => array('limit' => 0),
     );
-    //CRM-16000 added try/catch to api call
     try {
       $memberships = civicrm_api3('membership', 'get', $memParams);
-    } catch (CiviCRM_API3_Exception $e) {
-      $error = $e->getMessage();
-      return $error;
     }
-    //CRM-16000 remove inactive memberships if member has both active and inactive memberships
-    if ($memberships['count'] > 1){
-      $params = array(
-        'sequential' => 1,
-        'name' => array('IN' => array("Deceased", "Cancelled", "Pending", "Expired")),
-      );
-      try {
-        $result = civicrm_api3('MembershipStatus', 'get', $params);
-      } catch (CiviCRM_API3_Exception $e){
-        $error = $e->getMessage();
-        return $error;
+    catch (CiviCRM_API3_Exception $e) {
+      watchdog('civicrm_member_roles', $e->getMessage);
+    }
+    if ($memberships['count'] > 1) {
+      // Gather contact's memberships by membership type.
+      $membershipsByType = array();
+      foreach ($memberships['values'] as $mid => $membership) {
+        $membershipsByType[$membership['membership_type_id']][$membership['status_id']] = $mid;
       }
-      foreach ($result['values'] as $value){
-        $inactive[] = $value['id'];
-      }
-      foreach ($memberships['values'] as $key => $membership) {
-        if (in_array($membership['status_id'], $inactive)){
-          unset($membership['values'][$key]);
+      // Walk thru types, keep only the one with lowest weight status.
+      $statuses = array();
+      foreach ($membershipsByType as $type => $mems) {
+        // Don't bother if only one membership of $type.
+        if (count($mems) > 1) {
+          if (empty($statuses)) {
+            try {
+              $result = civicrm_api3('MembershipStatus', 'get', array('options' => array('sort' => "weight ASC")));
+              foreach ($result as $r) {
+                $statuses = array_keys($result['values']);
+              }
+            }
+            catch (CiviCRM_API3_Exception $e) {
+              watchdog('civicrm_member_roles', $e->getMessage);
+            }
+          }
+          $found = FALSE;
+          // CRM-16000: Walk statuses (sorted by weight) to decide which
+          // memberships to evaluate for Drupal role.
+          foreach ($statuses as $status_id => $x) {
+            if (CRM_Utils_Array::value($status_id, $mems)) {
+              if ($found) {
+                // Already found the membership to keep for this type, delete
+                // the others.
+                unset($memberships['values'][$mems[$status_id]]);
+              }
+              else {
+                $found = TRUE;
+              }
+            }
+          }
         }
       }
     }
