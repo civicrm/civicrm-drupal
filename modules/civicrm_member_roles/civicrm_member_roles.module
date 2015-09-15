@@ -513,41 +513,30 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL) {
       continue;
     }
 
-    //Get all memberships of contact
+    // Get all memberships of contact, plus status weight.
     $memParams = array(
       'contact_id' => $cid,
       'options' => array('limit' => 0),
+      'is_test' => 0,
+      'api.MembershipStatus.getsingle' => array(
+        'id' => '$value.status_id',
+        'return' => 'weight',
+      ),
     );
-    //CRM-16000 added try/catch to api call
     try {
       $memberships = civicrm_api3('membership', 'get', $memParams);
-    } catch (CiviCRM_API3_Exception $e) {
-      $error = $e->getMessage();
-      return $error;
     }
-    //CRM-16000 remove inactive memberships if member has both active and inactive memberships
-    if ($memberships['count'] > 1){
-      $params = array(
-        'sequential' => 1,
-        'name' => array('IN' => array("Deceased", "Cancelled", "Pending", "Expired")),
-      );
-      try {
-        $result = civicrm_api3('MembershipStatus', 'get', $params);
-      } catch (CiviCRM_API3_Exception $e){
-        $error = $e->getMessage();
-        return $error;
-      }
-      foreach ($result['values'] as $value){
-        $inactive[] = $value['id'];
-      }
-      foreach ($memberships['values'] as $key => $membership) {
-        if (in_array($membership['status_id'], $inactive)){
-          unset($membership['values'][$key]);
-        }
-      }
+    catch (CiviCRM_API3_Exception $e) {
+      watchdog('civicrm_member_roles', $e->getMessage);
     }
 
-    $contactMemberships = CRM_Utils_Array::value('values', $memberships);
+    $contactMemberships = CRM_Utils_Array::value('values', $memberships, array());
+
+    // CRM-16000 evaluate lower weight memberships last.
+    if ($memberships['count'] > 1) {
+      uasort($contactMemberships, '_civicrm_member_roles_sort_memberships');
+    }
+
     $addRoles           = array();
     $expRoles           = array();
 
@@ -596,6 +585,26 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL) {
     }
   }
   return TRUE;
+}
+
+/**
+ * Sort memberships by status weight, descending.
+ *
+ * @param array $a
+ *   One membership API result.
+ * @param array $b
+ *   The other membership API result.
+ *
+ * @return int
+ *   Whether to sort $a ahead of $b.
+ */
+function _civicrm_member_roles_sort_memberships($a, $b) {
+  $aStatusWeight = CRM_Utils_Array::value('weight', CRM_Utils_Array::value('api.MembershipStatus.getsingle', $a, array()));
+  $bStatusWeight = CRM_Utils_Array::value('weight', CRM_Utils_Array::value('api.MembershipStatus.getsingle', $b, array()));
+  if ($aStatusWeight == $bStatusWeight) {
+    return 0;
+  }
+  return ($aStatusWeight > $bStatusWeight) ? -1 : 1;
 }
 
 /**
