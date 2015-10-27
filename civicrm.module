@@ -1099,17 +1099,6 @@ function civicrm_civicrm_postProcess($formName, $form) {
 }
 
 /**
- * Implements hook_civicrm_merge().
- */
-function civicrm_civicrm_merge($type, &$data, $mainId, $otherId, $tables) {
-  if ($mainId == 2311 && $otherId == 5686 && $type == 'batch') {
-    $conflicts = &$data['fields_in_conflict'];
-    $conflicts['move_custom_1'] = 'end_user';
-    unset($conflicts['move_custom_8']);
-  }
-}
-
-/**
  * Implements hook_reviews().
  *
  * This implementation is invoked by coder_review module, and defines
