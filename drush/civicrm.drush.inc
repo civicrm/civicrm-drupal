@@ -202,6 +202,7 @@ function civicrm_drush_command() {
     // explicit callback declaration and non-standard name to avoid collision with "sql-conf"
     'callback' => 'drush_civicrm_sqlconf',
     'description' => 'Print CiviCRM database connection details.',
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION,
   );
   $items['civicrm-sql-connect'] = array(
     // explicit callback declaration and non-standard name to avoid collision with "sql-connect"
@@ -242,6 +243,7 @@ function civicrm_drush_command() {
     'callback' => 'drush_civicrm_sqlcli',
     'description' => "Open a SQL command-line interface using CiviCRM's credentials.",
     'aliases' => array('cvsqlc'),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION,
   );
   $items['civicrm-process-mail-queue'] = array(
     'description' => "Process pending CiviMail mailing jobs.",
@@ -1489,10 +1491,6 @@ function _civicrm_init($fail = TRUE) {
     require_once $civicrm_root . '/CRM/Core/ClassLoader.php';
     CRM_Core_ClassLoader::singleton()->register();
   }
-
-  // also initialize config object
-  require_once 'CRM/Core/Config.php';
-  $config = CRM_Core_Config::singleton();
 
   $init = TRUE;
   return $init;
