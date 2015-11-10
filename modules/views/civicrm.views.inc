@@ -754,16 +754,16 @@ function civicrm_date_views_tables() {
  */
 function civicrm_views_plugins() {
   $data = array();
-  
+
   // This just tells us that the themes are elsewhere
   $data['module'] = 'civicrm';
-  
+
   // Default argument to pull CiviCRM IDs from the URL
   $data['argument default']['civicrm_id'] = array(
     'title' => t('CiviCRM ID from URL'),
     'handler' => 'civicrm_plugin_argument_default_civicrm_id'
   );
-  
+
   // Calendar module integration
   if (module_exists('calendar')) {
     $civicrm_module_path = drupal_get_path('module', 'civicrm');
@@ -831,7 +831,6 @@ function civicrm_views_plugins() {
       ),
     );
   }
-	
+
   return $data;
 }
-
