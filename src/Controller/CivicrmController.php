@@ -68,7 +68,7 @@ class CivicrmController extends ControllerBase {
     // been taken care of. The SafeMarkup::set() function is stated to be used for
     // internal use only, so this is a cludge.
     $build = array(
-      '#markup' => SafeMarkup::set($content, 'all'),
+      '#markup' => SafeMarkup::format($content, []),
     );
     $counter = 0;
     foreach ($this->civicrmPageState->getCSS() as $css) {
@@ -86,7 +86,7 @@ class CivicrmController extends ControllerBase {
       // Mark the pageTitle as safe so markup is not escaped by Drupal.
       // This handles the case where, eg. the page title is surrounded by <span id="crm-remove-title" style=display: none">
       // Todo: This is a naughty way to do this. Better to have CiviCRM passing us no markup whatsoever.
-      \Drupal\Component\Utility\SafeMarkup::set($title);
+      \Drupal\Component\Utility\SafeMarkup::format($title, []);
       $build['#title'] = $title;
     }
 
