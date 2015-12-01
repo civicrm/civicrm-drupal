@@ -89,6 +89,33 @@ function civicrm_rules_rules_action_remove_from_group($contact, $settings) {
 }
 
 /**
+ * Action contact: add a contact to a group
+ */
+function civicrm_rules_rules_action_add_tag($contact, $settings) {
+  $contactId = !empty($contact->id) ? $contact->id : $contact->getVar('_contactId');
+
+  if ($contactId) {
+    foreach ($settings as $tagid) {
+      _civicrm_rules_tag_contact($contactId, $tagid);
+    }
+    return array('contact' => $contact);
+  }
+}
+
+/**
+ * Action contact: remove a contact from a group
+ */
+function civicrm_rules_rules_action_remove_tag($contact, $settings) {
+  $contactId = !empty($contact->id) ? $contact->id : $contact->getVar('_contactId');
+  if ($contactId) {
+    foreach ($settings as $tagid) {
+      _civicrm_rules_tag_contact($contactId, $tagid, 'delete');
+    }
+    return array('contact' => $contact);
+  }
+}
+
+/**
  * Action: Creates a contact.
  * FIX ME: This function is not called, hence can be deleted
  */

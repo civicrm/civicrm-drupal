@@ -67,6 +67,35 @@ function _civicrm_rules_group_contact($contactId, $groupId, $action = 'create') 
 }
 
 /**
+ * Function to get the list of tags
+ */
+function _civicrm_get_tags() {
+  civicrm_initialize();
+  $tagInformation = civicrm_api3('Tag', 'get', array('options' => array('limit' => 0),));
+
+  $tags = array();
+  foreach ($tagInformation['values'] as $values) {
+    $tags[$values['id']] = $values['title'];
+  }
+
+  return $tags;
+}
+
+/**
+ * Function to add tag to contacts
+ */
+function _civicrm_rules_tag_contact($contactId, $tagId, $action = 'create') {
+  civicrm_initialize();
+  $params = array(
+    'entity_table' => "civicrm_contact",
+    'entity_id' => $contactId,
+    'tag_id' => $tagId,
+  );
+  
+  civicrm_api3('EntityTag', $action, $params);
+}
+
+/**
  * Loads a contact into a version suitable for the rules actions
  */
 function _civicrm_rules_load_contact($contactID) {
