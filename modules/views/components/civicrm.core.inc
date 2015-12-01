@@ -758,6 +758,19 @@ function _civicrm_core_data(&$data, $enabled) {
     'field' => 'contact_id',
   );
 
+  // ADDRESS ID
+  $data['civicrm_address']['id'] = array(
+    'title' => t('Address'),
+    'help' => t('Contact Address'),
+    'relationship' => array(
+      'base' => 'civicrm_contact',
+      'field' => 'id',
+      'relationship table' => 'civicrm_address',
+      'relationship field' => 'contact_id',
+      'handler' => 'civicrm_handler_relationship_address',
+      'label' => t('CiviCRM Address'),
+    ),
+  );
 
   //BOOLEAN : IS PRIMARY ADDRESS
   $data['civicrm_address']['is_primary'] = array(
@@ -926,7 +939,10 @@ function _civicrm_core_data(&$data, $enabled) {
       'pseudo method' => 'stateProvince',
     ),
     'sort' => array(
-      'handler' => 'views_handler_sort',
+      'join_table' => 'civicrm_state_province',
+      'join_left_field' => 'state_province_id',
+      'join_field' => 'id',
+      'handler' => 'civicrm_handler_sort_address_pseudoconstant',
     ),
   );
 
@@ -1014,7 +1030,10 @@ function _civicrm_core_data(&$data, $enabled) {
       'pseudo method' => 'country',
     ),
     'sort' => array(
-      'handler' => 'views_handler_sort',
+      'join_table' => 'civicrm_country',
+      'join_left_field' => 'country_id',
+      'join_field' => 'id',
+      'handler' => 'civicrm_handler_sort_address_pseudoconstant',
     ),
   );
 
@@ -1039,7 +1058,10 @@ function _civicrm_core_data(&$data, $enabled) {
       'pseudo method' => 'county',
     ),
     'sort' => array(
-      'handler' => 'views_handler_sort',
+      'join_table' => 'civicrm_county',
+      'join_left_field' => 'county_id',
+      'join_field' => 'id',
+      'handler' => 'civicrm_handler_sort_address_pseudoconstant',
     ),
   );
 
@@ -1162,6 +1184,20 @@ function _civicrm_core_data(&$data, $enabled) {
     'left_field' => 'contact_id',
     'field' => 'contact_id',
   );
+  
+  // EMAIL ADDRESS ID
+  $data['civicrm_email']['id'] = array(
+    'title' => t('Email Address'),
+    'help' => t('Contact Email Address'),
+    'relationship' => array(
+      'base' => 'civicrm_contact',
+      'field' => 'id',
+      'relationship table' => 'civicrm_email',
+      'relationship field' => 'contact_id',
+      'handler' => 'civicrm_handler_relationship_mail',
+      'label' => t('CiviCRM Email'),
+    ),
+  );
 
   //BOOLEAN : IS PRIMARY EMAIL
   $data['civicrm_email']['is_primary'] = array(
@@ -1179,6 +1215,7 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
+      'handler' => 'civicrm_handler_sort_mail',
     ),
   );
 
@@ -1389,6 +1426,20 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
+    ),
+  );
+
+  // PHONE ID
+  $data['civicrm_phone']['id'] = array(
+    'title' => t('Phone'),
+    'help' => t('Contact Phone Number'),
+    'relationship' => array(
+      'base' => 'civicrm_contact',
+      'field' => 'id',
+      'relationship table' => 'civicrm_phone',
+      'relationship field' => 'contact_id',
+      'handler' => 'civicrm_handler_relationship_phone',
+      'label' => t('CiviCRM Phone'),
     ),
   );
 
