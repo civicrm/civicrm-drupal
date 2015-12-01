@@ -271,6 +271,9 @@ function _civicrm_get_url_parameters_as_url_string() {
  *  Context.
  */
 function civicrm_metatag_metatags_view_alter(&$output, $instance) {
+  if (arg(0) != 'civicrm') {
+    return;
+  }
   $linkUrls = array('og:url', 'canonical', 'shortlink');
   foreach ($linkUrls as $url) {
     if (isset($output[$url]['#attached']['drupal_add_html_head'][0][0]['#value'])) {
