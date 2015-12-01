@@ -227,9 +227,13 @@ function civicrm_drush_command() {
     'description' => 'Execute a query against the CiviCRM database.',
     'examples' => array(
       'drush civicrm-sql-query "SELECT * FROM civicrm_contact WHERE id=1"' => 'Browse user record',
+      'drush civicrm-sql-query --file=example.sql' => 'Alternate way to import sql statements from a file.',
     ),
     'arguments' => array(
-      'query' => 'A SQL query. Mandatory.',
+      'query' => 'A SQL query. Ignored if \'file\' is provided.',
+    ),
+    'options' => array(
+      'file' => 'Path to a file containing the SQL to be run. ',
     ),
   );
   $items['civicrm-sql-cli'] = array(
@@ -1308,7 +1312,7 @@ function drush_civicrm_pre_civicrm_sqlquery() {
 /**
  * Implementation of command 'civicrm-sql-query'
  */
-function drush_civicrm_sqlquery($query) {
+function drush_civicrm_sqlquery($query = '') {
   return drush_sql_query($query);
 }
 
