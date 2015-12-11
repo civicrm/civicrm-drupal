@@ -72,6 +72,9 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
 
         $state_html = array();
         foreach ($result as $state_id => $state) {
+          if (empty($state_html[$state->country_id])) {
+            $state_html[$state->country_id] = '';
+          }
           $state_html[$state->country_id] .= '<option value="' . $state_id . '">' . $state->name . '</option>';
           if(in_array($state->country_id, $selected_countries)) {
             $loaded_list[$state_id] = $state->name;
