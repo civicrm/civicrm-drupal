@@ -1228,6 +1228,10 @@ function drush_civicrm_sqlconf() {
   if (version_compare(DRUSH_VERSION, 6, '>=')) {
     drush_print_r($conf);
   }
+
+  // Return the conf array too, so it can be used as array when called through
+  // a php function (e.g. drush_invoke_process).
+  return $conf;
 }
 
 /**
