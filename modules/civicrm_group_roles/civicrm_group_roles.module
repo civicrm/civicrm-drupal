@@ -260,8 +260,8 @@ function civicrm_group_roles_civicrm_post($op, $objectName, $objectId, &$objectR
  * Helper function to add a role to a given user
  * Copied from user.module function user_multiple_role_edit()
  *
- * @param $uid The user id of the account to modify
- * @param $rid Thedebug_backtrace role id being added
+ * @param int $uid The user id of the account to modify
+ * @param int $rid The debug_backtrace role id being added
  */
 function civicrm_group_roles_add_role($uid, $rid, $role_name) {
   $account = user_load((int)$uid, TRUE);
@@ -338,32 +338,39 @@ function civicrm_group_roles_menu() {
     'type' => MENU_NORMAL_ITEM,
   );
   $items['admin/config/civicrm/civicrm_group_roles/show_rules'] = array(
-    'title' => t('List Association Rules'),
+    'title' => t('Association rules'),
     'access callback' => 'user_access',
     'access arguments' => array('access civicrm group role setting'),
     'weight' => -5,
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/config/civicrm/civicrm_group_roles/add_rule'] = array(
-    'title' => t('Add Association Rule'),
+    'title' => t('Add association rule'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('civicrm_group_roles_add_rule_form'),
     'access callback' => 'user_access',
     'access arguments' => array('access civicrm group role setting'),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_LOCAL_ACTION,
   );
   $items['admin/config/civicrm/civicrm_group_roles/add_rule/%rule_id'] = array(
-    'title' => t('Add Association Rule'),
+    'title' => t('Edit association rule'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('civicrm_group_roles_add_rule_form', 1),
     'access callback' => 'user_access',
     'access arguments' => array('access civicrm group role setting'),
-    'type' => MENU_LOCAL_TASK,
   );
   $items['admin/config/civicrm/civicrm_group_roles/manual_sync'] = array(
-    'title' => t('Manually Synchronize'),
+    'title' => t('Manually synchronize'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('civicrm_group_roles_manual_sync'),
+    'access callback' => 'user_access',
+    'access arguments' => array('access civicrm group role setting'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/config/civicrm/civicrm_group_roles/settings'] = array(
+    'title' => t('Settings'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('civicrm_group_roles_settings'),
     'access callback' => 'user_access',
     'access arguments' => array('access civicrm group role setting'),
     'type' => MENU_LOCAL_TASK,
@@ -413,7 +420,7 @@ function civicrm_group_roles_show_rules($action = NULL, $id = NULL) {
   $groups = CRM_Utils_Array::value('values', $groups);
 
   //Begin building main output table.
-  $header = array('rid' => t('Rule ID'), 'name' => t('Rule Name (\'CiviCRM Group\' <--> \'Drupal Role\')'), 'op' => t('Operation'));
+  $header = array('rid' => t('Rule ID'), 'name' => t('Rule Name (\'CiviCRM Group\' <--> \'Drupal Role\')'), 'op' => t('Operations'));
   $data = array();
 
   $rules = db_query('SELECT * FROM {civicrm_group_roles_rules} ORDER BY id ASC')->fetchAll();
@@ -427,23 +434,23 @@ function civicrm_group_roles_show_rules($action = NULL, $id = NULL) {
   }
 
   if (!empty($data)) {
-
     $output['data'] = array(
-      '#prefix' => t("Use the 'Add Association Rule' form to add new rules.") . '<br/><br/>',
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $data,
     );
   }
   else {
-    $output = t('There are no rules currently set.') . ' ' . ts('Use the \'Add Association Rule\' form to add one.');
+    $output = t('There are no rules currently set.');
   }
 
   return $output;
 }
 
 /**
- * Implements hook_form(). Add/edit association rules.
+ * Implements hook_form().
+ *
+ * Add/edit association rules.
  *
  * @ingroup forms
  * @see civicrm_group_roles_add_rule_validate()
@@ -502,7 +509,7 @@ function civicrm_group_roles_add_rule_form($form, $form_state = array(), $edit_i
     $form['add_rule']['select_group']['#default_value'] = check_plain($default_values->group_id);
     $form['add_rule']['select_role']['#default_value'] = check_plain($default_values->role_id);
     $form['edit_flag'] = array('#type' => 'hidden', '#value' => check_plain($edit_id));
-    $form['submit']['#value'] = t('Edit association rule');
+    $form['submit']['#value'] = t('Save changes');
   }
 
   return $form;
@@ -549,7 +556,6 @@ function civicrm_group_roles_add_rule_form_submit($form, &$form_state) {
     }
   }
   else {
-
     $add_rule = db_insert('civicrm_group_roles_rules')->fields(array(
                   'role_id' => (int)$form_state['values']['add_rule']['select_role'],
                   'group_id' => (int)$form_state['values']['add_rule']['select_group'],
@@ -559,6 +565,8 @@ function civicrm_group_roles_add_rule_form_submit($form, &$form_state) {
       drupal_set_message(t('Your association rule has been added.'));
     }
   }
+
+  $form_state['redirect'] = 'admin/config/civicrm/civicrm_group_roles';
 }
 
 /**
@@ -765,9 +773,11 @@ function _civicrm_group_roles_validate_groups(array $groups) {
 
     // CRM-11161: Exclude smart groups as we don't want to add contacts statically to a smart group
     if (CRM_Utils_Array::value('saved_search_id', $group_result['values'][0])) {
-      $msg = 'Group ID @groupId is a smart group, so the user was not added to it statically.';
-      $variables = array('@groupId' => $groupId);
-      watchdog('civicrm_group_roles', $msg, $variables, WATCHDOG_INFO);
+      if (variable_get('civicrm_group_roles_debugging', 0)) {
+        $msg = 'Group ID @groupId is a smart group, so the user was not added to it statically.';
+        $variables = array('@groupId' => $groupId);
+        watchdog('civicrm_group_roles', $msg, $variables, WATCHDOG_INFO);
+      }
       unset($groups[$key]);
       continue;
     }
@@ -819,17 +829,20 @@ function civicrm_group_roles_sync_roles($account) {
       'version'  => 3,
     );
     $contacts = civicrm_api('contact', 'get', $params);
-    if ($contacts['count'] > 0) { // The user is in there
-      $message = 'Role @role (@rid) should be held by user @user (@uid) because they are part of group @group (contactID: @cid)';
-      $params = array(
-        '@role' => $group->name,
-        '@rid' => $group->role_id,
-        '@user' => $account->name,
-        '@uid' => $account->uid,
-        '@group' => $group->group_id,
-        '@cid' => $contact,
-      );
-      watchdog('civicrm_group_roles', $message, $params, WATCHDOG_INFO);
+    // If we found a user
+    if ($contacts['count'] > 0) {
+      if (variable_get('civicrm_group_roles_debugging', 0)) {
+        $message = 'Role @role (@rid) should be held by user @user (@uid) because they are part of group @group (contactID: @cid)';
+        $params = array(
+          '@role' => $group->name,
+          '@rid' => $group->role_id,
+          '@user' => $account->name,
+          '@uid' => $account->uid,
+          '@group' => $group->group_id,
+          '@cid' => $contact,
+        );
+        watchdog('civicrm_group_roles', $message, $params, WATCHDOG_INFO);
+      }
       $correctSyncedRoles[$group->role_id] = $group->name;
     }
   }
@@ -839,15 +852,35 @@ function civicrm_group_roles_sync_roles($account) {
 
   $finalRoles = $account->roles + $rolesToAdd;
   $finalRoles = array_diff($finalRoles, $rolesToRemove);
-  $params = array(
-    '@initial' => print_r($account->roles, TRUE),
-    '@add' => print_r($rolesToAdd, TRUE),
-    '@remove' => print_r($rolesToRemove, TRUE),
-    '@final' => print_r($finalRoles, TRUE),
-  );
-  watchdog('civicrm_group_roles', 'Initial roles: @initial, roles to add: @add, roles to remove: @remove, final roles: @final', $params, WATCHDOG_INFO);
+  if (variable_get('civicrm_group_roles_debugging', 0)) {
+    $params = array(
+      '@initial' => print_r($account->roles, TRUE),
+      '@add' => print_r($rolesToAdd, TRUE),
+      '@remove' => print_r($rolesToRemove, TRUE),
+      '@final' => print_r($finalRoles, TRUE),
+    );
+    watchdog('civicrm_group_roles', 'Initial roles: @initial, roles to add: @add, roles to remove: @remove, final roles: @final', $params, WATCHDOG_INFO);
+  }
 
   if ($account->roles !== $finalRoles) {
     user_save($account, array('roles' => $finalRoles));
   }
+}
+
+/**
+ * Settings form
+ *
+ * @ingroup forms
+ */
+function civicrm_group_roles_settings($form, &$form_state) {
+
+  $form['civicrm_group_roles_debugging'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable detailed database logging'),
+    '#default_value' => variable_get('civicrm_group_roles_debugging', 0),
+    '#description' => 'Log the details of roles that are added and removed from users.',
+  );
+
+  // Default handler to save form configuration
+  return system_settings_form($form);
 }
