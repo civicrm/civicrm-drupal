@@ -56,7 +56,7 @@ class CivicrmController extends ControllerBase {
     }
 
     // Synchronize the Drupal user with the Contacts database (why?)
-    $this->civicrm->synchronizeUser($this->currentUser());
+    $this->civicrm->synchronizeUser(\Drupal\user\Entity\User::load($this->currentUser()->id()));
 
     // Add CSS, JS, etc. that is required for this page.
     \CRM_Core_Resources::singleton()->addCoreResources();
@@ -92,4 +92,5 @@ class CivicrmController extends ControllerBase {
 
     return $build;
   }
+
 }
