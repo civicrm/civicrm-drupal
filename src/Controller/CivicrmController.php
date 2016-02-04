@@ -47,6 +47,11 @@ class CivicrmController extends ControllerBase {
     // to an environment variable.
     $_GET['q'] = implode('/', $args);
 
+    // feed CiviCRM's session with the drupal session's user ID.
+    $user = \Drupal\user\Entity\User::load(\Drupal::currentUser()->id());
+    $civiSession= new \CRM_Core_Session;
+    $civiSession->set('userID', $user->get('uid')->value);
+
     // @Todo: Enable CiviCRM's CRM_Core_TemporaryErrorScope::useException() and possibly catch exceptions.
     // At the moment, civicrm doesn't allow exceptions to bubble up to Drupal. See CRM-15022.
     $content = $this->civicrm->invoke($args);

@@ -46,10 +46,11 @@ class Civicrm {
   }
 
   public function invoke($args) {
-    // Civicrm will echo/print directly to stdout. We need to capture it
+    // Civicrm can echo/print directly to stdout. We need to capture it
     // so that we can return the output as a renderable array.
     ob_start();
-    $content = \CRM_Core_Invoke::invoke($args);
+    $invoke= new \CRM_Core_Invoke;
+    $content = $invoke->invoke($args);
     $output = ob_get_clean();
     return !empty($content) ? $content : $output;
   }
