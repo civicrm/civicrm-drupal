@@ -213,6 +213,20 @@ function civicrm_drush_command() {
 }
 
 /**
+ * Implementation of database specification for the active DB connection
+ */
+function drush_civicrm_get_db_spec() {
+  if (version_compare(DRUSH_VERSION, 7, '>=')) {
+      $sql = drush_sql_get_class();
+      $db_spec = $sql->db_spec();
+  }
+  else {
+    $db_spec = _drush_sql_get_db_spec();
+  }
+  return $db_spec;
+}
+
+/**
  * Implementation of drush_hook_COMMAND_validate for command 'civicrm-install'
  */
 function drush_civicrm_install_validate() {
@@ -225,7 +239,7 @@ function drush_civicrm_install_validate() {
     $db_spec = _drush_sql_get_all_db_specs();
   }
   if (!isset($db_spec)) {
-    $db_spec = _drush_sql_get_db_spec();
+    $db_spec = drush_civicrm_get_db_spec();
   }
 
   if (!drush_get_option('dbuser', FALSE)) {
@@ -404,7 +418,7 @@ function _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $mo
   }
 
   $baseUrl = !$baseUrl ? ($GLOBALS['base_url']) : ($protocol . '://' . $baseUrl);
-  $db_spec = _drush_sql_get_db_spec();
+  $db_spec = drush_civicrm_get_db_spec();
 
   // Check version: since 4.1, Drupal6 must be used for the UF in D6
   // The file civicrm-version.php appeared around 4.0, so it is safe to assume
