@@ -99,7 +99,7 @@ function civicrm_views_data_alter(&$data) {
     _civicrm_contribute_data($data, $enabled);
     // Also include Accounts
     include_once 'components/civicrm.accounts.inc';
-    _civicrm_financial_data($data, $enabled);
+    _civicrm_accounts_data($data, $enabled);
   }
   if (isset($enabled['CiviEvent'])) {
     include_once 'components/civicrm.event.inc';
