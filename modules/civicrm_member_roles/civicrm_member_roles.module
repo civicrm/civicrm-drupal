@@ -248,11 +248,11 @@ function civicrm_member_roles_configure() {
       'update' => t('Synchronize when membership is updated.'),
     ),
   );
-  $form['settings']['civicrm_member_roles_membership_count'] = array(
+  $form['settings']['civicrm_member_roles_cron_limit'] = array(
     '#type' => 'textfield',
     '#title' => t('Memberships Synchronized on Cron'),
-    '#description' => t('Enter how many Memberships and Roles you would like to synchronize per cron run. This prevents the operation from timing out when too many items are processed at once. If this is empty, all Memberships and Roles will be processed.'),
-    '#default_value' => variable_get('civicrm_member_roles_membership_count', 150),
+    '#description' => t('Enter how many Memberships and Roles you would like to synchronize per cron run. Synchronization will be performed randomly. This prevents the operation from timing out when too many items are processed at once. If this is empty, all Memberships and Roles will be processed.'),
+    '#default_value' => variable_get('civicrm_member_roles_cron_limit', 150),
     '#element_validate' => array('element_validate_integer_positive'),
     '#size' => 15,
     '#maxlength' => 4,
@@ -482,12 +482,12 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL, $sync_type = N
   //Find all contacts that have membership rules (or just use $ext_uid)
   if (empty($ext_uid) && empty($cid)) {
     // Get the number of contacts to sync at once, if we're syncing on cron.
-    $contact_count = variable_get('civicrm_member_roles_membership_count', 150);
-    if ($sync_type == 'cron' && is_numeric($contact_count) && $contact_count > 0) {
+    $cron_limit = variable_get('civicrm_member_roles_cron_limit', 150);
+    if ($sync_type == 'cron' && is_numeric($cron_limit) && $cron_limit > 0) {
       $sql = "SELECT DISTINCT uf.contact_id FROM civicrm_uf_match uf
       LEFT JOIN civicrm_membership m ON uf.contact_id = m.contact_id
       WHERE m.id IS NOT NULL AND m.membership_type_id IN (" . implode(',', array_keys($memberroles)) . ")
-      ORDER BY RAND() LIMIT " . $contact_count;
+      ORDER BY RAND() LIMIT " . $cron_limit;
     }
     else {
       $sql = "SELECT DISTINCT uf.contact_id FROM civicrm_uf_match uf
