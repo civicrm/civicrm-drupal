@@ -115,12 +115,25 @@ function civicrm_requirements($phase) {
   return $requirements;
 }
 
+/**
+ * Returns the path to where CiviCRM is installed.
+ */
 function _civicrm_find_civicrm() {
-  // Only acceptable location for civicrm is in /libraries/civicrm
-  $path =  \Drupal::root() . '/libraries/civicrm';
+  // Recommended location for civicrm is in /libraries/civicrm
+  // [citation needed]
+  $path = \Drupal::root() . '/libraries/civicrm';
   if (file_exists($path . '/CRM/Core/ClassLoader.php')) {
     return realpath($path);
   }
+
+  // We also allow /modules/civicrm, which seems to work fine.
+  // FIXME: what about Drupal profiles?
+  $path = \Drupal::root() . '/modules/civicrm';
+  if (file_exists($path . '/CRM/Core/ClassLoader.php')) {
+    return realpath($path);
+  }
+
+  return NULL;
 }
 
 /**
