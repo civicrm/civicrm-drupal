@@ -83,9 +83,7 @@ class civicrm_handler_field_contact_image extends views_handler_field {
       '#element_validate' => array('element_validate_integer_positive'),
       '#dependency' => array(
         'edit-options-url-only' => array(0),
-        'edit-options-image-style' => array(''),
       ),
-      '#dependency_count' => 2,
     );
 
     $form['height'] = array(
@@ -96,11 +94,15 @@ class civicrm_handler_field_contact_image extends views_handler_field {
       '#element_validate' => array('element_validate_integer_positive'),
       '#dependency' => array(
         'edit-options-url-only' => array(0),
-        'edit-options-image-style' => array(''),
       ),
-      '#dependency_count' => 2,
     );
 
+    if (module_exists('image')) {
+      $form['width']['#dependency']['edit-options-image-style'] = array('');
+      $form['width']['#dependency_count'] = 2;
+      $form['height']['#dependency']['edit-options-image-style'] = array('');
+      $form['height']['#dependency_count'] = 2;
+    }
   }
 
   function render($values) {
