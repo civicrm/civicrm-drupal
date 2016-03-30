@@ -265,31 +265,40 @@ function _civicrm_registerClassLoader() {
 }
 
 function setMySQLTimeZone(){
- // get UFTImeZone should go on UFClasses -@ todo = move it
- $timeZoneOffset = getUFTimeZone();
- if($timeZoneOffset){
-  $sql = "SET time_zone = '$timeZoneOffset'";
-  CRM_Core_DAO::executequery($sql);
- }
+  static $run_once = FALSE;
+  if ($run_once) {
+    return;
+  }
+  $run_once = TRUE;
+
+  // If possible, use date_api and date_timezone modules to avoid Drupal 6's
+  // native offsets (which don't work under DST).
+  if (function_exists('date_timezone_cron')) {
+    $timezone_name = date_default_timezone_name();
+    // Calculate second offset from UTC.
+    $timezone = new DateTimeZone($timezone_name);
+    $time = new DateTime('now', $timezone);
+    $offset = $timezone->getOffset($time);
+  }
+  else {
+    global $user;
+    if ($user->uid && variable_get('configurable_timezones', 1) && strlen($user->timezone)) {
+      $offset = $user->timezone;
+    }
+    else {
+      $offset = variable_get('date_default_timezone', '0');
+    }
+  }
+
+  // Turn the second offset into an offset string of the
+  // form '+04:00' or '-10:00', for example.
+  $hours = (int) $offset / 3600;
+  $minutes = (int) ($offset % 3600) / 60;
+  $offset_string = sprintf("%+03d:%02d", $hours, $minutes);
+
+  CRM_Core_DAO::executeQuery("SET time_zone = '$offset_string'");
 }
 
-function getUFTimeZone(){
- global $user;
- if (variable_get('configurable_timezones', 1) && $user->uid && strlen($user->timezone)) {
-  $timezone = $user->timezone;
- } else {
-  $timezone = variable_get('date_default_timezone', null);
- }
- if(empty($timezone)){
-  return false;
- }
- $hour = $user->timezone / 3600;
- $timeZoneOffset = sprintf("%02d:%02d", $timezone / 3600, ($timezone/60)%60 );
- if($timeZoneOffset > 0){
-  $timeZoneOffset = '+' . $timeZoneOffset;
- }
- return $timeZoneOffset;
-}
 /**
  * Function to get the contact type
  *
