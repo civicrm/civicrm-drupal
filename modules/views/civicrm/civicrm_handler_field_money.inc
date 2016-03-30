@@ -39,8 +39,35 @@ class civicrm_handler_field_money extends views_handler_field {
 
   function render($values) {
     $value = $this->get_value($values);
-    return CRM_Utils_Money::format($value);
+    $currency_code = $this->get_value($values, 'currency_code');
+
+    switch ($this->options ['display_format']) {
+      case 'formatted':
+        return CRM_Utils_Money::format($value);
+
+      case 'raw':
+        return $value;
+    }
+  }
+
+  function option_definition() {
+    $options = parent::option_definition();
+
+    $options ['display_format'] = array('default' => 'formatted');
+
+    return $options;
+  }
+
+  function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+    $form ['display_format'] = array(
+      '#type' => 'select',
+      '#title' => t('Display format'),
+      '#options' => array(
+        'formatted' => t('Currency formatted amount ($123.45)'),
+        'raw' => t('Raw amount (123.45)'),
+      ),
+      '#default_value' => $this->options ['display_format'],
+    );
   }
 }
-
-
