@@ -251,6 +251,20 @@ function civicrm_drush_command() {
 }
 
 /**
+ * Implementation of database specification for the active DB connection
+ */
+function drush_civicrm_get_db_spec() {
+  if (version_compare(DRUSH_VERSION, 7, '>=')) {
+      $sql = drush_sql_get_class();
+      $db_spec = $sql->db_spec();
+  }
+  else {
+    $db_spec = _drush_sql_get_db_spec();
+  }
+  return $db_spec;
+}
+
+/**
  * Implementation of drush_hook_COMMAND_validate for command 'civicrm-install'
  */
 function drush_civicrm_install_validate() {
@@ -263,7 +277,7 @@ function drush_civicrm_install_validate() {
     $db_spec = _drush_sql_get_all_db_specs();
   }
   if (!isset($db_spec)) {
-    $db_spec = _drush_sql_get_db_spec();
+    $db_spec = drush_civicrm_get_db_spec();
   }
 
   if (!drush_get_option('dbuser', FALSE)) {
@@ -442,7 +456,7 @@ function _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $mo
   }
 
   $baseUrl = !$baseUrl ? ($GLOBALS['base_url']) : ($protocol . '://' . $baseUrl);
-  $db_spec = _drush_sql_get_db_spec();
+  $db_spec = drush_civicrm_get_db_spec();
 
   // Check version: since 4.1, Drupal6 must be used for the UF in D6
   // The file civicrm-version.php appeared around 4.0, so it is safe to assume
@@ -919,7 +933,7 @@ function drush_civicrm_restore_validate() {
   if (!is_dir($code_dir)) {
     return drush_set_error('CIVICRM_RESTORE_DIR_NOT_FOUND', dt('Could not locate civicrm directory inside restore-dir.'));
   }
-  elseif (!file_exists("$code_dir/civicrm-version.txt")) {
+  elseif (!file_exists("$code_dir/civicrm-version.php")) {
     return drush_set_error('CIVICRM_RESTORE_DIR_NOT_VALID', dt('civicrm directory inside restore-dir, doesn\'t look to be a valid civicrm codebase.'));
   }
 
@@ -946,7 +960,7 @@ function drush_civicrm_restore() {
   $restore_backup_dir = rtrim($restore_backup_dir, '/');
 
   // get confirmation from user -
-  $db_spec = _drush_sql_get_db_spec();
+  $db_spec = drush_civicrm_get_db_spec();
   drush_print(dt("\nProcess involves :"));
   drush_print(dt("1. Restoring '\$restore-dir/civicrm' directory to '!toDir'.", array('!toDir' => $civicrm_root_base)));
   drush_print(dt("2. Dropping and creating '!db' database.", array('!db' => $db_spec['database'])));
@@ -989,7 +1003,15 @@ function drush_civicrm_restore() {
 
   drush_log(dt('Database backed up.'), 'ok');
 
-  $exec = 'mysql' . _drush_sql_get_credentials() . ' -e ';
+  if (version_compare(DRUSH_VERSION, 7, '>=')) {
+    $sql = drush_sql_get_class();
+    $exec = 'mysql ' . $sql->creds() . ' -e ';
+    $dbDriver = $db_spec['driver'];
+  }
+  else {
+    $exec = 'mysql' . _drush_sql_get_credentials() . ' -e ';
+    $dbDriver = _drush_sql_get_scheme();
+  }
   drush_log(dt("\nDropping database '!db' ..", array('!db' => $db_spec['database'])));
   if (drush_op('system', $exec . '"DROP DATABASE IF EXISTS ' . $db_spec['database'] . '"')) {
     return drush_set_error('CIVICRM_RESTORE_DATABASE_DROP_FAILED', dt('Could not drop database: @name', array('@name' => $db_spec['database'])));
@@ -1002,13 +1024,23 @@ function drush_civicrm_restore() {
   drush_log(dt('Database created.'), 'ok');
 
   // 3. restore database
-  switch (_drush_sql_get_scheme()) {
+  switch ($dbDriver) {
     case 'mysql':
-      $send = 'mysql' . _drush_sql_get_credentials();
+      if (version_compare(DRUSH_VERSION, 7, '>=')) {
+        $send = 'mysql ' . $sql->creds();
+      }
+      else {
+        $send = 'mysql' . _drush_sql_get_credentials();
+      }
       break;
 
     case 'pgsql':
-      $send .= 'psql -d ' . _drush_sql_get_credentials() . ' --file -';
+      if (version_compare(DRUSH_VERSION, 7, '>=')) {
+        $send .= 'psql -d ' . $sql->creds() . ' --file -';
+      }
+      else {
+        $send .= 'psql -d ' . _drush_sql_get_credentials() . ' --file -';
+      }
       break;
   }
   $exec = "$send < $sql_file";
