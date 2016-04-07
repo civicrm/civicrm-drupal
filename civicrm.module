@@ -227,9 +227,6 @@ function civicrm_initialize() {
       foreach ($formats as $id => $format) {
         wysiwyg_get_profile($id);
       }
-      $path = drupal_get_path('module', 'filter');
-      drupal_add_js($path . '/filter.js');
-      drupal_add_css($path . '/filter.css');
     }
   }
   setMySQLTimeZone();
