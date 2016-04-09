@@ -33,21 +33,6 @@
  *
  */
 
-// $Id: example.drush.inc,v 1.5 2009/09/30 13:15:54 weitzman Exp $
-
-
-/**
- * @file
- *   Example drush command.
- *
- *   Shows how to make your own drush command.
- *
- *   You can copy this file to any of the following
- *     1. A .drush folder in your HOME folder.
- *     2. Anywhere in a folder tree below an active module on your site.
- *     3. In an arbitrary folder specified with the --include option.
- */
-
 /**
  * Implementation of hook_drush_command().
  *
@@ -1065,13 +1050,6 @@ function drush_civicrm_restore() {
 }
 
 /**
- * ?? for command 'civicrm-civimail'
- */
-function drush_civicrm_civimail_cron() {
-  civicrm_api('Mailing', 'Process', array('version' => 3));
-}
-
-/**
  * Implementation of command 'civicrm-member-records'
  */
 function drush_civicrm_member_records() {
@@ -1537,3 +1515,18 @@ function drush_civicrm_api() {
   }
 }
 
+/**
+ * Callback function for civicrm-process-mail-queue.
+ *
+ * Call the process_mailing job to process any outstanding mailing jobs. This
+ * command will need to be run as a user with the correct permissions to
+ * process mailings.
+ *
+ * @see civicrm_drush_command()
+ */
+function drush_civicrm_process_mail_queue() {
+  $init = _civicrm_init();
+  $facility = new CRM_Core_JobManager();
+  $facility->setSingleRunParams('Job', 'process_mailing', array(), 'Started by drush');
+  $facility->executeJobByAction('Job', 'process_mailing');
+}
