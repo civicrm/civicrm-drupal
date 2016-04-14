@@ -217,6 +217,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
@@ -237,6 +238,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
@@ -256,6 +258,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
@@ -276,6 +279,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
@@ -641,6 +645,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -766,6 +771,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
@@ -1149,6 +1155,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
@@ -1389,6 +1396,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'field' => array(
       'handler' => 'civicrm_handler_field_money',
       'click sortable' => TRUE,
+      'currency field' => 'currency',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',
