@@ -35,15 +35,19 @@ class civicrm_handler_field_money extends views_handler_field {
       return;
     }
     require_once 'CRM/Utils/Money.php';
+
+    if ($this->definition['currency field']) {
+      $this->additional_fields['currency'] = array('field' => $this->definition['currency field']);
+    }
   }
 
   function render($values) {
     $value = $this->get_value($values);
-    $currency_code = $this->get_value($values, 'currency_code');
+    $currency = $this->get_value($values, 'currency');
 
     switch ($this->options ['display_format']) {
       case 'formatted':
-        return CRM_Utils_Money::format($value);
+        return CRM_Utils_Money::format($value, $currency);
 
       case 'raw':
         return $value;
