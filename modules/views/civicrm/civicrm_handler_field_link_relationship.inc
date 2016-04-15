@@ -85,7 +85,7 @@ class civicrm_handler_field_link_relationship extends views_handler_field {
 
     $form['link_text'] = array(
       '#type' => 'textfield',
-      '#title' => t('Link text'),
+      '#title' => t('Link Text'),
       '#description' => t('The text that will display in the field with the link.'),
       '#default_value' => isset($this->options['link_text']) ? $this->options['link_text'] : '',
       '#required' => TRUE,
