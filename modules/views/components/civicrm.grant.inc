@@ -199,19 +199,22 @@ function _civicrm_grant_data(&$data, $enabled) {
   );
   civicrm_views_add_date_arguments($data['civicrm_grant'], array('title' => 'Report Due Date', 'name' => 'grant_due_date'));
 
-  //Grant Report Received (boolean)
+  //Grant Report Received (numeric)
   $data['civicrm_grant']['grant_report_received'] = array(
     'title' => t('Grant Report Received'),
     'help' => t('Has the Grant Report been received?'),
     'field' => array(
-      'handler' => 'views_handler_field_boolean',
+      //'handler' => 'views_handler_field_boolean',
+      'handler' => 'views_handler_field_numeric',
       'click sortable' => TRUE,
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_boolean_operator',
+      // 'handler' => 'views_handler_filter_boolean_operator',
+      'handler' => 'views_handler_filter_numeric',
+      'allow empty' => TRUE,
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
