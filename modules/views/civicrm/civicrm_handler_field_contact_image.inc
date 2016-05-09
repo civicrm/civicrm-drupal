@@ -13,7 +13,8 @@ class civicrm_handler_field_contact_image extends views_handler_field {
     $options['alt'] = array(
       'default' => '',
     );
-    if (module_exists('image')) {
+    $directory = $this->get_civi_relative_upload_path();
+    if (module_exists('image') && $directory !== FALSE) {
       $options['image_style'] = array(
         'default' => '',
       );
@@ -29,6 +30,7 @@ class civicrm_handler_field_contact_image extends views_handler_field {
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
+    $directory = $this->get_civi_relative_upload_path();
 
     $form['url_only'] = array(
       '#title' => t('Output the image URL only'),
@@ -57,7 +59,7 @@ class civicrm_handler_field_contact_image extends views_handler_field {
       ),
     );
 
-    if (module_exists('image')) {
+    if (module_exists('image') && $directory !== FALSE) {
       $styles = image_styles();
       $style_options = array('' => t('None (original image)'));
       foreach ($styles as $style) {
@@ -97,7 +99,7 @@ class civicrm_handler_field_contact_image extends views_handler_field {
       ),
     );
 
-    if (module_exists('image')) {
+    if (module_exists('image') && $directory !== FALSE) {
       $form['width']['#dependency']['edit-options-image-style'] = array('');
       $form['width']['#dependency_count'] = 2;
       $form['height']['#dependency']['edit-options-image-style'] = array('');
@@ -118,11 +120,11 @@ class civicrm_handler_field_contact_image extends views_handler_field {
       'title' => $this->options['title'],
       'alt' => $this->options['alt'],
     );
-    if ($this->options['image_style'] && module_exists('image')) {
+    $directory = $this->get_civi_relative_upload_path();
+    if ($this->options['image_style'] && module_exists('image') && $directory !== FALSE) {
       $image['style_name'] = empty($this->options['image_style']) ? '' : $this->options['image_style'];
-      $config = CRM_Core_Config::singleton();
-      $split_customFileUploadDir = explode('files', $config->customFileUploadDir);
-      $image['path'] = str_replace('\\', '/', substr($split_customFileUploadDir[1], 1)) . substr(strstr($value, 'photo='), 6);
+      $image_path = $directory . substr(strstr($value, 'photo='), 6);
+      $image['path'] = str_replace('\\', '/', $image_path);
       return theme('image_style', $image);
     }
     else {
@@ -131,4 +133,30 @@ class civicrm_handler_field_contact_image extends views_handler_field {
       return theme('image', $image);
     }
   }
+
+  /**
+   * Get the CiviCRM upload directory relative to the Drupal public upload
+   * directory so that we can support image styles.
+   *
+   * Returns the relative path if it is supported, otherwise returns FALSE.
+   *
+   * @return bool|string
+   */
+  function get_civi_relative_upload_path() {
+    civicrm_initialize();
+    $wrapper = file_stream_wrapper_get_instance_by_uri('public://');
+    $drupal_upload_path = $wrapper->getDirectoryPath();
+    $civi_upload_path = Civi::paths()->getUrl(Civi::settings()->get('customFileUploadDir'));
+    $relative_upload_path = explode($drupal_upload_path, $civi_upload_path);
+
+    // If we couldn't explode() then Civi's upload path is not in the public://
+    // directory, so we cannot support image styles.
+    if (count($relative_upload_path) != 2) {
+      return FALSE;
+    }
+
+    // Otherwise, return the relative path without the leading slash
+    return substr($relative_upload_path[1], 1);
+  }
+
 }
