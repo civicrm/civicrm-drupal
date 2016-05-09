@@ -32,7 +32,7 @@
  * Filters Activity Statuses, and is configured using the labels from the database
  *
  */
-class civicrm_handler_filter_pseudo_constant extends views_handler_filter_in_operator {
+class civicrm_handler_filter_pseudo_constant extends views_handler_filter_many_to_one {
   public $_pseudo_constant; function construct() {
     parent::construct();
     if (!civicrm_initialize() ||
