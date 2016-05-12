@@ -1621,6 +1621,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'label' => t('Related Phone'),
     ),
   );
+  
+  
   // CIVICRM Activities are here with all the activeness they can muster, base tabling it up.
   //----------------------------------------------------------------------------------------
 
@@ -1633,7 +1635,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'help' => t("View displays CiviCRM Activities"),
   );
 
-  //CiviCRM Add support for CiviCRM attachments
+  // CiviCRM Add support for attachments -civicrm_file Details of the file
   $data['civicrm_file']['table']['group'] = t('CiviCRM Files');
 
   $data['civicrm_file']['table']['base'] = array(
@@ -1662,6 +1664,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'views_handler_sort',
     ),
   );
+
   //URI
   $data['civicrm_file']['uri'] = array(
     'title' => t('URI'),
@@ -1671,6 +1674,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
     ),
   );
+
   //File Upload Date
   $data['civicrm_file']['upload_date'] = array(
     'title' => t('File Upload Date'),
@@ -1686,6 +1690,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_sort_date',
     ),
   );
+
   //File Description
   $data['civicrm_file']['description'] = array(
     'title' => t('Description'),
@@ -1705,6 +1710,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'views_handler_sort',
     ),
   );
+
   //File Mime Type
   $data['civicrm_file']['mime_type'] = array(
     'title' => t('Mime Type'),
@@ -1715,7 +1721,8 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
-  //Add CiviCRM entity file table
+  
+  // CiviCRM Add support for attachments - CiviCRM entity file table - what entity it is attached to
   $data['civicrm_entity_file']['table']['group'] = t('CiviCRM Entity Files');
 
   $data['civicrm_entity_file']['table']['base'] = array(
@@ -1724,6 +1731,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'title' => t('CiviCRM Entity Files'),
     'help' => t("View displays CiviCRM Attachments create link to download"),
   );
+  
   //Numeric File ID
   $data['civicrm_entity_file']['id'] = array(
     'title' => t('Entity File ID'),
@@ -1743,6 +1751,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'views_handler_sort',
     ),
   );
+
   //EntityTable
   $data['civicrm_entity_file']['entity_table'] = array(
     'title' => t('Entity Table'),
@@ -1754,16 +1763,16 @@ function _civicrm_core_data(&$data, $enabled) {
   );
   
   //Entity ID
-  $data['civicrm_entity_file']['file_id'] = array(
-    'title' => t('File ID'),
-    'help' => t('FK to the ID of the file in civicrm_file table'),
+  $data['civicrm_entity_file']['entity_id'] = array(
+    'title' => t('Entity ID'),
+    'help' => t('FK to the ID in entity_table'),
     'field' => array(
       'handler' => 'views_handler_field_numeric',
       'click sortable' => TRUE,
     ),
   );
   
-  //Entity ID
+  //File ID
   $data['civicrm_entity_file']['file_id'] = array(
     'title' => t('File ID'),
     'help' => t('FK to the ID of the file in civicrm_file table'),
@@ -2263,9 +2272,7 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
-    /*
-     * Add joins for CiviCRM attachments
-     */
+  // Add joins for CiviCRM attachments
   $data['civicrm_file']['table']['join']['civicrm_activity'] = array(
     'left_table' => 'civicrm_entity_file',
     'left_field' => 'file_id',
@@ -2280,7 +2287,7 @@ function _civicrm_core_data(&$data, $enabled) {
       array(
         'field' => 'entity_table',
         'value' => 'civicrm_activity',
-        'numeric' => FALSE,
+        'numeric' => FALSE, 
       ),
     ),
   );
