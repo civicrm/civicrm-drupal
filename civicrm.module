@@ -390,19 +390,14 @@ function civicrm_invoke() {
   // synchronize the drupal uid with the contacts db
   global $user;
 
-  /*
-  * FIXME: hack to bypass synchronize if running upgrade to avoid
-  * any serious non-recoverable error which might hinder the
-  * upgrade process.
-  */
-
-  if (!isset($args[1]) ||
-    $args[1] != 'upgrade'
-  ) {
-
-    CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal',
-      civicrm_get_ctype('Individual')
-    );
+  /**
+   * Bypass synchronize if running upgrade to avoid any serious
+   * non-recoverable error which might hinder the upgrade process.
+   *
+   * @FIXME
+   */
+  if (!isset($args[1]) || $args[1] != 'upgrade') {
+    CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal', civicrm_get_ctype('Individual'));
   }
 
   // Fix the path for the url alias module.
