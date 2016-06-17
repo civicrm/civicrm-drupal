@@ -29,17 +29,9 @@ class CivicrmController extends ControllerBase {
     );
   }
 
-  public function main($args, $one, $two, $three, $four, $five) {
-    // $one, $two... $five are optional path components. These default to an empty
-    // string. We append any non-empty path components to the $args array before passing
-    // this to invoke().
-    foreach ([$one, $two, $three, $four, $five] as $optional_arg) {
-      if ($optional_arg) {
-        $args[] = $optional_arg;
-      }
-      else {
-        break;
-      }
+  public function main($args, $extra) {
+    if ($extra) {
+      $args = array_merge($args, explode('/', $extra));
     }
 
     // CiviCRM's Invoke.php has hardwired in the expectation that the query parameter 'q' is being used.
