@@ -661,7 +661,7 @@ function drush_civicrm_upgrade_db_validate() {
   }
   $_GET['q'] = 'civicrm/upgrade';
 
-  if (!_civicrm_init()) {
+  if (!_civicrm_init(TRUE, TRUE)) {
     return FALSE;
   }
 
@@ -772,7 +772,7 @@ function drush_civicrm_update_cfg() {
  * Implements hook_drush_cache_clear.
  */
 function civicrm_drush_cache_clear(&$types) {
-  if (_civicrm_init(FALSE)) {
+  if (_civicrm_init(FALSE, TRUE)) {
     $types['civicrm'] = 'drush_civicrm_cacheclear';
   }
 }
@@ -785,7 +785,7 @@ function civicrm_drush_cache_clear(&$types) {
  * when "drush cc" is called.
  */
 function drush_civicrm_cacheclear() {
-  _civicrm_init();
+  _civicrm_init(TRUE, TRUE);
 
   // Clear the classloader cache variable
   // Should be done in CiviCRM core so that the system flush always deletes
@@ -1444,13 +1444,15 @@ function _civicrm_dsn_close() {
  * Initializes the CiviCRM environment and configuration.
  * TODO: document why we can't call civicrm_initialize() directly.
  *
- * @param  bool fail
+ * @param bool $fail
  *   If true, will halt drush. Otherwise, return false but do not interrupt.
+ * @param bool $load_config
+ *   If true, loads the CiviCRM configuration.
  *
  * @return bool
  *   Returns TRUE if CiviCRM was initialized.
  */
-function _civicrm_init($fail = TRUE) {
+function _civicrm_init($fail = TRUE, $load_config = FALSE) {
   static $init = NULL;
 
   // return if already initialized
@@ -1490,6 +1492,11 @@ function _civicrm_init($fail = TRUE) {
   if (substr($codeVer, 0, 3) >= '4.2') {
     require_once $civicrm_root . '/CRM/Core/ClassLoader.php';
     CRM_Core_ClassLoader::singleton()->register();
+  }
+
+  if ($load_config) {
+    require_once 'CRM/Core/Config.php';
+    CRM_Core_Config::singleton();
   }
 
   $init = TRUE;
