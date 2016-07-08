@@ -661,7 +661,7 @@ function drush_civicrm_upgrade_db_validate() {
   }
   $_GET['q'] = 'civicrm/upgrade';
 
-  if (!_civicrm_init(TRUE, TRUE)) {
+  if (!_civicrm_init()) {
     return FALSE;
   }
 
@@ -772,7 +772,7 @@ function drush_civicrm_update_cfg() {
  * Implements hook_drush_cache_clear.
  */
 function civicrm_drush_cache_clear(&$types) {
-  if (_civicrm_init(FALSE, TRUE)) {
+  if (_civicrm_init(FALSE)) {
     $types['civicrm'] = 'drush_civicrm_cacheclear';
   }
 }
@@ -785,7 +785,7 @@ function civicrm_drush_cache_clear(&$types) {
  * when "drush cc" is called.
  */
 function drush_civicrm_cacheclear() {
-  _civicrm_init(TRUE, TRUE);
+  _civicrm_init();
 
   // Clear the classloader cache variable
   // Should be done in CiviCRM core so that the system flush always deletes
@@ -1394,7 +1394,7 @@ function drush_civicrm_post_civicrm_sqlcli() {
 function _civicrm_dsn_init($reset = FALSE) {
   static $globalDbUrl = NULL;
 
-  if (!_civicrm_init()) {
+  if (!_civicrm_init(TRUE, FALSE)) {
     return FALSE;
   }
 
@@ -1452,7 +1452,7 @@ function _civicrm_dsn_close() {
  * @return bool
  *   Returns TRUE if CiviCRM was initialized.
  */
-function _civicrm_init($fail = TRUE, $load_config = FALSE) {
+function _civicrm_init($fail = TRUE, $load_config = TRUE) {
   static $init = NULL;
 
   // return if already initialized
