@@ -383,9 +383,9 @@ function _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname,
   $siteRoot = drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE);
 
   $sqlPath = "$modPath/civicrm/sql";
-  $conn = @mysql_connect($dbhost, $dbuser, $dbpass);
-  if (!@mysql_select_db($dbname) &&
-    !@mysql_query("CREATE DATABASE $database")
+  $conn = new mysqli($dbhost, $dbuser, $dbpass);
+  if ($conn->select_db($dbname) &&
+    !$conn->query("CREATE DATABASE $database")
   ) {
     drush_die(dt('CiviCRM database was not found. Failed to create one.'));
   }
