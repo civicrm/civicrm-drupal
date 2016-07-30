@@ -383,15 +383,25 @@ function _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname,
   $siteRoot = drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE);
 
   $sqlPath = "$modPath/civicrm/sql";
-  $conn = @mysqli_connect($dbhost, $dbuser, $dbpass);
-  if (!@mysqli_select_db($conn, $dbname) &&
-    !@mysqli_query($conn, "CREATE DATABASE $dbname")
-  ) {
+
+  if (function_exists('mysqli_connect')) {
+    $dbhostParts = explode(':', $dbhost);
+    $conn = @mysqli_connect($dbhostParts[0], $dbuser, $dbpass, '', isset($dbhostParts[1]) ? $dbhostParts[1] : '');
+    $dbOK = ($a = @mysqli_select_db($conn, $dbname)) || ($b = @mysqli_query($conn, "CREATE DATABASE $dbname"));
+  }
+  elseif (function_exists('mysql_connect')) {
+    $conn = @mysql_connect($dbhost, $dbuser, $dbpass);
+    $dbOK = @mysql_select_db($dbname, $conn) || @mysql_query("CREATE DATABASE $dbname", $conn);
+  }
+  else {
+    $dbOK = FALSE;
+  }
+  if (!$dbOK) {
     drush_die(dt('CiviCRM database was not found. Failed to create one.'));
   }
 
   // setup database with civicrm structure and data
-  $dsn = "mysqli://{$dbuser}:{$dbpass}@{$dbhost}/{$dbname}?new_link=true";
+  $dsn = "mysql://{$dbuser}:{$dbpass}@{$dbhost}/{$dbname}?new_link=true";
   drush_log(dt("Loading CiviCRM database structure .."));
   civicrm_source($dsn, $sqlPath . '/civicrm.mysql');
   drush_log(dt("Loading CiviCRM database with required data .."));
