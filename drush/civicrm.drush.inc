@@ -370,8 +370,8 @@ function drush_civicrm_install() {
 
 function _civicrm_extract_tarfile($destinationPath, $option = 'tarfile') {
   $tarpath = drush_get_option($option, FALSE);
-  if (drush_shell_exec("gzip -d " . $tarfile)) {
-    $tarpath = substr($tarfile, 0, strlen($tarfile) - 3);
+  if (drush_shell_exec("gzip -d " . $tarpath)) {
+    $tarpath = preg_replace('/(tar\.gz|tgz)$/', 'tar', $tarpath);
   }
   drush_shell_exec("tar -xf $tarpath -C \"$destinationPath\"");
 }
