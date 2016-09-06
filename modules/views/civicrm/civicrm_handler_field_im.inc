@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.7                                                |
+ | CiviCRM version 4.7                                               |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -24,13 +24,13 @@
 */
 
 /**
- * Field handler to provide relationship to CiviCRM Instant Messaging.
+ * Field handler for Instant Messaging field
  *
- * @ingroup civicrm_relationship_handlers
+ * @ingroup civicrm_field_handlers
  */
-class civicrm_handler_relationship_im extends civicrm_handler_relationship_location {
-
+class civicrm_handler_field_im extends civicrm_handler_field_location {
   static $_provider;
+
   function construct() {
     parent::construct();
     if (!self::$_provider) {
@@ -55,9 +55,9 @@ class civicrm_handler_relationship_im extends civicrm_handler_relationship_locat
     }
     $form['provider'] = array(
       '#type' => 'radios',
-      '#title' => 'Instant Messaging provider for this relationship',
+      '#title' => 'Instant Messaging provider for this field',
       '#options' => $imOptions,
-      '#description' => t('Instant Messaging provider to be used for this relationship'),
+      '#description' => t('Instant Messaging provider to be displayed for this field'),
       '#default_value' => $this->options['provider'],
       '#fieldset' => 'location_choices',
     );
@@ -91,29 +91,13 @@ class civicrm_handler_relationship_im extends civicrm_handler_relationship_locat
   function ensure_my_table() {
     if (!isset($this->table_alias)) {
       if (!method_exists($this->query, 'ensure_table')) {
-        vpr(t('Ensure my table called but query has no ensure_table method.'));
-        return;
+        vpr_trace();
+        exit;
       }
       $join = $this->get_join();
       $this->table_alias = $this->query->ensure_table($this->table, $this->relationship, $join);
     }
     return $this->table_alias;
-  }
-
-  /**
-   * Called to implement a relationship in a query.
-   */
-  function query() {
-    // Just ensure the one table. This is briefer than parent::query(), which
-    // attempts to create an additional join.
-    $this->alias = $this->ensure_my_table();
-    //register relationship
-    $this->view->relationship[$this->options['id']]->alias = $this->alias;
-    $this->query->relationships[$this->alias] = array(
-        'link' => $this->relationship,
-        'table' => $this->table,
-        'base' => $this->table,
-    );
   }
 }
 

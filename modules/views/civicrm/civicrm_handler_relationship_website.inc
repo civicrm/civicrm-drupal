@@ -24,11 +24,69 @@
 */
 
 /**
- * Field handler to provide relationship to CiviCRM email.
+ * Field handler to provide relationship to CiviCRM Website.
  *
  * @ingroup civicrm_relationship_handlers
  */
-class civicrm_handler_relationship_mail extends civicrm_handler_relationship_location {
+class civicrm_handler_relationship_website extends civicrm_handler_relationship_location {
+
+  static $_websiteType;
+  function construct() {
+    parent::construct();
+    if (!self::$_websiteType) {
+      if (!civicrm_initialize()) {
+        return;
+      }
+      self::$_websiteType = CRM_Core_PseudoConstant::get('CRM_Core_DAO_Website', 'website_type_id');
+    }
+  }
+
+  function option_definition() {
+    $options = parent::option_definition();
+    $options['website_type'] = array('default' => 0);
+    return $options;
+  }
+
+  function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+    $websiteOptions = array(0 => 'Any');
+    foreach (self::$_websiteType as $id => $type) {
+      $websiteOptions[$id] = $type;
+    }
+    $form['website_type'] = array(
+      '#type' => 'radios',
+      '#title' => 'Website type for this relationship',
+      '#options' => $websiteOptions,
+      '#description' => t('Website type to be used for this relationship'),
+      '#default_value' => $this->options['website_type'],
+      '#fieldset' => 'location_choices',
+    );
+  }
+
+  function join_website($join = array()) {
+    $extra = array();
+    if (isset($join->extra)) {
+      $extra = $join->extra;
+    }
+    if (isset($this->options['website_type']) && $this->options['website_type']) {
+      $extra[] = array(
+          'value' => $this->options['website_type'],
+          'numeric' => TRUE,
+          'field' => 'website_type_id',
+          'operator' => '=',
+      );
+    }
+    if (!empty($extra)) {
+      $join->extra = $extra;
+    }
+    return $join;
+  }
+
+  function get_join() {
+    $join = parent::get_join();
+    $join = $this->join_website($join);
+    return $join;
+  }
 
   function ensure_my_table() {
     if (!isset($this->table_alias)) {
