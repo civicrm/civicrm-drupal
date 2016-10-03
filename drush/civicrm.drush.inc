@@ -370,8 +370,8 @@ function drush_civicrm_install() {
 
 function _civicrm_extract_tarfile($destinationPath, $option = 'tarfile') {
   $tarpath = drush_get_option($option, FALSE);
-  if (drush_shell_exec("gzip -d " . $tarfile)) {
-    $tarpath = substr($tarfile, 0, strlen($tarfile) - 3);
+  if (drush_shell_exec("gzip -d " . $tarpath)) {
+    $tarpath = preg_replace('/(tar\.gz|tgz)$/', 'tar', $tarpath);
   }
   drush_shell_exec("tar -xf $tarpath -C \"$destinationPath\"");
 }
@@ -383,10 +383,20 @@ function _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname,
   $siteRoot = drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE);
 
   $sqlPath = "$modPath/civicrm/sql";
-  $conn = @mysql_connect($dbhost, $dbuser, $dbpass);
-  if (!@mysql_select_db($dbname) &&
-    !@mysql_query("CREATE DATABASE $database")
-  ) {
+
+  if (function_exists('mysqli_connect')) {
+    $dbhostParts = explode(':', $dbhost);
+    $conn = @mysqli_connect($dbhostParts[0], $dbuser, $dbpass, '', isset($dbhostParts[1]) ? $dbhostParts[1] : NULL);
+    $dbOK = ($a = @mysqli_select_db($conn, $dbname)) || ($b = @mysqli_query($conn, "CREATE DATABASE $dbname"));
+  }
+  elseif (function_exists('mysql_connect')) {
+    $conn = @mysql_connect($dbhost, $dbuser, $dbpass);
+    $dbOK = @mysql_select_db($dbname, $conn) || @mysql_query("CREATE DATABASE $dbname", $conn);
+  }
+  else {
+    $dbOK = FALSE;
+  }
+  if (!$dbOK) {
     drush_die(dt('CiviCRM database was not found. Failed to create one.'));
   }
 
