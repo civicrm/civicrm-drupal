@@ -24,55 +24,55 @@
 */
 
 /**
- * Field handler for phone field
+ * Field handler for website field
  *
  * @ingroup civicrm_field_handlers
  */
-class civicrm_handler_field_phone extends civicrm_handler_field_location {
-  static $_phoneType;
+class civicrm_handler_field_website extends civicrm_handler_field_location {
+  static $_websiteType;
 
   function construct() {
     parent::construct();
-    if (!self::$_phoneType) {
+    if (!self::$_websiteType) {
       if (!civicrm_initialize()) {
         return;
       }
-      self::$_phoneType = CRM_Core_PseudoConstant::get('CRM_Core_DAO_Phone', 'phone_type_id');
+      self::$_websiteType = CRM_Core_PseudoConstant::get('CRM_Core_DAO_Website', 'website_type_id');
     }
   }
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['phone_type'] = array('default' => 0);
+    $options['website_type'] = array('default' => 0);
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $phoneOptions = array(0 => 'Any');
-    foreach (self::$_phoneType as $id => $type) {
-      $phoneOptions[$id] = $type;
+    $websiteOptions = array(0 => 'Any');
+    foreach (self::$_websiteType as $id => $type) {
+      $websiteOptions[$id] = $type;
     }
-    $form['phone_type'] = array(
+    $form['website_type'] = array(
       '#type' => 'radios',
-      '#title' => 'Phone type for this field',
-      '#options' => $phoneOptions,
-      '#description' => t('Phone type to be displayed for this field'),
-      '#default_value' => $this->options['phone_type'],
+      '#title' => 'Website type for this field',
+      '#options' => $websiteOptions,
+      '#description' => t('Website type to be displayed for this field'),
+      '#default_value' => $this->options['website_type'],
       '#fieldset' => 'location_choices',
     );
   }
 
-  function join_phone($join = array()) {
+  function join_website($join = array()) {
     $extra = array();
     if (isset($join->extra)) {
       $extra = $join->extra;
     }
-    if (isset($this->options['phone_type']) && $this->options['phone_type']) {
+    if (isset($this->options['website_type']) && $this->options['website_type']) {
       $extra[] = array(
-          'value' => $this->options['phone_type'],
+          'value' => $this->options['website_type'],
           'numeric' => TRUE,
-          'field' => 'phone_type_id',
+          'field' => 'website_type_id',
           'operator' => '=',
       );
     }
@@ -84,7 +84,7 @@ class civicrm_handler_field_phone extends civicrm_handler_field_location {
 
   function get_join() {
     $join = parent::get_join();
-    $join = $this->join_phone($join);
+    $join = $this->join_website($join);
     return $join;
   }
 

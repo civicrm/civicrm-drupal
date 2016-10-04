@@ -24,11 +24,69 @@
 */
 
 /**
- * Field handler to provide relationship to CiviCRM email.
+ * Field handler to provide relationship to CiviCRM Instant Messaging.
  *
  * @ingroup civicrm_relationship_handlers
  */
-class civicrm_handler_relationship_mail extends civicrm_handler_relationship_location {
+class civicrm_handler_relationship_im extends civicrm_handler_relationship_location {
+
+  static $_provider;
+  function construct() {
+    parent::construct();
+    if (!self::$_provider) {
+      if (!civicrm_initialize()) {
+        return;
+      }
+      self::$_provider = CRM_Core_PseudoConstant::get('CRM_Core_DAO_IM', 'provider_id');
+    }
+  }
+
+  function option_definition() {
+    $options = parent::option_definition();
+    $options['provider'] = array('default' => 0);
+    return $options;
+  }
+
+  function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+    $imOptions = array(0 => 'Any');
+    foreach (self::$_provider as $id => $type) {
+      $imOptions[$id] = $type;
+    }
+    $form['provider'] = array(
+      '#type' => 'radios',
+      '#title' => 'Instant Messaging provider for this relationship',
+      '#options' => $imOptions,
+      '#description' => t('Instant Messaging provider to be used for this relationship'),
+      '#default_value' => $this->options['provider'],
+      '#fieldset' => 'location_choices',
+    );
+  }
+
+  function join_im($join = array()) {
+    $extra = array();
+    if (isset($join->extra)) {
+      $extra = $join->extra;
+    }
+    if (isset($this->options['provider']) && $this->options['provider']) {
+      $extra[] = array(
+          'value' => $this->options['provider'],
+          'numeric' => TRUE,
+          'field' => 'provider_id',
+          'operator' => '=',
+      );
+    }
+    if (!empty($extra)) {
+      $join->extra = $extra;
+    }
+    return $join;
+  }
+
+  function get_join() {
+    $join = parent::get_join();
+    $join = $this->join_im($join);
+    return $join;
+  }
 
   function ensure_my_table() {
     if (!isset($this->table_alias)) {
