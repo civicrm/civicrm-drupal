@@ -90,6 +90,7 @@ files[] = modules/views/civicrm/civicrm_handler_relationship_memberships_contrib
 files[] = modules/views/civicrm/civicrm_handler_relationship_location.inc
 files[] = modules/views/civicrm/civicrm_handler_relationship_mail.inc
 files[] = modules/views/civicrm/civicrm_handler_relationship_phone.inc
+files[] = modules/views/civicrm/civicrm_handler_relationship_im.inc
 files[] = modules/views/civicrm/civicrm_handler_relationship_address.inc
 
 ; views plugins

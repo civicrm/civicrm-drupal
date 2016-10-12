@@ -26,7 +26,7 @@
  * Drupal module file.
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2015
+ * @copyright CiviCRM LLC (c) 2004-2016
  */
 require_once 'civicrm_user.inc';
 
@@ -850,7 +850,7 @@ function civicrm_add_jquery(&$html) {
   return $html;
 }
 
-function civicrm_form_alter(&$form, &$formValues, $formID) {
+function civicrm_form_alter(&$form, $formValues, $formID) {
   switch ($formID) {
     case 'user_admin_permissions':
       $form['#submit'][] = 'civicrm_user_admin_permissions_submit';
@@ -872,7 +872,6 @@ function civicrm_form_alter(&$form, &$formValues, $formID) {
         NULL, TRUE, FALSE
       );
       $form = array_merge($form, $output);
-      $formValues['no_cache'] = TRUE;
       break;
 
     case 'user_profile_form':
@@ -902,7 +901,6 @@ function civicrm_form_alter(&$form, &$formValues, $formID) {
           $form = array_merge($form, $output);
         }
       }
-      $formValues['no_cache'] = TRUE;
       break;
 
     default:
