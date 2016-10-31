@@ -238,6 +238,14 @@ function civicrm_drush_command() {
       'file' => 'Path to a file containing the SQL to be run. ',
     ),
   );
+  $items['civicrm-sql-drop'] = array(
+    // explicit callback declaration and non-standard name to avoid collision with "sql-query"
+    'callback' => 'drush_civicrm_sqldrop',
+    'description' => 'Drop all tables in the CiviCRM database.',
+    'options' => array(
+      'yes' => 'Skip confirmation and proceed.',
+    ),
+  );
   $items['civicrm-sql-cli'] = array(
     // explicit callback declaration and non-standard name to avoid collision with "sql-cli"
     'callback' => 'drush_civicrm_sqlcli',
@@ -1355,6 +1363,52 @@ function drush_civicrm_post_civicrm_sql_query() {
  * this function is called when using drush 5.
  */
 function drush_civicrm_post_civicrm_sqlquery() {
+  _civicrm_dsn_close();
+}
+
+/**
+ * Implements drush_hook_pre_COMMAND().
+ *
+ * this function is called when using drush 6.
+ */
+function drush_civicrm_pre_civicrm_sql_drop() {
+  _civicrm_dsn_init();
+}
+
+/**
+ * Implements drush_hook_pre_COMMAND().
+ *
+ * this function is called when using drush 5.
+ */
+function drush_civicrm_pre_civicrm_sqldrop() {
+  _civicrm_dsn_init();
+}
+
+/**
+ * Implementation of command 'civicrm-sql-drop'
+ */
+function drush_civicrm_sqldrop() {
+  drush_sql_query("SET GLOBAL foreign_key_checks = 0;");
+  $output = drush_sql_drop();
+  drush_sql_query("SET GLOBAL foreign_key_checks = 1;");
+  return $output;
+}
+
+/**
+ * Implements drush_hook_post_COMMAND().
+ *
+ * this function is called when using drush 6.
+ */
+function drush_civicrm_post_civicrm_sql_drop() {
+  _civicrm_dsn_close();
+}
+
+/**
+ * Implements drush_hook_post_COMMAND().
+ *
+ * this function is called when using drush 5.
+ */
+function drush_civicrm_post_civicrm_sqldrop() {
   _civicrm_dsn_close();
 }
 
