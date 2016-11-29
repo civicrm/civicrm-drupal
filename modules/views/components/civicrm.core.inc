@@ -711,6 +711,11 @@ function _civicrm_core_data(&$data, $enabled) {
       'field' => 'contact_id',
     ),
   );
+  //CiviCRM Address
+  $data['civicrm_address']['table']['join']['civicrm_address'] = array(
+      'left_field' => 'id',
+      'field' => 'id',
+  );
 
   //CiviCRM Address Using Contacts as a pitstop before going on to Participants
   $data['civicrm_address']['table']['join']['civicrm_participant'] = array(
@@ -1145,6 +1150,12 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
+  //CiviCRM Email
+  $data['civicrm_email']['table']['join']['civicrm_email'] = array(
+      'left_field' => 'id',
+      'field' => 'id',
+  );
+
   //CiviCRM Email Using Contacts as a pitstop before going on to Participants
   $data['civicrm_email']['table']['join']['civicrm_participant'] = array(
     'left_table' => 'civicrm_contact',
@@ -1299,6 +1310,12 @@ function _civicrm_core_data(&$data, $enabled) {
       'left_field' => 'id',
       'field' => 'contact_id',
     ),
+  );
+
+  //CiviCRM Phone
+  $data['civicrm_phone']['table']['join']['civicrm_phone'] = array(
+      'left_field' => 'id',
+      'field' => 'id',
   );
 
   //CiviCRM Phone Using Contacts as a pitstop before going on to Participants
@@ -1533,6 +1550,12 @@ function _civicrm_core_data(&$data, $enabled) {
       ),
   );
 
+  //CiviCRM Im
+  $data['civicrm_im']['table']['join']['civicrm_im'] = array(
+      'left_field' => 'id',
+      'field' => 'id',
+  );
+
   //CiviCRM Im Using Contacts as a pitstop before going on to Participants
   $data['civicrm_im']['table']['join']['civicrm_participant'] = array(
       'left_table' => 'civicrm_contact',
@@ -1646,7 +1669,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'title' => t('Name'),
       'help' => t('IM screen name'),
       'field' => array(
-          'handler' => 'views_handler_field',
+          'handler' => 'civicrm_handler_field_im',
           'click sortable' => TRUE,
       ),
   );
@@ -1731,6 +1754,12 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
+  //CiviCRM Website
+  $data['civicrm_website']['table']['join']['civicrm_website'] = array(
+      'left_field' => 'id',
+      'field' => 'id',
+  );
+
   //CiviCRM Website Using Contacts as a pitstop before going on to Participants
   $data['civicrm_website']['table']['join']['civicrm_participant'] = array(
     'left_table' => 'civicrm_contact',
@@ -1800,7 +1829,7 @@ function _civicrm_core_data(&$data, $enabled) {
     'title' => t('Website URL'),
     'help' => t('Website URL'),
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'civicrm_handler_field_website',
       'click sortable' => TRUE,
     ),
     'argument' => array(
@@ -1816,8 +1845,8 @@ function _civicrm_core_data(&$data, $enabled) {
     'relationship' => array(
       'base' => 'civicrm_contact',
       'base field' => 'id',
-      'handler' => 'views_handler_relationship',
-      'label' => t('Related Phone'),
+      'handler' => 'civicrm_handler_relationship_website',
+      'label' => t('Related Website'),
     ),
   );
   // CIVICRM Activities are here with all the activeness they can muster, base tabling it up.
