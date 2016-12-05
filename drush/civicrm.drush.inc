@@ -401,7 +401,7 @@ function _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname,
   }
 
   // setup database with civicrm structure and data
-  $dsn = "mysql://{$dbuser}:{$dbpass}@{$dbhost}/{$dbname}?new_link=true";
+  $dsn = "mysqli://{$dbuser}:{$dbpass}@{$dbhost}/{$dbname}?new_link=true";
   drush_log(dt("Loading CiviCRM database structure .."));
   civicrm_source($dsn, $sqlPath . '/civicrm.mysql');
   drush_log(dt("Loading CiviCRM database with required data .."));
