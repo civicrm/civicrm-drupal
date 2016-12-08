@@ -126,6 +126,14 @@ class civicrm_handler_relationship_location extends views_handler_relationship {
     return $extra;
   }
 
+
+  function join_required($join = array()) {
+    if (!empty($this->options['required'])) {
+      $join->type = 'INNER';
+    }
+    return $join;
+  }
+
   function join_location($join = array()) {
     $extra = array();
     if (isset($join->extra)) {
@@ -141,6 +149,7 @@ class civicrm_handler_relationship_location extends views_handler_relationship {
 
   function get_join() {
     $join = parent::get_join();
+    $join = $this->join_required($join);
     $join = $this->join_location($join);
     return $join;
   }
