@@ -343,6 +343,19 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
           'field'      => 'entity_id',
         );
       }
+
+      // Expose group custom data to group relationship.
+      if ($join_table == 'civicrm_group') {
+        $data[$current_group['table_name']]['table']['join']['civicrm_group'] = array(
+          'left_field' => 'id',
+          'field'      => 'entity_id',
+        );
+        $data[$current_group['table_name']]['table']['join']['civicrm_group_contact'] = array(
+          'left_table' => $join_table,
+          'left_field' => 'id',
+          'field'      => 'entity_id',
+        );
+      }
     }
 
     foreach ($current_group['fields'] as $key => $current_field) {
@@ -771,7 +784,7 @@ function civicrm_views_plugins() {
     $civicrm_module_path = drupal_get_path('module', 'civicrm');
     $data['row'] = array(
       'civicrm_event_calendar' => array(
-      	'title' => t('Calendar Items'),
+        'title' => t('Calendar Items'),
         'help' => t('Displays each selected event as a Calendar item.'),
         'handler' => 'calendar_plugin_row_civicrm',
         'path' => "$civicrm_module_path/modules/views/plugins",
@@ -794,7 +807,7 @@ function civicrm_views_plugins() {
         'dao class' => 'CRM_Activity_DAO_Activity',
         'title field' => 'subject',
       ),
-			'civicrm_case_calendar' => array(
+      'civicrm_case_calendar' => array(
         'title' => t('Case Items'),
         'help' => t('Displays each selected case as a Calendar item.'),
         'handler' => 'calendar_plugin_row_civicrm',
