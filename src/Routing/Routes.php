@@ -19,19 +19,16 @@ class Routes {
     // and let each default to empty string.
     foreach ($items as $path => $item) {
       $route = new Route(
-        '/' . $path . '/{one}/{two}/{three}/{four}/{five}',
+        '/' . $path . '/{extra}',
         array(
           '_title' => isset($item['title']) ? $item['title'] : 'CiviCRM',
           '_controller' => 'Drupal\civicrm\Controller\CivicrmController::main',
           'args' => explode('/', $path),
-          'one' => '',
-          'two' => '',
-          'three' => '',
-          'four' => '',
-          'five' => '',
+          'extra' => '',
         ),
         array(
           '_access' => 'TRUE',
+          'extra' => '.*',
         )
       );
 
