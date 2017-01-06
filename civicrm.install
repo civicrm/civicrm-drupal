@@ -126,13 +126,13 @@ function civicrm_requirements($phase) {
 function _civicrm_find_civicrm() {
   if ($path = drupal_get_path('module', 'civicrm')) {
     if (file_exists($path . '/CRM/Core/ClassLoader.php')) {
-      return realpath($path);
+      return \Drupal::service('file_system')->realpath($path);
     }
   }
 
   if ($path = libraries_get_path('civicrm')) {
     if (file_exists($path . '/CRM/Core/ClassLoader.php')) {
-      return realpath($path);
+      return \Drupal::service('file_system')->realpath($path);
     }
   }
 
