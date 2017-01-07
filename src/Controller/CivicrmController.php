@@ -31,7 +31,6 @@ class CivicrmController extends ControllerBase {
 
   public function main($args, $extra) {
     if ($extra) {
-     //kint($extra);
       $args = array_merge($args, explode(':', $extra));
     }
 
