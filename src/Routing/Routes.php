@@ -28,10 +28,9 @@ class Routes {
         ),
         array(
           '_access' => 'TRUE',
-          'extra' => '.*',
+          'extra' => '.+',
         )
       );
-
       $route_name = CivicrmHelper::parseURL($path)['route_name'];
       $collection->add($route_name, $route);
     }
