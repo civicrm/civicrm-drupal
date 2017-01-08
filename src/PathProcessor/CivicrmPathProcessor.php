@@ -29,9 +29,9 @@ class CivicrmPathProcessor implements InboundPathProcessorInterface {
         }
       }
       if (!empty($longest)) {
-       $params = str_replace($longest, '', $path);
-         
-          // replace slashes with colons and the controller will piece it back together
+        // parse url component parameters from path
+        $params = str_replace($longest . '/', '', $path);
+        // replace slashes with colons and the controller will piece it back together
         if(strlen($params)) {
           $params = str_replace('/', ':', $params);
           return "$longest/$params";
