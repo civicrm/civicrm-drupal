@@ -22,7 +22,7 @@ class CivicrmPathProcessor implements InboundPathProcessorInterface {
         $item = '/' . $item;
         // if he current path is a civicrm path
         if ((strpos($path, $item ) === 0))  {
-          // discover any additional path components after the registered route
+          // discover longest matching civicrm path in the request path 
           
           if (strlen($item) > strlen($longest)) {
            $longest = $item;
@@ -30,16 +30,18 @@ class CivicrmPathProcessor implements InboundPathProcessorInterface {
         }
       }
       if (!empty($longest)) {
-       
-        $regex_path = '|^' . str_replace('/', '\/', $longest) . '\/|';
-        $params = preg_replace($regex_path, '', $path);
+       $params = str_replace($longest, '', $path);
          
           // replace slashes with colons and the controller will piece it back together
         if(strlen($params)) {
           $params = str_replace('/', ':', $params);
+          return "$longest/$params";
         }
-        $new_path = "$longest/$params";
-        return $new_path;     
+        else {
+          return $longest;
+        }
+       
+   
       }
     }
     return $path;
