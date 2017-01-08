@@ -31,7 +31,7 @@ class CivicrmController extends ControllerBase {
 
   public function main($args, $extra) {
     if ($extra) {
-      $args = array_merge($args, explode('/', $extra));
+      $args = array_merge($args, explode(':', $extra));
     }
 
     // CiviCRM's Invoke.php has hardwired in the expectation that the query parameter 'q' is being used.

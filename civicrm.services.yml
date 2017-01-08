@@ -8,3 +8,7 @@ services:
     arguments: [@string_translation, @civicrm.page_state]
     tags:
       - { name: breadcrumb_builder, priority: 1002 }
+  civicrm.path_processor:
+    class: Drupal\civicrm\PathProcessor\CivicrmPathProcessor
+    tags:
+      - { name: path_processor_inbound, priority: 250 }
