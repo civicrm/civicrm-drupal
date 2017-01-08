@@ -37,6 +37,8 @@ class CivicrmPathProcessor implements InboundPathProcessorInterface {
           if (substr($params, 0, 1) == ':') {
            $params = substr($params, 1);
           }
+          //\Drupal::logger('my_module')->notice('Path ' . $longest);
+          //\Drupal::logger('my_module')->notice('Params: ' . $params);
           return "$longest/$params";
         }
         else {

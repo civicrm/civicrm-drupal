@@ -12,5 +12,3 @@ services:
     class: Drupal\civicrm\PathProcessor\CivicrmPathProcessor
     tags:
       - { name: path_processor_inbound, priority: 250 }
-
-      
