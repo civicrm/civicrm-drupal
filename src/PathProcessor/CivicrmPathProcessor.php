@@ -12,7 +12,6 @@ class CivicrmPathProcessor implements InboundPathProcessorInterface {
   public function processInbound($path, Request $request) {
     // if the path is a civicrm path   
     if (strpos($path, '/civicrm/') === 0) {
-      
       // initialize civicrm
       $civicrm = new Civicrm();
       // fetch civicrm menu items
@@ -40,8 +39,6 @@ class CivicrmPathProcessor implements InboundPathProcessorInterface {
         else {
           return $longest;
         }
-       
-   
       }
     }
     return $path;
