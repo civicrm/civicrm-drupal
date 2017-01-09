@@ -2940,7 +2940,7 @@ function _civicrm_core_data(&$data, $enabled) {
 
   while ($dao->fetch()) {
     // call getTree using $dao->id as groupID, $dao->extends as entityType, with possible subtypes in $dao->extends_entity_column_value
-    $extendsContactSubtype = (('Contact' === $dao->extends) && !empty($dao->extends_entity_column_value));
+    $extendsContactSubtype = (in_array($dao->extends, array('Contact', 'Individual', 'Organization', 'Household')) && !empty($dao->extends_entity_column_value));
     $contactSubtypes = !$extendsContactSubtype ? NULL : array_filter(explode(CRM_Core_DAO::VALUE_SEPARATOR, $dao->extends_entity_column_value));
     $contactSubtypes = empty($contactSubtypes) ? NULL : $contactSubtypes;
     $data = civicrm_views_custom_data_cache($data, $dao->extends, $dao->id, $contactSubtypes);
