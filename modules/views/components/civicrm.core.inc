@@ -609,9 +609,7 @@ function _civicrm_core_data(&$data, $enabled) {
       'pseudo method' => 'subTypePairs',
     ),
     'filter' => array(
-      'handler' => 'civicrm_handler_filter_pseudo_constant',
-      'pseudo class' => 'CRM_Contact_BAO_ContactType',
-      'pseudo method' => 'subTypePairs',
+      'handler' => 'civicrm_handler_filter_custom_option',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
