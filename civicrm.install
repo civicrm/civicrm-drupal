@@ -85,7 +85,6 @@ function civicrm_requirements($phase) {
 
   // Grab db connection info
   $db_config = _civicrm_get_db_config()['info'];
-  $db_config['host'] = "{$db_config['host']}:{$db_config['port']}";
 
   $install_requirements = new \Civi\Install\Requirements();
 
