@@ -155,6 +155,9 @@ function civicrm_drush_command() {
   $items['civicrm-enable-debug'] = array(
     'description' => "Enable CiviCRM Debugging.",
   );
+  $items['civicrm-disable-debug'] = array(
+    'description' => "Disable CiviCRM Debugging.",
+  );
   $items['civicrm-upgrade'] = array(
     'description' => "Replace CiviCRM codebase with new specified tarfile and upgrade database by executing the CiviCRM upgrade process - civicrm/upgrade?reset=1.",
     'examples' =>
