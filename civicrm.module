@@ -100,7 +100,6 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
   // And we need the contact_id of the current user ($current_contact_id) so
   // that we can perform proper access checks.
   $current_user = \Drupal::currentUser();
-
   $contact_id = \CRM_Core_BAO_UFMatch::getContactId($account->id());
   $current_contact_id = \CRM_Core_BAO_UFMatch::getContactId($current_user->id());
   if (!$contact_id || !$current_contact_id) {
