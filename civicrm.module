@@ -93,7 +93,7 @@ function civicrm_entity_extra_field_info() {
  * We use this hook to add the pseudo-fields we've added in civicrm_entity_extra_field_info()
  * to the user display.
  */
-function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode, $langcode) {
+function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
   \Drupal::service('civicrm');
 
   // We need the $contact_id so that we know what data to pull out of Civicrm.
@@ -105,7 +105,6 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
   if (!$contact_id || !$current_contact_id) {
     return;
   }
-
 
   // Contact record link.
   if (($conf = $display->getComponent('civicrm_record')) && $current_user->hasPermission('access CiviCRM') && \CRM_Contact_BAO_Contact_Permission::allow($current_contact_id)) {
