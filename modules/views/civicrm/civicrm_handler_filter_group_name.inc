@@ -48,7 +48,9 @@ class civicrm_handler_filter_group_name extends views_handler_filter_in_operator
       ));
       $this->civi_groups = array();
       foreach ($result['values'] as $group) {
-        $this->civi_groups[$group['name']] = $group['title'];
+        if (isset($group['name'])) {
+          $this->civi_groups[$group['name']] = $group['title'];
+        }
       }
     }
   }

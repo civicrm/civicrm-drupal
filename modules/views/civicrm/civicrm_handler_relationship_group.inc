@@ -44,9 +44,11 @@ class civicrm_handler_relationship_group extends views_handler_relationship {
       }
       $group_type = implode(', ', $group_types);
 
-      $this->civi_groups[$group['name']] =
-        $group['title'] . ' | ' .
-        $group_type;
+      if (isset($group['name'])) {
+        $this->civi_groups[$group['name']] =
+          $group['title'] . ' | ' .
+          $group_type;
+      }
     }
   }
 

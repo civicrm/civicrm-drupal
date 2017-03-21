@@ -32,8 +32,10 @@ class civicrm_handler_relationship_standard_group_contact extends views_handler_
         'options' => array('limit' => 0, 'sort' => "title"),
     ));
     foreach ($result['values'] as $group) {
-      $this->group_ids[$group['name']] = $group['id'];
-      $this->group_titles[$group['name']] = $group['title'];
+      if (isset($group['name'])) {
+        $this->group_ids[$group['name']] = $group['id'];
+        $this->group_titles[$group['name']] = $group['title'];
+      }
     }
   }
 
