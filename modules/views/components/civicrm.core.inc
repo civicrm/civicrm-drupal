@@ -2555,7 +2555,7 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
- $data['civicrm_relationship']['is_permission_a_b'] = array(
+  $data['civicrm_relationship']['is_permission_a_b'] = array(
     'title' => t('Contact A has Permission Over Contact B?'),
     'help' => t('Contact A has Permission Over Contact B?'),
     'field' => array(
@@ -2574,7 +2574,7 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
- $data['civicrm_relationship']['is_permission_b_a'] = array(
+  $data['civicrm_relationship']['is_permission_b_a'] = array(
     'title' => t('Contact B has Permission Over Contact A?'),
     'help' => t('Contact B has Permission Over Contact A?'),
     'field' => array(
