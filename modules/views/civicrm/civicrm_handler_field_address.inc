@@ -80,7 +80,8 @@ class civicrm_handler_field_address extends civicrm_handler_field_location {
         exit;
       }
       $join = $this->get_join();
-      if (empty($this->relationship)) { //https://www.drupal.org/node/2617032
+      //CRM-20203: Make sure latitude and longitude doesn't add more joins
+      if (empty($this->relationship) && strpos($this->field, 'geo_code_') != 0) { //https://www.drupal.org/node/2617032
         $this->table_alias = $this->query->add_table($this->table, $this->relationship, $join);
       } else {
         $this->table_alias = $this->query->ensure_table($this->table, $this->relationship, $join);
