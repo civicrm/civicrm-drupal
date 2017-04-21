@@ -2555,6 +2555,44 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
+  $data['civicrm_relationship']['is_permission_a_b'] = array(
+    'title' => t('Contact A has Permission Over Contact B?'),
+    'help' => t('Contact A has Permission Over Contact B?'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+      'allow empty' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
+  $data['civicrm_relationship']['is_permission_b_a'] = array(
+    'title' => t('Contact B has Permission Over Contact A?'),
+    'help' => t('Contact B has Permission Over Contact A?'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+      'allow empty' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   //Relationship start date
   $data['civicrm_relationship']['start_date'] = array(
     'title' => t('Start Date'),
