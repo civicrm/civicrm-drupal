@@ -1249,37 +1249,80 @@ function civicrm_reviews() {
 }
 
 /**
+ * If any of the modules with changed status implement CiviCRM hooks, rebuild
+ * the CiviCRM menu and caches. Otherwise let it pass.
+ *
+ * Previously, enabling/disabling any Drupal modules would trigger a lengthy
+ * set of DB updates while CRM_Core_Invoke::rebuildMenuAndCaches() rebuilt
+ * various triggers and stored functions. This need not happen if the module
+ * does not interact with CiviCRM at all.
+ *
+ * @see https://issues.civicrm.org/jira/browse/CRM-13796
+ *
+ * @param $modules
+ */
+function _civicrm_modules_changed($modules) {
+  $rebuild = FALSE;
+  $hooks = [
+    // Data hooks.
+    'civicrm_caseTypes',
+    'civicrm_custom',
+    'civicrm_managed',
+    'civicrm_entityTypes',
+    // Extension lifecycle hooks.
+    'civicrm_upgrade',
+    'civicrm_uninstall',
+    'civicrm_install',
+    'civicrm_enable',
+    'civicrm_disable',
+    'civicrm_postInstall',
+    // Permission hooks.
+    'civicrm_permission',
+    // Other hooks.
+    'civicrm_config',
+  ];
+  foreach ($hooks as $hook) {
+    if (!$rebuild) {
+      $implementors = module_implements($hook);
+      if (!empty(array_intersect($modules, $implementors))) {
+        $rebuild = TRUE;
+      }
+    }
+  }
+  if ($rebuild) {
+    civicrm_initialize();
+    CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
+  }
+}
+
+/**
  * Implements hook_modules_installed().
  *
  * @param array $modules
  */
 function civicrm_modules_installed($modules) {
-  civicrm_initialize();
-  CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
+  _civicrm_modules_changed($modules);
 }
 
 /**
  * Implements hook_modules_enabled().
  */
 function civicrm_modules_enabled($modules) {
-  civicrm_initialize();
-  CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
+  _civicrm_modules_changed($modules);
 }
 
 /**
  * Implements hook_modules_disabled().
  */
 function civicrm_modules_disabled($modules) {
-  civicrm_initialize();
-  CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
+  _civicrm_modules_changed($modules);
 }
 
 /**
  * Implements hook_modules_uninstalled().
  */
 function civicrm_modules_uninstalled($modules) {
-  civicrm_initialize();
-  CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
+  _civicrm_modules_changed($modules);
 }
 
 /**
