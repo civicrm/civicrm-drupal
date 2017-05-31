@@ -217,6 +217,46 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
+  //LEGAL Name for the Contact
+  $data['civicrm_contact']['legal_name'] = array(
+    'title' => t('Legal Name'),
+    'help' => t('Legal Name of the Contact'),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_contact_link',
+      'click sortable' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+      'allow empty' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
+  //Current Employer ID
+  $data['civicrm_contact']['employer_id'] = array(
+    'title' => t('Current Employer ID'),
+    'help' => t('Current Employer ID'),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_contact_link',
+      'click sortable' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+      'allow empty' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   //Gender
   $data['civicrm_contact']['gender'] = array(
     'title' => t('Gender'),
