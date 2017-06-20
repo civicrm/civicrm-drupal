@@ -21,7 +21,7 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /*
  * Heavily based on anonymous code contribution. No claim.
@@ -93,55 +93,45 @@ class civicrm_handler_field_event_link extends views_handler_field {
       $custom_link = $this->options['custom_link'];
     }
 
-
     switch ($link_choice) {
 
       // LINKING TO EVENT PAGE (PUBLICLY ACCESSIBLE)
 
       case 'page':
         if (user_access('view event info') && $data !== NULL && $data !== '') {
-          return civicrm_views_href($data,
-            'civicrm/event/info',
-            "reset=1&id={$values->{$this->aliases['id']}}"
-          );
+          $path = "civicrm/event/info?reset=1&id={$values->{$this->aliases['id']}}";
+          return civicrm_views_href($data, drupal_get_path_alias($path), NULL);
         }
 
         // LINKING TO EVENT REGISTRATION PAGE
       case 'registration':
         if (user_access('register for events') && $data !== NULL && $data !== '') {
-       require_once 'CRM/Core/Config.php';
-          $config = CRM_Core_Config::singleton();
-          if ($enable_cart =
-            CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::EVENT_PREFERENCES_NAME, 'enable_cart')) {
+          if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::EVENT_PREFERENCES_NAME, 'enable_cart')) {
             require_once 'CRM/Event/Cart/BAO/EventInCart.php';
             //TODO don't call for every row
             $link = CRM_Event_Cart_BAO_EventInCart::get_registration_link($values->{$this->aliases['id']});
-            return civicrm_views_href($link['label'], $link['path'], $link['query']);
+            $label = $link['label'];
+            $path = "{$link['path']}?{$link['query']}";
           }
           else {
-            return civicrm_views_href($data,
-              'civicrm/event/register',
-              "reset=1&id={$values->{$this->aliases['id']}}"
-            );
+            $label = $data;
+            $path = "civicrm/event/register?reset=1&id={$values->{$this->aliases['id']}}";
           }
+          return civicrm_views_href($label, drupal_get_path_alias($path), NULL);
         }
 
         // LINKING TO EVENT CONFIG PAGE
       case 'config':
         if (user_access('access CiviEvent') && $data !== NULL && $data !== '') {
-          return civicrm_views_href($data,
-            'civicrm/event/manage/eventInfo',
-            "action=update&id={$values->{$this->aliases['id']}}&reset=1"
-          );
+          $path = "civicrm/event/manage/settings?action=update&id={$values->{$this->aliases['id']}}&reset=1";
+          return civicrm_views_href($data, drupal_get_path_alias($path), NULL);
         }
 
         // LINKING TO EVENT PARTICIPANTS LIST
       case 'participants':
         if (user_access('access CiviEvent') && $data !== NULL && $data !== '') {
-          return civicrm_views_href($data,
-            'civicrm/event/search',
-            "reset=1&force=1&event={$values->{$this->aliases['id']}}"
-          );
+          $path = "civicrm/event/search?reset=1&force=1&event={$values->{$this->aliases['id']}}";
+          return civicrm_views_href($data, drupal_get_path_alias($path), NULL);
         }
 
         // CUSTOM NODE LINKAGE, GOOD FOR LINKING TO OTHER VIEWS WITH AN ARGUMENT
@@ -159,5 +149,5 @@ class civicrm_handler_field_event_link extends views_handler_field {
   function render($values) {
     return $this->render_link(check_plain($values->{$this->field_alias}), $values);
   }
-}
 
+}

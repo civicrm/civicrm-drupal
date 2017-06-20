@@ -21,7 +21,7 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /*
    * Copyright (C) 2009 James Rakich
@@ -100,62 +100,49 @@ class civicrm_handler_field_link_event extends views_handler_field {
       $custom_link = $this->options['custom_link'];
     }
 
-
     switch ($link_choice) {
 
       // LINKING TO EVENT INFO
 
       case 'page':
         if (user_access('view event info') && $link_text !== NULL && $link_text !== '') {
-          return civicrm_views_href($link_text,
-            'civicrm/event/info',
-            "id={$values->id}&reset=1"
-          );
+          $path = "civicrm/event/info?reset=1&id={$values->{$this->aliases['id']}}";
+          return civicrm_views_href($link_text, drupal_get_path_alias($path), NULL);
         }
 
         // LINKING TO EVENT REGISTRATION
       case 'register':
         if (user_access('register for events') && $link_text !== NULL && $link_text !== '') {
-          return civicrm_views_href($link_text,
-            'civicrm/event/register',
-            "id={$values->id}&reset=1"
-          );
+          $path = "civicrm/event/register?reset=1&id={$values->{$this->aliases['id']}}";
+          return civicrm_views_href($link_text, drupal_get_path_alias($path), NULL);
         }
 
         // LINKING TO EVENT CONFIG
       case 'config':
         if (user_access('access CiviEvent') && $link_text !== NULL && $link_text !== '') {
-          return civicrm_views_href($link_text,
-            'civicrm/event/manage',
-            "action=update&id={$values->id}&reset=1"
-          );
+          $path = "civicrm/event/manage/settings?action=update&id={$values->{$this->aliases['id']}}&reset=1";
+          return civicrm_views_href($link_text, drupal_get_path_alias($path), NULL);
         }
 
         // LINKING TO EVENT PARTICIPANT LISTING
       case 'listing':
         if (user_access('view event participants') && $link_text !== NULL && $link_text !== '') {
-          return civicrm_views_href($link_text,
-            'civicrm/event/participant',
-            "reset=1&id={$values->id}"
-          );
+          $path = "civicrm/event/participant?reset=1&id={$values->id}";
+          return civicrm_views_href($link_text, drupal_get_path_alias($path), NULL);
         }
 
         // LINKING TO EVENT PARTICIPANTS
       case 'participants':
         if (user_access('edit event participants') && $link_text !== NULL && $link_text !== '') {
-          return civicrm_views_href($link_text,
-            'civicrm/event/search',
-            "reset=1&force=1&event={$values->id}"
-          );
+          $path = "civicrm/event/search?reset=1&force=1&event={$values->{$this->aliases['id']}}";
+          return civicrm_views_href($link_text, drupal_get_path_alias($path), NULL);
         }
 
         // LINKING TO EVENT DELETION
       case 'delete':
         if (user_access('access CiviEvent') && $link_text !== NULL && $link_text !== '') {
-          return civicrm_views_href($link_text,
-            'civicrm/event/manage',
-            "action=delete&id={$values->id}"
-          );
+          $path = "civicrm/event/manage?action=delete&id={$values->id}";
+          return civicrm_views_href($link_text, drupal_get_path_alias($path), NULL);
         }
 
         // CUSTOM NODE LINKAGE, GOOD FOR LINKING TO OTHER VIEWS WITH AN ARGUMENT
@@ -178,5 +165,5 @@ class civicrm_handler_field_link_event extends views_handler_field {
   function render($values) {
     return $this->render_link(NULL, $values);
   }
-}
 
+}
