@@ -142,9 +142,8 @@ function civicrm_views_data_alter(&$data) {
  * @return String path to CiviCRM
  */
 function civicrm_views_href($text, $path, $query) {
-  civicrm_initialize();
-  require_once 'CRM/Utils/System.php';
-  return CRM_Utils_System::href($text, $path, $query);
+  $url = civicrm_views_url($path, $query);
+  return "<a href=\"$url\">$text</a>";
 }
 
 /**
@@ -159,9 +158,24 @@ function civicrm_views_href($text, $path, $query) {
  * @return string            an HTML string containing a link to the given path.
  */
 function civicrm_views_url($path, $query, $absolute = FALSE) {
-  civicrm_initialize();
-  require_once 'CRM/Utils/System.php';
-  return CRM_Utils_System::url($path, $query, $absolute);
+  // Force alphabetical order of query params, for consistent support
+  // of Drupal aliases. This is required because $query is a string that may
+  // be coming to us in any order; but query parameter order matters when
+  // passing that query string as part of $path in url($path). Admittedly it's
+  // not common to passt the query string as part of $path in url($path) (you
+  // would normally pass it as $options['query'] in url($path, $options)), but
+  // doing so is required for Drupal alias support.
+  if (!empty($query)) {
+    parse_str($query, $query_data);
+    ksort($query_data);
+    $query = http_build_query($query_data);
+    $path .= "?{$query}";
+  }
+  $options = array(
+    'absolute' => $absolute,
+  );
+  $url = url($path, $options);
+  return $url;
 }
 
 /**
