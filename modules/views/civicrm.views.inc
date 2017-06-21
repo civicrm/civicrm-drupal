@@ -166,7 +166,12 @@ function civicrm_views_url($path, $query, $absolute = FALSE) {
   // would normally pass it as $options['query'] in url($path, $options)), but
   // doing so is required for Drupal alias support.
   if (!empty($query)) {
-    parse_str($query, $query_data);
+    if (is_array($query)) {
+      $query_data = $query;
+    }
+    else {
+      parse_str($query, $query_data);
+    }
     ksort($query_data);
     $query = http_build_query($query_data);
     $path .= "?{$query}";
