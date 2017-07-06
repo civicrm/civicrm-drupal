@@ -2993,6 +2993,31 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
+   $data['civicrm_tag']['parent_name'] = array(
+    'title' => t('Parent Name'),
+    'help' => t('Name of Parent Tag'),
+    'real field' => 'parent_id',
+    'field' => array(
+      'handler' => 'civicrm_handler_field_pseudo_constant',
+      'click sortable' => TRUE,
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'get',
+      'pseudo args' => array('CRM_Core_BAO_EntityTag', 'tag_id'),
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+    ),
+    'filter' => array(
+      'handler' => 'civicrm_handler_filter_pseudo_constant',
+      'pseudo class' => 'CRM_Core_PseudoConstant',
+      'pseudo method' => 'get',
+      'pseudo args' => array('CRM_Core_BAO_EntityTag', 'tag_id'),
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   /*
     * UF Match table - expose drupal ID
     */
