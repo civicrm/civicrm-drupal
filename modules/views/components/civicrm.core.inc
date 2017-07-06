@@ -2967,6 +2967,30 @@ function _civicrm_core_data(&$data, $enabled) {
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+      'allow empty' => TRUE,
+    ),
+  );
+
+  $data['civicrm_tag']['parent_id'] = array(
+    'title' => t('Tag Parent ID'),
+    'help' => t('The numeric ID of the parent tag'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+      'click sortable' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+      'numeric' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+      'allow empty' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
   );
 
   /*
