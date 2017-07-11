@@ -684,7 +684,33 @@ function _civicrm_event_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_field_link_participant',
     ),
   );
-
+  
+  // for PCP pages, specifically events with PCP enabled
+  $data['civicrm_pcp']['event_page'] = array(
+    'title' => t('Associated Event Page'),
+    'real field' => 'page_id',
+    'help' => t('The Event Page with which this Personal Campaign Page is associated.'),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_pseudo_constant',
+      'click sortable' => TRUE,
+      'pseudo class' => 'CRM_Event_PseudoConstant',
+      'pseudo method' => 'eventPage',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+      'numeric' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'civicrm_handler_filter_pseudo_constant',
+      'allow empty' => TRUE,
+      'pseudo class' => 'CRM_Event_PseudoConstant',
+      'pseudo method' => 'eventPage',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+ 
   //Add CiviVolunteer if it is installed
   $sql = "SHOW TABLES LIKE 'civicrm_volunteer_project'";
   $result = CRM_Core_DAO::executeQuery($sql);
