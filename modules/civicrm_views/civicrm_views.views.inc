@@ -663,9 +663,7 @@ function _civicrm_views_get_custom_fields() {
             LEFT JOIN civicrm_custom_group g ON g.id = f.custom_group_id
             where g.is_active = 1";
 
-  // We make a bogus call to civicrm_api() so that it will include its requisite files
-  // for the two function calls below. Yes, this is gross — but that's what you get it if you break autoloading conventions.
-  civicrm_api(NULL, NULL, array());
+  require_once 'api/class.api.php';
 
   $custom_fields = array();
   $dao = \CRM_Core_DAO::executeQuery($query);
