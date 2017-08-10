@@ -829,6 +829,12 @@ function drush_civicrm_cacheclear() {
     return;
   }
 
+  // Without this, custom fields disappear from views that use them.
+  // Check that the views module is enabled by testing the presence of a function.
+  if (function_exists('views_invalidate_cache')) {
+    views_invalidate_cache();
+  }
+
   drush_log(dt('The CiviCRM cache has been cleared.'), 'ok');
 }
 
