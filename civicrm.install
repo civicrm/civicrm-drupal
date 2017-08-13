@@ -130,11 +130,9 @@ function _civicrm_find_civicrm() {
   }
 
   $path = 'vendor/civicrm/civicrm-core';
-  //if ($path = libraries_get_path('civicrm')) {
-    if (file_exists($path . '/CRM/Core/ClassLoader.php')) {
-      return \Drupal::service('file_system')->realpath($path);
-    }
-  //}
+  if (file_exists($path . '/CRM/Core/ClassLoader.php')) {
+    return \Drupal::service('file_system')->realpath($path);
+  }
 
   return NULL;
 }
