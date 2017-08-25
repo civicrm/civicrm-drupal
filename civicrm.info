@@ -6,6 +6,8 @@ core = 7.x
 project = civicrm
 php = 5.3
 
+scripts[] = js/civicrm-drupal.js
+
 files[] = civicrm.module
 files[] = civicrm.install
 files[] = civicrm_user.inc
