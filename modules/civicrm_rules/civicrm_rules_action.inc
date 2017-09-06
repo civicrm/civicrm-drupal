@@ -61,7 +61,9 @@ The content of the email is:
   }
 
   $defaults = array(
-    'parameter' => array('contact' => array('type' => 'contact',
+    'parameter' => array(
+      'contact' => array(
+        'type' => 'contact',
         'label' => t('Contact'),
         'save' => TRUE,
       ),
