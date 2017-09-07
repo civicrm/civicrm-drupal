@@ -42,7 +42,13 @@
  */
 function _civicrm_get_groups() {
   civicrm_initialize();
-  $groupInformation = civicrm_api('group', 'get', array('version' => 3));
+  $groupInformation = civicrm_api('group', 'get', array(
+    'version' => 3,
+    'options' => array(
+      'limit' => 0,
+      'sort' => 'title ASC',
+    ),
+  ));
 
   $groups = array();
   foreach ($groupInformation['values'] as $values) {
@@ -91,7 +97,7 @@ function _civicrm_rules_tag_contact($contactId, $tagId, $action = 'create') {
     'entity_id' => $contactId,
     'tag_id' => $tagId,
   );
-  
+
   civicrm_api3('EntityTag', $action, $params);
 }
 
