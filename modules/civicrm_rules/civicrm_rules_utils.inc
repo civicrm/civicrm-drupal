@@ -23,7 +23,7 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
@@ -77,7 +77,7 @@ function _civicrm_rules_group_contact($contactId, $groupId, $action = 'create') 
  */
 function _civicrm_get_tags() {
   civicrm_initialize();
-  $tagInformation = civicrm_api3('Tag', 'get', array('options' => array('limit' => 0),));
+  $tagInformation = civicrm_api3('Tag', 'get', array('options' => array('limit' => 0)));
 
   $tags = array();
   foreach ($tagInformation['values'] as $values) {
@@ -137,7 +137,7 @@ function _civicrm_rules_load_mailing($mailingID) {
 }
 
 
-/*
+/**
  * function to return labels for checkboxes & stuff
  */
 function civicrm_rules_get_options($type) {
