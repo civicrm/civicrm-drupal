@@ -19,6 +19,8 @@ class CivicrmUFMatch extends RelationshipPluginBase {
   public function __construct(array $configuration, $plugin_id, $plugin_definition, Civicrm $civicrm) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
+    $civicrm->initialize();
+
     $this->civicrm_current_domain = \CRM_Core_Config::domainID();
 
     $this->civicrm_domains['current'] = t('Current domain');
