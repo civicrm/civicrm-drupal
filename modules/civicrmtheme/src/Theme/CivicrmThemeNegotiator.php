@@ -41,7 +41,14 @@ class CivicrmThemeNegotiator implements ThemeNegotiatorInterface {
    * {@inheritdoc}
    */
   public function applies(RouteMatchInterface $route_match) {
-    $parts = explode('/', ltrim($route_match->getRouteObject()->getPath(), '/'));
+    $route = $route_match->getRouteObject();
+
+    // Some pages, like 404 pages, don't have a route objet.
+    if (!$route) {
+      return FALSE;
+    }
+
+    $parts = explode('/', ltrim($route->getPath(), '/'));
 
     if ($parts[0] != 'civicrm') {
       return FALSE;
