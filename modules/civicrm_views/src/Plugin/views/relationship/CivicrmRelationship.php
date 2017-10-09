@@ -19,6 +19,8 @@ class CivicrmRelationship extends RelationshipPluginBase {
   public function __construct(array $configuration, $plugin_id, $plugin_definition, Civicrm $civicrm) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
+    $civicrm->initialize();
+
     // relationshipType() returns information about relations as array with fields
     // 'name_a_b', 'name_b_a', 'contact_type_a' and 'contact_type_b'.
     $this->relationships[0] = t('Any');

@@ -20,12 +20,10 @@ use Drupal\Component\Utility\SafeMarkup;
  */
 class CivicrmBlock extends BlockBase implements ContainerFactoryPluginInterface {
   public function __construct(Civicrm $civicrm, array $configuration, $plugin_id, array $plugin_definition) {
-    // We don't do anything with the Civicrm service, only ensure that it
-    // has been initialized.
-
     // Mark all CiviCRM blocks as uncachable.
     $configuration['cache']['max_age'] = 0;
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $civicrm->initialize();
   }
 
   static public function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {

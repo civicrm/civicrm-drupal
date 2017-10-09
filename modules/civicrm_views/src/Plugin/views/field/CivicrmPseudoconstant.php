@@ -20,6 +20,8 @@ class CivicrmPseudoconstant extends FieldPluginBase {
   public function __construct(array $configuration, $plugin_id, $plugin_definition, Civicrm $civicrm) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
+    $civicrm->initialize();
+
     $this->pseudovalues = call_user_func_array($this->definition['pseudo callback'], $this->definition['pseudo arguments']);
   }
 

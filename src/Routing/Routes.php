@@ -11,7 +11,7 @@ class Routes {
     $collection = new RouteCollection();
 
     // Initialize CiviCRM.
-    \Drupal::service('civicrm');
+    \Drupal::service('civicrm')->initialize();
 
     $items = \CRM_Core_Menu::items();
 

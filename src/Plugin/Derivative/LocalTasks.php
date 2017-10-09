@@ -9,8 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class LocalTasks extends DeriverBase implements ContainerDeriverInterface {
   public function __construct(Civicrm $civicrm) {
-    // We don't do anything with the Civicrm service, only ensure that it
-    // has been initialized.
+    $civicrm->initialize();
   }
 
   static public function create(ContainerInterface $container, $base_plugin_id) {
