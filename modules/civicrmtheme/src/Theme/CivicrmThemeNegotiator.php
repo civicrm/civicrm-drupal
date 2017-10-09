@@ -2,6 +2,7 @@
 
 namespace Drupal\civicrmtheme\Theme;
 
+use Dompdf\Exception;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -62,8 +63,15 @@ class CivicrmThemeNegotiator implements ThemeNegotiatorInterface {
     $admin_theme = $config->get('admin_theme');
     $public_theme = $config->get('public_theme');
 
-    // @todo Should we inject the 'civicrm' service instead?
-    if ((!$admin_theme && !$public_theme) || !\Drupal::service('civicrm')) {
+    if (!$admin_theme && !$public_theme) {
+      return FALSE;
+    }
+
+    // Attempt to initialize CiviCRM.
+    try {
+      \Drupal::service('civicrm');
+    }
+    catch (\Exception $e) {
       return FALSE;
     }
 
@@ -75,6 +83,9 @@ class CivicrmThemeNegotiator implements ThemeNegotiatorInterface {
    */
   public function determineActiveTheme(RouteMatchInterface $route_match) {
     $path = ltrim($route_match->getRouteObject()->getPath(), '/');
+
+    // Initialize CiviCRM.
+    \Drupal::service('civicrm');
 
     // Get the menu for above URL.
     $item = \CRM_Core_Menu::get($path);
