@@ -6,11 +6,18 @@ use Drupal\Core\Config\ConfigException;
 use Drupal\Core\Session\AccountInterface;
 
 class Civicrm {
+
+  protected $initialized = FALSE;
+
   /**
    * Initialize CiviCRM. Call this function from other modules too if
    * they use the CiviCRM API.
    */
-  public function __construct() {
+  public function initialize() {
+    if ($this->initialized) {
+      return;
+    }
+
     // Get ready for problems
     $docLinkInstall = "http://wiki.civicrm.org/confluence/display/CRMDOC/Drupal+Installation+Guide";
     $docLinkTrouble = "http://wiki.civicrm.org/confluence/display/CRMDOC/Installation+and+Configuration+Trouble-shooting";
@@ -43,9 +50,18 @@ class Civicrm {
 
     // Initialize the system by creating a config object
     \CRM_Core_Config::singleton();
+
+    // Mark CiviCRM as initialized.
+    $this->initialized = TRUE;
+  }
+
+  public function isInitialized() {
+    return $this->initialized;
   }
 
   public function invoke($args) {
+    $this->initialize();
+
     // Civicrm will echo/print directly to stdout. We need to capture it
     // so that we can return the output as a renderable array.
     ob_start();
@@ -61,6 +77,7 @@ class Civicrm {
    * @param string $contact_type
    */
   public function synchronizeUser(AccountInterface $account, $contact_type = 'Individual') {
+    $this->initialize();
     \CRM_Core_BAO_UFMatch::synchronize($account, FALSE, 'Drupal', $this->getCtype($contact_type));
   }
 

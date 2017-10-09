@@ -33,7 +33,7 @@ function civicrm_user_insert(AccountInterface $account) {
  * Implements hook_user_update().
  */
 function civicrm_user_update(AccountInterface $account) {
-  \Drupal::service('civicrm');
+  \Drupal::service('civicrm')->initialize();
 
   // Update primary email address of contact if it has changed.
   $contact_id = \CRM_Core_BAO_UFMatch::getContactId($account->id());
@@ -52,6 +52,6 @@ function civicrm_user_update(AccountInterface $account) {
  * Implements hook_user_delete().
  */
 function civicrm_user_delete(AccountInterface $account) {
-  \Drupal::service('civicrm');
+  \Drupal::service('civicrm')->initialize();
   \CRM_Core_BAO_UFMatch::deleteUser($account->id());
 }
