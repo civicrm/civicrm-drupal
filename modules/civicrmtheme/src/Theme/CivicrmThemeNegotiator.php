@@ -3,6 +3,7 @@
 namespace Drupal\civicrmtheme\Theme;
 
 use Dompdf\Exception;
+use Drupal\civicrm\Civicrm;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -28,14 +29,22 @@ class CivicrmThemeNegotiator implements ThemeNegotiatorInterface {
   protected $configFactory;
 
   /**
+   * The Civicrm service.
+   *
+   * @var \Drupal\civicrm\Civicrm
+   */
+  protected $civicrm;
+
+  /**
    * Constructs a CivicrmThemeNegotiator.
    *
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The current user service.
    */
-  public function __construct(AccountInterface $user, ConfigFactoryInterface $config_factory) {
+  public function __construct(AccountInterface $user, ConfigFactoryInterface $config_factory, Civicrm $civicrm) {
     $this->user = $user;
     $this->configFactory = $config_factory;
+    $this->civicrm = $civicrm;
   }
 
   /**
@@ -69,7 +78,7 @@ class CivicrmThemeNegotiator implements ThemeNegotiatorInterface {
 
     // Attempt to initialize CiviCRM.
     try {
-      \Drupal::service('civicrm');
+      $this->civicrm->initialize();
     }
     catch (\Exception $e) {
       return FALSE;
@@ -85,7 +94,7 @@ class CivicrmThemeNegotiator implements ThemeNegotiatorInterface {
     $path = ltrim($route_match->getRouteObject()->getPath(), '/');
 
     // Initialize CiviCRM.
-    \Drupal::service('civicrm');
+    $this->civicrm->initialize();
 
     // Get the menu for above URL.
     $item = \CRM_Core_Menu::get($path);
