@@ -19,8 +19,7 @@ class UserProfile extends FormBase  {
   protected $uf_group;
 
   public function __construct(Civicrm $civicrm) {
-    // We don't do anything with the Civicrm service, only ensure that it
-    // has been initialized.
+    $civicrm->initialize();
   }
 
   static function create(ContainerInterface $container) {
