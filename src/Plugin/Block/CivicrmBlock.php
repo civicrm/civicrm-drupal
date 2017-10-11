@@ -5,8 +5,8 @@ namespace Drupal\civicrm\Plugin\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\civicrm\Civicrm;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Render\Markup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Provides the core Civicrm blocks.
@@ -45,7 +45,7 @@ class CivicrmBlock extends BlockBase implements ContainerFactoryPluginInterface 
     // Bypass Drupal SafeString escaping by setting output as already escaped.
     if ($content) {
       return array(
-        '#markup' => SafeMarkup::set($content, 'all'),
+        '#markup' => Markup::create($content),
       );
     }
     return array();

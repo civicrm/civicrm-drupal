@@ -15,7 +15,7 @@ function civicrm_page_attachments(array &$page) {
   $markup  = [
     '#type'   => 'markup',
     '#weight' => -99,
-    '#markup' => \Drupal\Component\Utility\SafeMarkup::format($headers, []),
+    '#markup' => \Drupal\Core\Render\Markup::create($headers),
   ];
   
   $page['#attached']['html_head'][] = [$markup, 'civicrm-headers'];
@@ -206,7 +206,7 @@ function civicrm_form_user_register_form_alter(&$form, &$form_state, $form_id) {
   $html = \CRM_Core_BAO_UFGroup::getEditHTML(NULL, '', 1, TRUE, FALSE, NULL, FALSE, $civicrm->getCtype());
 
   $form['civicrm_profile_register'] = array(
-    '#markup' => Drupal\Component\Utility\SafeMarkup::format($html, []),
+    '#markup' => \Drupal\Core\Render\Markup::create($html),
   );
   $form['#validate'][] = '_civicrm_user_register_form_validate';
 }
