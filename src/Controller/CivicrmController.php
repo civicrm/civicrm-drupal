@@ -77,8 +77,7 @@ class CivicrmController extends ControllerBase {
       // Mark the pageTitle as safe so markup is not escaped by Drupal.
       // This handles the case where, eg. the page title is surrounded by <span id="crm-remove-title" style=display: none">
       // Todo: This is a naughty way to do this. Better to have CiviCRM passing us no markup whatsoever.
-      Markup::create($title),
-      $build['#title'] = $title;
+      $build['#title'] = Markup::create($title);
     }
 
     return $build;
