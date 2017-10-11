@@ -8,10 +8,10 @@
 namespace Drupal\civicrm\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Render\Markup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\civicrm\CivicrmPageState;
 use Drupal\civicrm\Civicrm;
-use Drupal\Component\Utility\SafeMarkup;
 
 class CivicrmController extends ControllerBase {
   protected $civicrm;
@@ -57,10 +57,9 @@ class CivicrmController extends ControllerBase {
     }
 
     // We set the CiviCRM markup as safe and assume all XSS (an other) issues have already
-    // been taken care of. The SafeMarkup::set() function is stated to be used for
-    // internal use only, so this is a cludge.
+    // been taken care of.
     $build = array(
-      '#markup' => SafeMarkup::format($content, []),
+      '#markup' => Markup::create($content),
     );
     $counter = 0;
     foreach ($this->civicrmPageState->getCSS() as $css) {
@@ -78,7 +77,7 @@ class CivicrmController extends ControllerBase {
       // Mark the pageTitle as safe so markup is not escaped by Drupal.
       // This handles the case where, eg. the page title is surrounded by <span id="crm-remove-title" style=display: none">
       // Todo: This is a naughty way to do this. Better to have CiviCRM passing us no markup whatsoever.
-      \Drupal\Component\Utility\SafeMarkup::format($title, []);
+      Markup::create($title),
       $build['#title'] = $title;
     }
 

@@ -6,11 +6,11 @@ use Drupal\civicrm\Civicrm;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Drupal\Core\Cache\Cache;
-use Drupal\Component\Utility\SafeMarkup;
 
 class UserProfile extends FormBase  {
   protected $user;
@@ -54,7 +54,7 @@ class UserProfile extends FormBase  {
       '#type' => 'fieldset',
       '#title' => $this->uf_group['title'],
       'html' => array(
-        '#markup' => SafeMarkup::set($html, 'all'),
+        '#markup' => Markup::create($html),
       ),
     );
     $form['actions'] = array(
