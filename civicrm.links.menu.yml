@@ -1,0 +1,5 @@
+civicrm.admin_config_civicrm:
+  route_name: civicrm.admin_config_civicrm
+  parent: system.admin_config
+  title: CiviCRM
+  weight: -10
