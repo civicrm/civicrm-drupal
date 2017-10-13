@@ -31,13 +31,18 @@ function civicrm_page_attachments(array &$page) {
 function civicrm_toolbar() {
   $items = [];
 
+  // Always return it with right cache context even if it's empty so that the
+  // permissions can control it's visibility.
+  $items['civicrm'] = [
+    '#cache' => [
+      'contexts' => ['user.permissions'],
+    ],
+  ];
+
   $user = \Drupal::currentUser();
-  if ($user->hasPermission('access civicrm')) {
-    $items['civicrm'] = [
+  if ($user->hasPermission('access CiviCRM')) {
+    $items['civicrm'] += [
       '#type' => 'toolbar_item',
-      '#cache' => [
-        'contexts' => ['user'],
-      ],
       'tab' => [
         '#type' => 'link',
         '#title' => t('CiviCRM'),
