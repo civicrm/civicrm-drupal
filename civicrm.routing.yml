@@ -22,5 +22,7 @@ civicrm.user_profile:
   path: '/user/{user}/edit/profile/{profile}'
   defaults:
     _form: '\Drupal\civicrm\Form\UserProfile'
+  options:
+    _admin_route: TRUE
   requirements:
     _custom_access: '\Drupal\civicrm\Form\UserProfile::access'
