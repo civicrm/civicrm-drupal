@@ -576,7 +576,7 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL, $sync_type = N
       }
       foreach ($memberships['values'] as $key => $membership) {
         if (in_array($membership['status_id'], $inactive)) {
-          unset($membership['values'][$key]);
+          unset($memberships['values'][$key]);
         }
       }
     }
