@@ -2714,9 +2714,24 @@ function _civicrm_core_data(&$data, $enabled) {
   }
 
   /*
-     * Add support for CivicRM groups table
+     * Add support for CiviCRM groups table
      */
+  $data['civicrm_group_contact']['table']['group'] = t('CiviCRM Groups');
 
+  $data['civicrm_group_contact']['table']['join']['civicrm_contact'] = array(
+      'left_field' => 'id',
+      'field' => 'contact_id',
+  );
+
+  $data['civicrm_contact']['table']['join']['civicrm_group_contact'] = array(
+      'left_field' => 'contact_id',
+      'field' => 'id',
+  );
+
+  $data['civicrm_group_contact']['table']['join']['civicrm_group_contact'] = array(
+      'left_field' => 'id',
+      'field' => 'id',
+  );
 
   $data['civicrm_group']['table']['group'] = t('CiviCRM Groups');
 
@@ -2726,51 +2741,58 @@ function _civicrm_core_data(&$data, $enabled) {
     'help' => t("View displays CiviCRM Groups."),
   );
 
-  $data['civicrm_group']['table']['join']['civicrm_contact'] = array(
-    'left_table' => 'civicrm_group_contact',
+  $data['civicrm_group']['table']['join']['civicrm_group_contact'] = array(
     'left_field' => 'group_id',
     'field' => 'id',
   );
 
-  $data['civicrm_group_contact']['table']['join']['civicrm_contact'] = array(
-    // Directly links to group table
+  $data['civicrm_group_contact']['table']['join']['civicrm_group'] = array(
     'left_field' => 'id',
-    'field' => 'contact_id',
+    'field' => 'group_id',
   );
 
-  $data['civicrm_group_contact']['table']['group'] = t('CiviCRM Groups');
-  $data['civicrm_group_status']['table']['group'] = t('Contact Group Status');
+  $data['civicrm_group']['table']['join']['civicrm_group'] = array(
+      'left_field' => 'id',
+      'field' => 'id',
+  );
 
-  $data['civicrm_group_contact']['status'] = array(
-    'title' => t('Contact Status'),
-    'help' => t('The group status of the contact'),
-    'field' => array(
-      'handler' => 'civicrm_handler_filter_group_status',
-      'click sortable' => TRUE,
-    ),
-    'filter' => array(
-      'handler' => 'civicrm_handler_filter_group_status',
-      'allow empty' => TRUE,
-    ),
+  $data['civicrm_group']['table']['join']['civicrm_contact'] = array(
+      'left_table' => 'civicrm_group_contact',
+      'left_field' => 'group_id',
+      'field' => 'id',
   );
 
   // CiviCRM Groups - FIELDS
+  //Group Contact ID
+  $data['civicrm_group_contact']['id'] = array(
+      'title' => t('Contact in Standard Group'),
+      'help' => t('The contact is part of a standard group'),
+      'relationship' => array(
+        'base' => 'civicrm_contact',
+        'base field' => 'id',
+        'relationship table' => 'civicrm_group_contact',
+        'relationship field' => 'contact_id',
+        'handler' => 'civicrm_handler_relationship_standard_group_contact',
+        'label' => t('CiviCRM Standard Group Contact'),
+      ),
+  );
 
-  // Numeric Group ID
+  //Group Status
   $data['civicrm_group_contact']['status'] = array(
     'title' => t('Contact Status'),
     'help' => t('The group status of the contact'),
     'field' => array(
-      'handler' => 'civicrm_handler_filter_group_status',
+      'handler' => 'civicrm_handler_field_pseudo_constant',
       'click sortable' => TRUE,
+      'pseudo class' => 'CRM_Contact_BAO_GroupContact',
+      'pseudo method' => 'buildOptions',
+      'pseudo args' => array('status'),
     ),
     'filter' => array(
       'handler' => 'civicrm_handler_filter_group_status',
       'allow empty' => TRUE,
     ),
   );
-
-  //CiviCRM Groups - FIELDS
 
   //Numeric Group ID
   $data['civicrm_group']['id'] = array(
@@ -2791,7 +2813,16 @@ function _civicrm_core_data(&$data, $enabled) {
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
+    'relationship' => array(
+      'base' => 'civicrm_group_contact',
+      'base field' => 'group_id',
+      'relationship table' => 'civicrm_group',
+      'relationship field' => 'id',
+      'handler' => 'civicrm_handler_relationship_standard_group',
+      'label' => t('CiviCRM Group'),
+    ),
   );
+
   //Is Group Active?
   $data['civicrm_group']['is_active'] = array(
     'title' => t('Is Active'),
@@ -2810,10 +2841,22 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'views_handler_sort',
     ),
   );
-
-
+  $data['civicrm_group']['name'] = array(
+    'title' => t('Machine Name'),
+    'help' => t('Group Machine Name'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+    ),
+    'filter' => array(
+      'handler' => 'civicrm_handler_filter_group_name',
+    ),
+  );
   $data['civicrm_group']['title'] = array(
-    'title' => t('Title'),
+    'title' => t('Title [Deprecated - Use Name or new Title]'),
     'help' => t('Group Title'),
     'real field' => 'id',
     'field' => array(
@@ -2834,6 +2877,21 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'views_handler_sort',
     ),
   );
+  $data['civicrm_group']['title_'] = array(
+    'title' => t('Title'),
+    'help' => t('Group Title'),
+    'real field' => 'title',
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
   $data['civicrm_group']['description'] = array(
     'title' => t('Description'),
     'help' => t('Description of the Group'),
@@ -2848,10 +2906,10 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'views_handler_sort',
     ),
   );
+
   /*
      * Add support for CiviCRM tags
      */
-
   $data['civicrm_tag']['table']['group'] = t('CiviCRM Tags');
 
   $data['civicrm_tag']['table']['join']['civicrm_contact'] = array(
