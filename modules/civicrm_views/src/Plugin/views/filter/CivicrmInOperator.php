@@ -13,6 +13,7 @@ use Drupal\civicrm\Civicrm;
 class CivicrmInOperator extends InOperator {
   public function __construct(array $configuration, $plugin_id, $plugin_definition, Civicrm $civicrm) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $civicrm->initialize();
   }
 
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {

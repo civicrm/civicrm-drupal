@@ -1,0 +1,54 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function civicrmtheme_form_system_themes_admin_form_alter(&$form, FormStateInterface $form_state) {
+  // Define a fieldset for civicrm theme setting section
+  $form['admin_theme']['civicrm'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('CiviCRM'),
+    '#collapsible' => TRUE,
+    '#weight' => 9,
+  );
+
+  $args = $form_state->getBuildInfo()['args'];
+  $theme_options = $args[0];
+
+  $config = \Drupal::config('civicrmtheme.settings');
+
+  $form['admin_theme']['civicrm']['civicrm_admin'] = array(
+    '#type' => 'select',
+    '#options' => ['' => t('Default theme')] + $theme_options,
+    '#title' => t('CiviCRM Administration theme'),
+    '#description' => t('Choose theme for CiviCRM administration/backend pages.'),
+    '#default_value' => $config->get('admin_theme'),
+  );
+
+  $form['admin_theme']['civicrm']['civicrm_public'] = array(
+    '#type' => 'select',
+    '#options' => ['' => t('Default theme')] + $theme_options,
+    '#title' => t('CiviCRM Public theme'),
+    '#description' => t('Choose theme for CiviCRM frontend pages.'),
+    '#default_value' => $config->get('public_theme'),
+  );
+
+  // Add extra submit
+  $form['#submit'][] = 'civicrmtheme_system_themes_admin_form_submit';
+  $form['admin_theme']['actions']['#weight'] = 10;
+}
+
+/**
+ * Process system_themes_form extra submit.
+ */
+function civicrmtheme_system_themes_admin_form_submit($form, FormStateInterface $form_state) {
+  $config = \Drupal::configFactory()->getEditable('civicrmtheme.settings');
+  $config->set('admin_theme', $form_state->getValue('civicrm_admin'));
+  $config->set('public_theme', $form_state->getValue('civicrm_public'));
+  $config->save();
+
+  $form_state->unsetValue('civicrm_admin');
+  $form_state->unsetValue('civicrm_public');
+}

@@ -4,7 +4,7 @@ function civicrm_views_views_data() {
   $data = array();
 
   try {
-    \Drupal::service('civicrm');
+    \Drupal::service('civicrm')->initialize();
   }
   catch (Exception $e) {
     \Drupal::logger('civicrm_views')->error("Unable to initialize CiviCRM. Aborting hook_views_data().");
@@ -84,7 +84,7 @@ function civicrm_views_views_data() {
 
 function civicrm_views_views_data_alter(&$data) {
   try {
-    \Drupal::service('civicrm');
+    \Drupal::service('civicrm')->initialize();
   }
   catch (Exception $e) {
     \Drupal::logger('civicrm_views')->error("Unable to initialize CiviCRM. Aborting hook_views_data_alter().");

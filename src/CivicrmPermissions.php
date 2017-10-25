@@ -16,7 +16,7 @@ class CivicrmPermissions implements ContainerInjectionInterface {
   public function permissions() {
     // Initialize civicrm.
     // @Todo: Inject this via container injection instead.
-    \Drupal::service('civicrm');
+    \Drupal::service('civicrm')->initialize();
 
     $permissions = [];
     foreach (\CRM_Core_Permission::basicPermissions() as $permission => $title) {

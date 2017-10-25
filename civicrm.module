@@ -15,7 +15,7 @@ function civicrm_page_attachments(array &$page) {
   $markup  = [
     '#type'   => 'markup',
     '#weight' => -99,
-    '#markup' => \Drupal\Component\Utility\SafeMarkup::format($headers, []),
+    '#markup' => \Drupal\Core\Render\Markup::create($headers),
   ];
   
   $page['#attached']['html_head'][] = [$markup, 'civicrm-headers'];
@@ -31,13 +31,18 @@ function civicrm_page_attachments(array &$page) {
 function civicrm_toolbar() {
   $items = [];
 
+  // Always return it with right cache context even if it's empty so that the
+  // permissions can control it's visibility.
+  $items['civicrm'] = [
+    '#cache' => [
+      'contexts' => ['user.permissions'],
+    ],
+  ];
+
   $user = \Drupal::currentUser();
-  if ($user->hasPermission('access civicrm')) {
-    $items['civicrm'] = [
+  if ($user->hasPermission('access CiviCRM')) {
+    $items['civicrm'] += [
       '#type' => 'toolbar_item',
-      '#cache' => [
-        'contexts' => ['user'],
-      ],
       'tab' => [
         '#type' => 'link',
         '#title' => t('CiviCRM'),
@@ -94,7 +99,7 @@ function civicrm_entity_extra_field_info() {
  * to the user display.
  */
 function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
-  \Drupal::service('civicrm');
+  \Drupal::service('civicrm')->initialize();
 
   // We need the $contact_id so that we know what data to pull out of Civicrm.
   // And we need the contact_id of the current user ($current_contact_id) so
@@ -177,7 +182,7 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
  * based on the $contact_id's contact type.
  */
 function _civicrm_get_profiles($contact_id) {
-  \Drupal::service('civicrm');
+  \Drupal::service('civicrm')->initialize();
   $profiles = array();
   $ctype = \CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $contact_id, 'contact_type');
 
@@ -202,10 +207,11 @@ function _civicrm_get_profiles($contact_id) {
  */
 function civicrm_form_user_register_form_alter(&$form, &$form_state, $form_id) {
   $civicrm = \Drupal::service('civicrm');
+  $civicrm->initialize();
   $html = \CRM_Core_BAO_UFGroup::getEditHTML(NULL, '', 1, TRUE, FALSE, NULL, FALSE, $civicrm->getCtype());
 
   $form['civicrm_profile_register'] = array(
-    '#markup' => Drupal\Component\Utility\SafeMarkup::format($html, []),
+    '#markup' => \Drupal\Core\Render\Markup::create($html),
   );
   $form['#validate'][] = '_civicrm_user_register_form_validate';
 }
@@ -214,7 +220,7 @@ function civicrm_form_user_register_form_alter(&$form, &$form_state, $form_id) {
  * Validation function for additional profile form fields attached to user registration form.
  */
 function _civicrm_user_register_form_validate(&$form, &$form_state) {
-  \Drupal::service('civicrm');
+  \Drupal::service('civicrm')->initialize();
   $errors = CRM_Core_BAO_UFGroup::isValid(NULL, '', TRUE);
 
   if (is_array($errors)) {

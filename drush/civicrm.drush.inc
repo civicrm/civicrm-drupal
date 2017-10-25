@@ -545,7 +545,7 @@ function civicrm_drush_help($section) {
  * Implementation of command 'civicrm-ext-list'
  */
 function drush_civicrm_ext_list() {
-  \Drupal::service('civicrm');
+  \Drupal::service('civicrm')->initialize();
   try{
     $result = civicrm_api3('extension', 'get', array(
       'options' => array(
@@ -575,7 +575,7 @@ function drush_civicrm_ext_list() {
  * Implementation of command 'civicrm-ext-install'
  */
 function drush_civicrm_ext_install($extension_name) {
-  \Drupal::service('civicrm');
+  \Drupal::service('civicrm')->initialize();
   try{
     $result = civicrm_api('extension', 'install', array('key' => $extension_name, 'version' => 3));
     if($result['values'] && $result['values'] == 1) {
@@ -597,7 +597,7 @@ function drush_civicrm_ext_install($extension_name) {
  * Implementation of command 'civicrm-ext-disable'
  */
 function drush_civicrm_ext_disable($extension_name) {
-  \Drupal::service('civicrm');
+  \Drupal::service('civicrm')->initialize();
   try{
     $result = civicrm_api('extension', 'disable', array('key' => $extension_name, 'version' => 3));
     if($result['values'] && $result['values'] == 1) {
@@ -619,7 +619,7 @@ function drush_civicrm_ext_disable($extension_name) {
  * Implementation of command 'civicrm-ext-uninstall'
  */
 function drush_civicrm_ext_uninstall($extension_name) {
-  \Drupal::service('civicrm');
+  \Drupal::service('civicrm')->initialize();
   try{
     $result = civicrm_api('extension', 'uninstall', array('key' => $extension_name, 'version' => 3));
     if($result['values'] && $result['values'] == 1) {
@@ -1507,7 +1507,7 @@ function drush_civicrm_api() {
       break;
   }
 
-  \Drupal::service('civicrm');
+  \Drupal::service('civicrm')->initialize();
 
   global $user;
   CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal', 'Individual'

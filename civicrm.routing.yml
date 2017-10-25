@@ -10,9 +10,19 @@ civicrm.civicrm_logout:
   requirements:
     _user_is_logged_in: 'TRUE'
 
+civicrm.admin_config_civicrm:
+  path: '/admin/config/civicrm'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'CiviCRM'
+  requirements:
+    _permission: 'access administration pages'
+
 civicrm.user_profile:
   path: '/user/{user}/edit/profile/{profile}'
   defaults:
     _form: '\Drupal\civicrm\Form\UserProfile'
+  options:
+    _admin_route: TRUE
   requirements:
     _custom_access: '\Drupal\civicrm\Form\UserProfile::access'

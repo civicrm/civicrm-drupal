@@ -1,0 +1,8 @@
+name: CiviCRM Theme
+type: module
+description: 'Define alternate themes for CiviCRM.'
+package: CiviCRM
+version: 8.x-4.7
+core: 8.x
+dependencies:
+ - civicrm

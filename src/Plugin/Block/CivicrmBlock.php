@@ -5,8 +5,8 @@ namespace Drupal\civicrm\Plugin\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\civicrm\Civicrm;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Render\Markup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Provides the core Civicrm blocks.
@@ -20,12 +20,10 @@ use Drupal\Component\Utility\SafeMarkup;
  */
 class CivicrmBlock extends BlockBase implements ContainerFactoryPluginInterface {
   public function __construct(Civicrm $civicrm, array $configuration, $plugin_id, array $plugin_definition) {
-    // We don't do anything with the Civicrm service, only ensure that it
-    // has been initialized.
-
     // Mark all CiviCRM blocks as uncachable.
     $configuration['cache']['max_age'] = 0;
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $civicrm->initialize();
   }
 
   static public function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -47,7 +45,7 @@ class CivicrmBlock extends BlockBase implements ContainerFactoryPluginInterface 
     // Bypass Drupal SafeString escaping by setting output as already escaped.
     if ($content) {
       return array(
-        '#markup' => SafeMarkup::set($content, 'all'),
+        '#markup' => Markup::create($content),
       );
     }
     return array();

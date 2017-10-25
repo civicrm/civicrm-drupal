@@ -14,6 +14,7 @@ class CivicrmPathProcessor implements InboundPathProcessorInterface {
     if (strpos($path, '/civicrm/') === 0) {
       // initialize civicrm
       $civicrm = new Civicrm();
+      $civicrm->initialize();
       // fetch civicrm menu items
       $items = \CRM_Core_Menu::items();
       $longest = '';
