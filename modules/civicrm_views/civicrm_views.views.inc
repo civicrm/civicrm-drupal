@@ -61,9 +61,9 @@ function civicrm_views_views_data() {
         'field' => 'id',
         'base' => $field['table'],
         'base field' => 'entity_id',
-        'title' => t('CiviCRM Custom Field: !title', array('!title' => $field['group'])),
-        'label' => t('CiviCRM Custom Field: !title', array('!title' => $field['group'])),
-        'help' => t('CiviCRM Custom Field: !title', array('!title' => $field['group'])),
+        'title' => t('CiviCRM Custom Field: @title', array('@title' => $field['group'])),
+        'label' => t('CiviCRM Custom Field: @title', array('@title' => $field['group'])),
+        'help' => t('CiviCRM Custom Field: @title', array('@title' => $field['group'])),
       ),
     );
 
