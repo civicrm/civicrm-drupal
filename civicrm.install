@@ -78,7 +78,7 @@ function civicrm_requirements($phase) {
       'title' => 'CiviCRM location',
       'value' => NULL,
       'severity' => REQUIREMENT_ERROR,
-      'description' => 'CiviCRM must be downloaded into the libraries folder.',
+      'description' => 'CiviCRM must be installed via composer.',
     );
     return $requirements;
   }
@@ -119,19 +119,22 @@ function civicrm_requirements($phase) {
  *
  * @return string|void
  *
- * Recommended location for civicrm is in /libraries/civicrm [citation needed].
+ * Installation via composer is recommended.
  * We also allow /modules/civicrm, which seems to work fine.
  */
 function _civicrm_find_civicrm() {
+  $possible_paths = array();
+
   if ($path = drupal_get_path('module', 'civicrm')) {
+    $possible_paths[] = $path;
+  }
+  $possible_paths[] = 'vendor/civicrm/civicrm-core';
+  $possible_paths[] = '../vendor/civicrm/civicrm-core';
+
+  foreach ($possible_paths as $path) {
     if (file_exists($path . '/CRM/Core/ClassLoader.php')) {
       return \Drupal::service('file_system')->realpath($path);
     }
-  }
-
-  $path = 'vendor/civicrm/civicrm-core';
-  if (file_exists($path . '/CRM/Core/ClassLoader.php')) {
-    return \Drupal::service('file_system')->realpath($path);
   }
 
   return NULL;
