@@ -21,23 +21,22 @@
    | GNU Affero General Public License or the licensing of CiviCRM,     |
    | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
    +--------------------------------------------------------------------+
- */
 
-/**
- * @file Provides Views integration for CiviCRM Multi-Select Country custom fields
- *
- * @author DaveJ
- * based on civicrm_handler_filter_custom_option and civicrm_handler_filter_state
- */
+   **
+   * @file Provides Views integration for CiviCRM Multi-Select Country custom fields
+   *
+   * @author DaveJ
+   * based on civicrm_handler_filter_custom_option and civicrm_handler_filter_state
+   */
 class civicrm_handler_filter_state_multi extends views_handler_filter_in_operator {
-  public function construct() {
+  function construct() {
     parent::construct();
     if (!civicrm_initialize()) {
       return;
     }
   }
 
-  public function get_value_options() {
+  function get_value_options() {
     if (!isset($this->value_options)) {
       $states = CRM_Core_PseudoConstant::stateProvince();
       $options = array();
@@ -48,26 +47,29 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
       }
       $this->value_options = $options;
     }
-
-    //* code to add country->state/province conditional options first determine if there's a country filter on this view if there is, load the country->state options into a JSON object we can attach via javascript. Remove the state options set above and attach the javascript handler
+      /*
+     * code to add country->state/province conditional options first determine if there's a country filter on this view if there is, load the country->state options into a JSON object we can attach via javascript. Remove the state options set above and attach the javascript handler
+     */
 
     // get the country filter
     $filters = is_array($this->view->filter) ? $this->view->filter : array();
+    $state = '';
     foreach ($filters as $name => $handler) {
       if ($handler->definition['handler'] == 'civicrm_handler_filter_country_multi') {
         $country_field = $handler->field;
         $selected_countries = $loaded_list = array();
-        if (isset($this->view->exposed_input[$country_field])
+        if(isset($this->view->exposed_input[$country_field])
          && count((array) $this->view->exposed_input[$country_field])) {
           $selected_countries = (array) $this->view->exposed_input[$country_field];
         }
         $allowedCountries = array_keys($handler->value_options);
-        if (empty($allowedCountries)) {
+        if(empty($allowedCountries)) {
           $allowedCountries = array_keys(CRM_Core_PseudoConstant::country());
         }
 
         $result = db_query('SELECT id, name, country_id FROM {civicrm_state_province} WHERE country_id IN (:countries)',
-          array(':countries' => $allowedCountries))->fetchAllAssoc('id');
+          array(':countries' => $allowedCountries))
+        ->fetchAllAssoc('id');
 
         $state_html = array();
         foreach ($result as $state_id => $state) {
@@ -75,43 +77,53 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
             $state_html[$state->country_id] = '';
           }
           $state_html[$state->country_id] .= '<option value="' . $state_id . '">' . $state->name . '</option>';
-          if (in_array($state->country_id, $selected_countries)) {
+          if(in_array($state->country_id, $selected_countries)) {
             $loaded_list[$state_id] = $state->name;
           }
         }
         drupal_add_js(array('civicrm_views' => array('states' => $state_html)), 'setting');
         $c_object = json_encode($state_html);
       }
-    }
+      if ($handler->definition['handler'] == 'civicrm_handler_filter_state_multi') {
+        $state = CRM_Utils_Array::value($handler->field, $_GET);
+      }
+    } // end foreach
 
     // country filter exists, remove options, add js
     if (!empty($country_field)) {
       $this->value_options = $loaded_list;
 
-      $fid = md5($country_field);
-      $js = "(function ($) {
-               Drupal.behaviors.civicrm_views_{$fid} = {
+      $fid=md5($country_field);
+      $js = '(function ($) {
+               Drupal.behaviors.civicrm_views_' . $fid . ' = {
                  attach: function (context, settings) {
-                   $('#edit-{$country_field}').change(function() {
-                     var stateList = '<option value=\"All\">&lt;Any&gt;</option>';
-                     var selectedCountries = $(this).val();
-                     // ensure selectedCountries is an array
-                     if ($.type(selectedCountries) === 'string') {
+                   if ($("#edit-' . $country_field . '").val() && !settings.state) {
+                     load_state();
+                   }
+                   function load_state() {
+                     var country = $("#edit-' . $country_field . '");
+                     var stateList = \'<option value="All">&lt;Any&gt;</option>\';
+                     var selectedCountries = country.val();
+                     // get the string of options
+                     if(jQuery.type(selectedCountries) === "string") {
                        selectedCountries = [selectedCountries];
                      }
                      $.each(selectedCountries, function(index, selectedCountry) {
-                       stateList = stateList + (Drupal.settings.civicrm_views.states[selectedCountry] || '');
+                       stateList = stateList + ((Drupal.settings.civicrm_views.states[selectedCountry])? Drupal.settings.civicrm_views.states[selectedCountry] : \'\');
                      });
-                     $('select[name={$this->field}]').empty().html(stateList);
-                   });
+                     $("select[name=' . $this->field . ']").empty();
+                     $("select[name=' . $this->field . ']").html(stateList);
+                   }
+                   $("#edit-' . $country_field . '").change(load_state);
                  }
                }
-             })(jQuery);";
+             })(jQuery); ';
       drupal_add_js($js, 'inline', 'footer');
-    }
+      drupal_add_js(array('state' => $state), 'setting');
+    } // end if country filter
   }
 
-  public function operators() {
+  function operators() {
     $operators = parent::operators();
     $operators += array(
       'all' => array(
@@ -119,13 +131,13 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
         'short' => t('all'),
         'method' => 'op_simple',
         'values' => 1,
-      ),
-    );
+        ),
+      );
 
     return $operators;
   }
 
-  public function op_simple() {
+  function op_simple() {
     if (empty($this->value)) {
       return;
     }
@@ -133,19 +145,17 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
     $this->ensure_my_table();
 
     // negated operator uses AND, positive uses OR
-    $op = $glue = NULL;
+    $op = $glue = null;
     switch ($this->operator) {
       case 'in':
         $op = ' = ';
         $glue = ' OR ';
         break;
-
       case 'not in':
         $op = ' != ';
         $glue = ' AND ';
         break;
-
-      case 'all':
+      case 'all' :
         $clause = "$this->table_alias.$this->real_field IN (" . implode(',', $this->value) . ")";
         break;
     }
@@ -159,5 +169,4 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
 
     $this->query->add_where_expression($this->options['group'], $clause);
   }
-
 }
