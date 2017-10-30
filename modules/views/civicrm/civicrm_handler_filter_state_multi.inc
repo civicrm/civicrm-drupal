@@ -82,7 +82,7 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
         drupal_add_js(array('civicrm_views' => array('states' => $state_html)), 'setting');
         $c_object = json_encode($state_html);
       }
-    } // end foreach
+    }
 
     // country filter exists, remove options, add js
     if (!empty($country_field)) {
@@ -90,26 +90,25 @@ class civicrm_handler_filter_state_multi extends views_handler_filter_in_operato
 
       $fid = md5($country_field);
       $js = "(function ($) {
-               Drupal.behaviors.civicrm_views_{$fid}= {
+               Drupal.behaviors.civicrm_views_{$fid} = {
                  attach: function (context, settings) {
-                   $(" . '"#' . "edit-{$country_field}" . '"' . ").change( function() {
-                     var stateList = \'<option value=" . '"All"' . ">&lt;Any&gt;</option>\';
+                   $('#edit-{$country_field}').change(function() {
+                     var stateList = '<option value=\"All\">&lt;Any&gt;</option>';
                      var selectedCountries = $(this).val();
-                     // get the string of options
-                     if(jQuery.type(selectedCountries) === " . '"string"' . ") {
+                     // ensure selectedCountries is an array
+                     if ($.type(selectedCountries) === 'string') {
                        selectedCountries = [selectedCountries];
                      }
                      $.each(selectedCountries, function(index, selectedCountry) {
-                       stateList = stateList + ((Drupal.settings.civicrm_views.states[selectedCountry])? Drupal.settings.civicrm_views.states[selectedCountry] : \'\');
+                       stateList = stateList + (Drupal.settings.civicrm_views.states[selectedCountry] || '');
                      });
-                     $(" . '"' . "select[name={$this->field}]" . '"' . ").empty();
-                     $(" . '"' . "select[name={$this->field}]" . '"' . ").html(stateList);
+                     $('select[name={$this->field}]').empty().html(stateList);
                    });
                  }
                }
-             })(jQuery); ";
+             })(jQuery);";
       drupal_add_js($js, 'inline', 'footer');
-    } // end if country filter
+    }
   }
 
   public function operators() {
