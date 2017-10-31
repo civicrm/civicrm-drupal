@@ -10,16 +10,28 @@ require_once 'civicrm.user.inc';
  * Inject arbitrary html into the head region.
  */
 function civicrm_page_attachments(array &$page) {
-  
+  // Only do anything if CiviCRM is bootstrapped.
+  global $civicrm_root;
+  if (empty($civicrm_root)) {
+    return;
+  }
+
+  // Always add core styles (even if not on a /civicrm page).
+  CRM_Core_Resources::singleton()->addCoreStyles();
+
+  // Merge CiviCRM stuff into HTML header.
+  if ($region = CRM_Core_Region::instance('html-header', FALSE)) {
+    CRM_Utils_System::addHTMLHead($region->render('', FALSE));
+  }
+
   $headers = \Drupal::service('civicrm.page_state')->getHtmlHeaders();
   $markup  = [
     '#type'   => 'markup',
     '#weight' => -99,
     '#markup' => \Drupal\Core\Render\Markup::create($headers),
   ];
-  
-  $page['#attached']['html_head'][] = [$markup, 'civicrm-headers'];
 
+  $page['#attached']['html_head'][] = [$markup, 'civicrm-headers'];
 }
 
 /**
@@ -115,15 +127,16 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
   if (($conf = $display->getComponent('civicrm_record')) && $current_user->hasPermission('access CiviCRM') && \CRM_Contact_BAO_Contact_Permission::allow($current_contact_id)) {
     $build['civicrm_record'] = [
       '#type' => 'item',
-      '#title' => t('Contact record'),
       '#weight' => $conf['weight'],
       0 => [
         '#type' => 'link',
-        '#title' => t('View contact record'),
+        '#title' =>  t('View contact record'),
         '#url' => \Drupal\Core\Url::fromRoute('civicrm.civicrm_contact_view', [
           'reset' => 1,
           'cid' => $contact_id,
         ]),
+        '#prefix' => '<span class="user-page-link" id="user-page-contact" ><span class="user-page-bullet">&raquo;</span> ',
+        '#suffix' => '</span>',
       ],
     ];
   }
@@ -132,7 +145,6 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
   if (($conf = $display->getComponent('civicrm_dashboard')) && $current_user->hasPermission('access Contact Dashboard') && \CRM_Contact_BAO_Contact_Permission::allow($current_contact_id)) {
     $build['civicrm_dashboard'] = [
       '#type' => 'item',
-      '#title' => t('Contact dashboard'),
       '#weight' => $conf['weight'],
       0 => [
         '#type' => 'link',
@@ -141,6 +153,8 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
           'reset' => 1,
           'id' => $contact_id,
         ]),
+        '#prefix' => '<span class="user-page-link" id="user-page-dashboard" ><span class="user-page-bullet">&raquo;</span> ',
+        '#suffix' => '</span>',
       ],
     ];
   }
@@ -148,6 +162,8 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
   // Add profile summaries.
   // @Todo Do we need to check permissions before viewing each profile?
   if (($conf = $display->getComponent('civicrm_profiles')) && $current_user->hasPermission('profile view')) {
+    //CRM_Core_Resources::singleton()->addCoreStyles();
+
     $build['civicrm_profiles'] = array(
       '#weight' => $conf['weight'],
     );
@@ -155,10 +171,10 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
     foreach (_civicrm_get_profiles($contact_id) as $id => $profile) {
       $html = (new \CRM_Profile_Page_Dynamic($contact_id, $id, NULL))->run();
       $build['civicrm_profiles']["civicrm_profile_{$id}"] = [
-        '#type' => 'item',
+        '#theme' => 'civicrm_user_profile',
         '#title' => $profile['title'],
         0 => [
-          '#markup' => $html,
+          '#markup' => \Drupal\Core\Render\Markup::create($html),
         ],
         // @Todo Check access to this route before displaying the link
         1 => [
@@ -169,6 +185,8 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
             'user' => $account->id(),
             'profile' => $id,
           ]),
+          '#prefix' => '<span class="user-page-link" id="user-page-profile-' . substr($profile['title'], 0, 3) . '" ><span class="user-page-bullet">&raquo;</span> ',
+          '#suffix' => '</span>',
         ],
       ];
     }
@@ -240,6 +258,10 @@ function civicrm_theme() {
       'render element' => 'elements',
       'template' => 'civicrm-contact',
     ),
+    'civicrm_user_profile' => array(
+      'render element' => 'elements',
+      'template' => 'civicrm-user-profile',
+    )
   );
 }
 
