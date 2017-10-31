@@ -29,12 +29,7 @@
  *
  * @package CRM
  * @copyright CiviCRM LLC (c) 2004-2017
- * $Id$
- *
  */
-
-// $Id: example.drush.inc,v 1.5 2009/09/30 13:15:54 weitzman Exp $
-
 
 /**
  * @file
@@ -1524,7 +1519,8 @@ function drush_civicrm_api() {
   array_shift($args);
 
   // Parse $params
-  switch (drush_get_option('in', 'args')) {
+  $format = drush_get_option('in', 'args');
+  switch ($format) {
     case 'args':
       $params = $DEFAULTS;
       foreach ($args as $arg) {
@@ -1556,8 +1552,12 @@ function drush_civicrm_api() {
   );
 
   $result = civicrm_api($entity, $action, $params);
+  if (!empty($result['is_error'])) {
+    drush_set_error('CIVICRM api error', $result['error_message']);
+  }
 
-  switch (drush_get_option('out', 'pretty')) {
+  $format = drush_get_option('out', 'pretty');
+  switch ($format) {
     case 'pretty':
       drush_print_r($result);
       break;
