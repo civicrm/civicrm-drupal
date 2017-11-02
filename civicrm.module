@@ -141,7 +141,7 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
       '#weight' => $conf['weight'],
       0 => [
         '#type' => 'link',
-        '#title' =>  t('View contact record'),
+        '#title' => t('View contact record'),
         '#url' => \Drupal\Core\Url::fromRoute('civicrm.civicrm_contact_view', [
           'reset' => 1,
           'cid' => $contact_id,
@@ -173,8 +173,6 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
   // Add profile summaries.
   // @Todo Do we need to check permissions before viewing each profile?
   if (($conf = $display->getComponent('civicrm_profiles')) && $current_user->hasPermission('profile view')) {
-    //CRM_Core_Resources::singleton()->addCoreStyles();
-
     $build['civicrm_profiles'] = array(
       '#weight' => $conf['weight'],
     );
