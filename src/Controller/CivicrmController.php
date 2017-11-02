@@ -52,24 +52,12 @@ class CivicrmController extends ControllerBase {
 
     // Add CSS, JS, etc. that is required for this page.
     \CRM_Core_Resources::singleton()->addCoreResources();
-    if ($region = \CRM_Core_Region::instance('html-header', FALSE)) {
-      \CRM_Utils_System::addHTMLHead($region->render(''));
-    }
 
     // We set the CiviCRM markup as safe and assume all XSS (an other) issues have already
     // been taken care of.
     $build = array(
       '#markup' => Markup::create($content),
     );
-    $counter = 0;
-    foreach ($this->civicrmPageState->getCSS() as $css) {
-      $build['#attached']['html_head'][] = array($css, 'civicrm-controller-' . $counter);
-      $counter++;
-    }
-    foreach ($this->civicrmPageState->getJS() as $js) {
-      $build['#attached']['html_head'][] = array($js, 'civicrm-controller-' . $counter);
-      $counter++;
-    }
 
     // Override default title value if one has been set in the course
     // of calling \CRM_Core_Invoke::invoke().

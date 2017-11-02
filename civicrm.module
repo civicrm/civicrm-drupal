@@ -20,17 +20,28 @@ function civicrm_page_attachments(array &$page) {
   CRM_Core_Resources::singleton()->addCoreStyles();
 
   // Merge CiviCRM stuff into HTML header.
-  if ($region = CRM_Core_Region::instance('html-header', FALSE)) {
-    CRM_Utils_System::addHTMLHead($region->render('', FALSE));
+  if ($region = \CRM_Core_Region::instance('html-header', FALSE)) {
+    \CRM_Utils_System::addHTMLHead($region->render(''));
   }
 
-  $headers = \Drupal::service('civicrm.page_state')->getHtmlHeaders();
+  /** @var \Drupal\civicrm\CivicrmPageState $page_state */
+  $page_state = \Drupal::service('civicrm.page_state');
+
+  // Attach CSS and JS.
+  foreach ($page_state->getCSS() as $counter => $css) {
+    $page['#attached']['html_head'][] = array($css, 'civicrm-css-' . $counter);
+  }
+  foreach ($page_state->getJS() as $counter => $js) {
+    $page['#attached']['html_head'][] = array($js, 'civicrm-js-' . $counter);
+  }
+
+  // Any other miscellaneous headers.
+  $headers = $page_state->getHtmlHeaders();
   $markup  = [
     '#type'   => 'markup',
     '#weight' => -99,
     '#markup' => \Drupal\Core\Render\Markup::create($headers),
   ];
-
   $page['#attached']['html_head'][] = [$markup, 'civicrm-headers'];
 }
 
