@@ -471,6 +471,7 @@ function _civicrm_views_add_implicit_joins(&$data) {
       'users' => array(
         'left_field' => 'uid',
         'field' => 'uf_id',
+        'entity_type' => 'user',
         'extra' => array(
           array(
             'field' => 'domain_id',
