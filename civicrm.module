@@ -290,13 +290,12 @@ function civicrm_metatag_metatags_view_alter(&$output, $instance) {
  *
  * @return array
  */
-function civicrm_links__locale_block($variables) {
+function civicrm_preprocess_links__locale_block(&$variables) {
   if (arg(0) == 'civicrm') {
     foreach ($variables['links'] as $lang => $attr) {
       $variables['links'][$lang]['query'] = _civicrm_get_url_parameters();
     }
   }
-  return theme('links', $variables);
 }
 
 /**
@@ -951,9 +950,6 @@ function civicrm_user_admin_permissions_submit($form, &$form_state) {
  * Make sure this page preprocess function runs last
  * so that a theme can't call drupal_get_js().
  *
- * Also, add civicrm parameters to links so they are not truncated by the
- * language switcher.
- *
  * @param array $theme_registry
  *   Registry theme metadata.
  */
@@ -966,9 +962,6 @@ function civicrm_theme_registry_alter(&$theme_registry) {
     // Now add it on at the end of the array so that it runs last.
     $theme_registry['page']['preprocess functions'][] = 'civicrm_preprocess_page';
   }
-  // Rewrite the links in order to add back CiviCRM parameters for the language switcher.
-  $theme_registry['links__locale_block']['theme path'] = drupal_get_path('module', 'civicrm');
-  $theme_registry['links__locale_block']['function'] = 'civicrm_links__locale_block';
 }
 
 /**
