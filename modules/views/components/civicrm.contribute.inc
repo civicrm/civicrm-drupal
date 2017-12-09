@@ -1335,7 +1335,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
 
   // contribution page
   $data['civicrm_pcp']['contribution_page'] = array(
-    'title' => t('Associated Contribution or Event Page'),
+    'title' => t('Associated Contribution Page'),
     'real field' => 'page_id',
     'help' => t('The Contribution or Event Page with which this Personal Campaign Page is associated.'),
     'field' => array(
@@ -1353,6 +1353,34 @@ function _civicrm_contribute_data(&$data, $enabled) {
       'allow empty' => TRUE,
       'pseudo class' => 'CRM_Contribute_PseudoConstant',
       'pseudo method' => 'contributionPage',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
+  // event page
+  $data['civicrm_pcp']['event_page'] = array(
+    'title' => t('Associated Event Page'),
+    'real field' => 'page_id',
+    'help' => t('The Event or Event Page with which this Personal Campaign Page is associated.'),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_pseudo_constant',
+      'click sortable' => TRUE,
+      'pseudo class' => 'CRM_Event_PseudoConstant',
+      'pseudo method' => 'event',
+      'pseudo args' => array(NULL, FALSE, 'is_template = 0'),
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument',
+      'numeric' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'civicrm_handler_filter_pseudo_constant',
+      'allow empty' => TRUE,
+      'pseudo class' => 'CRM_Event_PseudoConstant',
+      'pseudo method' => 'event',
+      'pseudo args' => array(NULL, FALSE, 'is_template = 0'),
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
