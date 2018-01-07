@@ -57,6 +57,9 @@ class CivicrmController extends ControllerBase {
     // been taken care of.
     $build = array(
       '#markup' => Markup::create($content),
+      '#cache' => [
+        'max-age' => 0,
+      ],
     );
 
     // Override default title value if one has been set in the course
