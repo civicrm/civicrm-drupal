@@ -177,6 +177,9 @@ function civicrm_user_view(array &$build, \Drupal\user\UserInterface $account, \
       '#weight' => $conf['weight'],
     );
 
+    // We need the CiviCRM core Javascript.
+    CRM_Core_Resources::singleton()->addCoreResources();
+
     foreach (_civicrm_get_profiles($contact_id) as $id => $profile) {
       $html = (new \CRM_Profile_Page_Dynamic($contact_id, $id, NULL))->run();
       $build['civicrm_profiles']["civicrm_profile_{$id}"] = [
@@ -236,6 +239,9 @@ function civicrm_form_user_register_form_alter(&$form, &$form_state, $form_id) {
   $civicrm = \Drupal::service('civicrm');
   $civicrm->initialize();
   $html = \CRM_Core_BAO_UFGroup::getEditHTML(NULL, '', 1, TRUE, FALSE, NULL, FALSE, $civicrm->getCtype());
+
+  // We need the CiviCRM core Javascript.
+  CRM_Core_Resources::singleton()->addCoreResources();
 
   $form['civicrm_profile_register'] = array(
     '#markup' => \Drupal\Core\Render\Markup::create($html),
