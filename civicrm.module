@@ -240,11 +240,17 @@ function civicrm_form_user_register_form_alter(&$form, &$form_state, $form_id) {
   $civicrm->initialize();
   $html = \CRM_Core_BAO_UFGroup::getEditHTML(NULL, '', 1, TRUE, FALSE, NULL, FALSE, $civicrm->getCtype());
 
+  // Need to disable the page cache.
+  \Drupal::service('page_cache_kill_switch')->trigger();
+
   // We need the CiviCRM core Javascript.
   CRM_Core_Resources::singleton()->addCoreResources();
 
   $form['civicrm_profile_register'] = array(
     '#markup' => \Drupal\Core\Render\Markup::create($html),
+    '#cache' => [
+      'max-age' => 0,
+    ],
   );
   $form['#validate'][] = '_civicrm_user_register_form_validate';
 }
@@ -252,14 +258,13 @@ function civicrm_form_user_register_form_alter(&$form, &$form_state, $form_id) {
 /**
  * Validation function for additional profile form fields attached to user registration form.
  */
-function _civicrm_user_register_form_validate(&$form, &$form_state) {
+function _civicrm_user_register_form_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
   \Drupal::service('civicrm')->initialize();
   $errors = CRM_Core_BAO_UFGroup::isValid(NULL, '', TRUE);
 
   if (is_array($errors)) {
-    $form_builder = \Drupal::formBuilder();
     foreach ($errors as $name => $message) {
-      $form_builder->setErrorByName($name, $form_state, $message);
+      $form_state->setErrorByName($name, $message);
     }
   }
 }
