@@ -24,6 +24,13 @@ function civicrm_user_insert(AccountInterface $account) {
   }
   \CRM_Core_BAO_UFMatch::updateContactEmail($contact_id, $account->getEmail());
 
+  // If already in CiviCRM, we don't do then next bit because it will cause
+  // the current request to exit, stopping execution.
+  $config = CRM_Core_Config::singleton();
+  if ($config->inCiviCRM) {
+    return;
+  }
+
   // Process any profile form fields that may have been submitted.
   // In particular, this will pick up form fields that were submitted on the user_registration page.
   \CRM_Core_BAO_UFGroup::getEditHTML($contact_id, '', 2, TRUE, FALSE, NULL, FALSE, $civicrm->getCtype());
