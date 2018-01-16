@@ -39,6 +39,9 @@ class CivicrmController extends ControllerBase {
     // to an environment variable.
     $_GET['q'] = implode('/', $args);
 
+    // Need to disable the page cache.
+    \Drupal::service('page_cache_kill_switch')->trigger();
+
     // @Todo: Enable CiviCRM's CRM_Core_TemporaryErrorScope::useException() and possibly catch exceptions.
     // At the moment, civicrm doesn't allow exceptions to bubble up to Drupal. See CRM-15022.
     $content = $this->civicrm->invoke($args);
@@ -57,6 +60,9 @@ class CivicrmController extends ControllerBase {
     // been taken care of.
     $build = array(
       '#markup' => Markup::create($content),
+      '#cache' => [
+        'max-age' => 0,
+      ],
     );
 
     // Override default title value if one has been set in the course
