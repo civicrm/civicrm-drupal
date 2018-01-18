@@ -238,7 +238,7 @@ function _civicrm_get_profiles($contact_id) {
 function civicrm_form_user_register_form_alter(&$form, &$form_state, $form_id) {
   $civicrm = \Drupal::service('civicrm');
   $civicrm->initialize();
-  $html = \CRM_Core_BAO_UFGroup::getEditHTML(NULL, '', 1, TRUE, FALSE, NULL, FALSE, $civicrm->getCtype());
+  $html = \CRM_Core_BAO_UFGroup::getEditHTML(NULL, '', NULL, TRUE, TRUE, NULL, FALSE, $civicrm->getCtype());
 
   // Need to disable the page cache.
   \Drupal::service('page_cache_kill_switch')->trigger();
