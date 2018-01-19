@@ -330,13 +330,11 @@ function civicrm_group_roles_show_rules($action = NULL, $id = NULL) {
   $roles = user_roles(TRUE);
 
   // get civicrm groups
-  $params = array(
-    'version' => '3',
-    'option.limit' => 0,
-  );
+  $params = array('version' => 3, 'option.limit' => 0);
 
-  $groups = civicrm_api('group_contact','get',$params);
-  $groups = $groups['values'];
+  $groups = civicrm_api('group', 'get', $params);
+  $groups = CRM_Utils_Array::value('values', $groups, array());
+
   //Begin building main output table.
   $header = array(t('Rule ID'), t('Rule Name (\'CiviCRM Group\' <--> \'Drupal Role\')'), t('Operation'));
   $data = array();
