@@ -1177,6 +1177,7 @@ function drush_civicrm_pre_civicrm_sqldump() {
  * Implementation of command 'civicrm-sql-dump'
  */
 function drush_civicrm_sqldump() {
+  drush_set_option('extra','--routines');
   if (version_compare(DRUSH_VERSION, 7, '>=')) {
     drush_sql_dump();
   }
