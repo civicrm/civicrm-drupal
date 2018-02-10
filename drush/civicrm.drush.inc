@@ -194,12 +194,14 @@ function civicrm_drush_command() {
     'description' => 'Exports the CiviCRM DB as SQL using mysqldump.',
     'examples' => array(
       'drush civicrm-sql-dump --result-file=../CiviCRM.sql' => 'Save SQL dump to the directory above Drupal root.',
+      'drush civicrm-sql-dump --extra-options=--quick' => 'Pass the --quick option to mysqldump to help with large tables.',
     ),
     'options' => array(
       'data-only' => 'Dump data without statements to create any of the schema.',
       'gzip' => 'Compress the dump using the gzip program which must be in your $PATH.',
       'result-file' => 'Save to a file.',
       'tables-list' => 'comma-separated list of tables to transfer.',
+      'extra-options' => 'Add custom options to the dump command.',
     ),
   );
   $items['civicrm-sql-query'] = array(
@@ -1177,6 +1179,8 @@ function drush_civicrm_pre_civicrm_sqldump() {
  * Implementation of command 'civicrm-sql-dump'
  */
 function drush_civicrm_sqldump() {
+  $extra_options = drush_get_option('extra-options', '');
+  drush_set_option('extra', '--routines ' . $extra_options);
   if (version_compare(DRUSH_VERSION, 7, '>=')) {
     drush_sql_dump();
   }
