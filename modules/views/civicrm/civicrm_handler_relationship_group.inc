@@ -6,7 +6,7 @@
  * to the join clause based on group_id, status, group title, is_active, group is standard group.
  */
 class civicrm_handler_relationship_group extends views_handler_relationship {
-  static $civi_group_types;
+  public static $civi_group_types;
   private $civi_groups;
   protected $is_standard;
 
@@ -23,16 +23,16 @@ class civicrm_handler_relationship_group extends views_handler_relationship {
     self::$civi_group_types = CRM_Contact_BAO_Group::buildOptions('group_type');
 
     $standard_or_smart = ($this->is_standard ? 'IS NULL' : 'IS NOT NULL');
-    $result = civicrm_api3('Group', 'get', array(
-        'return' => array("name", "title", "group_type"),
-        'is_hidden' => 0,
-        'is_active' => 1,
-        'saved_search_id' => array($standard_or_smart => 1),
-        'options' => array('limit' => 0, 'sort' => "title"),
-    ));
-    $this->civi_groups = array();
+    $result = civicrm_api3('Group', 'get', [
+      'return' => ["name", "title", "group_type"],
+      'is_hidden' => 0,
+      'is_active' => 1,
+      'saved_search_id' => [$standard_or_smart => 1],
+      'options' => ['limit' => 0, 'sort' => "title"],
+    ]);
+    $this->civi_groups = [];
     foreach ($result['values'] as $group) {
-      $group_types = array();
+      $group_types = [];
       if (!empty($group['group_type'])) {
         foreach ((array) $group['group_type'] as $type) {
           if (!empty($type)) {
@@ -51,7 +51,6 @@ class civicrm_handler_relationship_group extends views_handler_relationship {
     }
   }
 
-
   /**
    * Add additional options
    * to the view. By defining these here, Views will take care of saving the
@@ -59,8 +58,8 @@ class civicrm_handler_relationship_group extends views_handler_relationship {
    */
   public function option_definition() {
     $options = parent::option_definition();
-    $options['civi_group_type'] = array('default' => NULL);
-    $options['civi_group_name'] = array('default' => NULL);
+    $options['civi_group_type'] = ['default' => NULL];
+    $options['civi_group_name'] = ['default' => NULL];
     return $options;
   }
 
@@ -70,47 +69,45 @@ class civicrm_handler_relationship_group extends views_handler_relationship {
   public function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['civi_group_type'] = array(
+    $form['civi_group_type'] = [
       '#type' => 'select',
       '#multiple' => TRUE,
       '#title' => 'Choose a specific group type',
       '#options' => self::$civi_group_types,
       '#description' => t('Choose to limit this relationship to one or more specific types of CiviCRM group.'),
       '#default_value' => $this->options['civi_group_type'],
-    );
-    $form['civi_group_name'] = array(
+    ];
+    $form['civi_group_name'] = [
       '#type' => 'select',
       '#multiple' => TRUE,
       '#title' => 'Choose a specific group',
       '#options' => $this->civi_groups,
       '#description' => t('Choose to limit this relationship to one or more specific CiviCRM groups.'),
       '#default_value' => $this->options['civi_group_name'],
-    );
+    ];
   }
 
-
-  public function join_required($join = array()) {
+  public function join_required($join = []) {
     if (!empty($this->options['required'])) {
       $join->type = 'INNER';
     }
     return $join;
   }
 
-
-  public function join_group_type($join = array()) {
-    $extra = array();
+  public function join_group_type($join = []) {
+    $extra = [];
     if (isset($join->extra)) {
       $extra = $join->extra;
     }
     if (isset($this->options['civi_group_type']) && $this->options['civi_group_type']) {
       $sep = CRM_Core_DAO::VALUE_SEPARATOR;
 
-      $extra[] = array(
+      $extra[] = [
         'value' => "($sep" . implode("$sep|$sep", $this->options['civi_group_type']) . "$sep)",
         'numeric' => FALSE,
         'field' => 'group_type',
         'operator' => 'RLIKE',
-      );
+      ];
     }
     if (!empty($extra)) {
       $join->extra = $extra;
@@ -118,17 +115,17 @@ class civicrm_handler_relationship_group extends views_handler_relationship {
     return $join;
   }
 
-  public function join_group_name($join = array()) {
-    $extra = array();
+  public function join_group_name($join = []) {
+    $extra = [];
     if (isset($join->extra)) {
       $extra = $join->extra;
     }
     if (isset($this->options['civi_group_name']) && $this->options['civi_group_name']) {
-      $extra[] = array(
+      $extra[] = [
         'value' => $this->options['civi_group_name'],
         'numeric' => FALSE,
         'field' => 'name',
-      );
+      ];
     }
     if (!empty($extra)) {
       $join->extra = $extra;
@@ -136,22 +133,21 @@ class civicrm_handler_relationship_group extends views_handler_relationship {
     return $join;
   }
 
-
-  public function join_group_active_not_hidden($join = array()) {
-    $extra = array();
+  public function join_group_active_not_hidden($join = []) {
+    $extra = [];
     if (isset($join->extra)) {
       $extra = $join->extra;
     }
-    $extra[] = array(
+    $extra[] = [
       'value' => 1,
       'numeric' => TRUE,
       'field' => 'is_active',
-    );
-    $extra[] = array(
+    ];
+    $extra[] = [
       'value' => 0,
       'numeric' => TRUE,
       'field' => 'is_hidden',
-    );
+    ];
 
     $join->extra = $extra;
     return $join;
@@ -166,7 +162,6 @@ class civicrm_handler_relationship_group extends views_handler_relationship {
     return $join;
   }
 
-
   /**
    * Called to implement a relationship in a query.
    */
@@ -175,11 +170,11 @@ class civicrm_handler_relationship_group extends views_handler_relationship {
     $this->alias = $this->query->add_table($this->table, $this->relationship, $join);
     //register relationship
     $this->view->relationship[$this->options['id']]->alias = $this->alias;
-    $this->query->relationships[$this->alias] = array(
+    $this->query->relationships[$this->alias] = [
       'link' => $this->relationship,
       'table' => $this->table,
       'base' => $this->table,
-    );
+    ];
 
   }
 

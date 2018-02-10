@@ -2972,6 +2972,10 @@ function _civicrm_core_data(&$data, $enabled) {
     'argument' => array(
       'handler' => 'views_handler_argument',
     ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+      'allow empty' => TRUE,
+    ),
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),

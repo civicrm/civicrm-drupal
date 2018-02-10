@@ -1,7 +1,7 @@
 <?php
 /*
   +--------------------------------------------------------------------+
-  | CiviCRM version 4.7                                                |
+  | CiviCRM version 5                                                  |
   +--------------------------------------------------------------------+
   | This file is a part of CiviCRM.                                    |
   |                                                                    |
@@ -39,14 +39,14 @@ class civicrm_handler_filter_group_name extends views_handler_filter_in_operator
         return;
       }
       $standard_or_smart = ($this->is_standard ? 'IS NULL' : 'IS NOT NULL');
-      $result = civicrm_api3('Group', 'get', array(
-          'return' => array("name", "title"),
-          'is_hidden' => 0,
-          'is_active' => 1,
-          'saved_search_id' => array($standard_or_smart => 1),
-          'options' => array('limit' => 0, 'sort' => "title"),
-      ));
-      $this->civi_groups = array();
+      $result = civicrm_api3('Group', 'get', [
+        'return' => ["name", "title"],
+        'is_hidden' => 0,
+        'is_active' => 1,
+        'saved_search_id' => [$standard_or_smart => 1],
+        'options' => ['limit' => 0, 'sort' => "title"],
+      ]);
+      $this->civi_groups = [];
       foreach ($result['values'] as $group) {
         if (isset($group['name'])) {
           $this->civi_groups[$group['name']] = $group['title'];
@@ -58,7 +58,7 @@ class civicrm_handler_filter_group_name extends views_handler_filter_in_operator
   public function get_value_options() {
     if (!isset($this->value_options)) {
       $this->value_title = t('Contact Group Title');
-      $options = array();
+      $options = [];
       foreach ($this->civi_groups as $name => $title) {
         $options[$name] = $title;
       }
