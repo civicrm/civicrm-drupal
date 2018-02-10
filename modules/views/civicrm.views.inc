@@ -5305,6 +5305,7 @@ function civicrm_get_filter_handler($type) {
 
     case "Float":
     case "Int":
+    case "Money":
       return 'views_handler_filter_numeric';
 
     case "Date":
