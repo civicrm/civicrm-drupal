@@ -63,7 +63,7 @@ The content of the email is:
   $defaults = array(
     'parameter' => array(
       'contact' => array(
-        'type' => 'contact',
+        'type' => 'civicrm_contact',
         'label' => t('Contact'),
         'save' => TRUE,
       ),
