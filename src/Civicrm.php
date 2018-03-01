@@ -49,7 +49,7 @@ class Civicrm {
     }
 
     // Initialize the system by creating a config object
-    \CRM_Core_Config::singleton();
+    \CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
 
     // Mark CiviCRM as initialized.
     $this->initialized = TRUE;
