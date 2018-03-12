@@ -86,7 +86,7 @@ class civicrm_handler_field_contact_image extends views_handler_field {
       '#dependency' => array(
         'edit-options-url-only' => array(0),
       ),
-            '#prefix' => t('If you do not see Drupal image styles here, it may be worth checking CiviCRM "Custom files directory" <br> at <strong>"CiviCRM > Administer > System Settings > Directories" </strong> : it <strong>has to </strong> contain <italic>[civicrm.files]</italic> token'), 
+      '#prefix' => t('If you do not see Drupal image styles here, it may be worth checking CiviCRM "Custom files directory" <br> at <strong>"CiviCRM > Administer > System Settings > Directories" </strong> : it <strong>has to </strong> contain <italic>[civicrm.files]</italic> token'),
     );
 
     $form['height'] = array(
@@ -124,7 +124,24 @@ class civicrm_handler_field_contact_image extends views_handler_field {
     $directory = $this->get_civi_relative_upload_path();
     if ($this->options['image_style'] && module_exists('image') && $directory !== FALSE) {
       $image['style_name'] = empty($this->options['image_style']) ? '' : $this->options['image_style'];
-      $image_path = $directory . substr(strstr($value, 'photo='), 6);
+      if (!strstr($value, 'photo=')) {
+        //This is a drupal managed file
+        //The URL stored in civicrm_contact.image_URL is URL encoded.
+        //For image_style to work, this must be decoded first.
+        $value = urldecode($value);
+
+        //Now we remove the hostname etc. and find the relative path
+        //of the file starting from the root of public://
+        $wrapper = file_stream_wrapper_get_instance_by_uri('public://');
+        $drupal_upload_path = $wrapper->getDirectoryPath() . '/';
+        $relative_upload_path = explode($drupal_upload_path, $value);
+        if (count($relative_upload_path) == 2) {
+          $image_path = $relative_upload_path[1];
+        }
+      }
+      else {
+        $image_path = $directory . substr(strstr($value, 'photo='), 6);
+      }
       $image['path'] = str_replace('\\', '/', $image_path);
       return theme('image_style', $image);
     }
