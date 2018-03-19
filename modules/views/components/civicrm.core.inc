@@ -2973,7 +2973,7 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
-   $data['civicrm_tag']['parent_name'] = array(
+  $data['civicrm_tag']['parent_name'] = array(
     'title' => t('Parent Name'),
     'help' => t('Name of Parent Tag'),
     'real field' => 'parent_id',
