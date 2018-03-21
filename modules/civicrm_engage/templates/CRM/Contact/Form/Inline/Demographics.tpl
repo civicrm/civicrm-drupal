@@ -59,7 +59,8 @@
       {foreach from=$demographics_groupTree item=cd_edit key=group_id}
         {foreach from=$cd_edit.fields item=element key=field_id}
           <table class="form-layout-compressed">
-            {include file="CRM/Custom/Form/CustomField.tpl"}
+            {assign var="element_name" value=$element.element_name}
+            {include file="CRM/Custom/Form/Edit/CustomField.tpl" formElement=$form.$element_name}
           </table>
         {/foreach}
       {/foreach}
