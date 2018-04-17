@@ -46,8 +46,25 @@ function civicrm_conf_init() {
    * above us, so use that
    */
   $currentDir = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+
   if (file_exists($currentDir . 'settings_location.php')) {
     include $currentDir . 'settings_location.php';
+  }
+  $potentialDirectories = [
+    $currentDir,
+    $currentDir . '..'  . DIRECTORY_SEPARATOR,
+    $currentDir . '..'  . DIRECTORY_SEPARATOR . '..'  . DIRECTORY_SEPARATOR,
+    $currentDir . '..'  . DIRECTORY_SEPARATOR . '..'  . DIRECTORY_SEPARATOR . '..'  . DIRECTORY_SEPARATOR,
+    $currentDir . '..'  . DIRECTORY_SEPARATOR . '..'  . DIRECTORY_SEPARATOR . '..'  . DIRECTORY_SEPARATOR . '..'  . DIRECTORY_SEPARATOR,
+  ];
+
+  foreach ($potentialDirectories as $potentialDirectory) {
+    // allow for the civicrm_settings_location.php file to be in parent directories
+    // e.g sites where current dir is sites/all/modules/civicrm or sites/all/modules/contrib/civicrm
+    // this means the file with the conf won't be deleted when the tarball is replaced.
+    if (file_exists($potentialDirectory . 'civicrm_settings_location.php')) {
+      include $potentialDirectory . 'civicrm_settings_location.php';
+    }
   }
 
   if (defined('CIVICRM_CONFDIR') && !isset($confdir)) {
