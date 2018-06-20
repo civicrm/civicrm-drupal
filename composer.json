@@ -27,7 +27,7 @@
   ],
   "require": {
     "composer/installers": "^1.0",
-    "civicrm/civicrm-core" : "4.7.*"
+    "civicrm/civicrm-core" : "5.2.*"
   },
   "extra": {
     "installer-name": "civicrm"
