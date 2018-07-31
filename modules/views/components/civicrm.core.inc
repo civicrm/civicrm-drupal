@@ -157,6 +157,18 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
+  $data['civicrm_event']['civicrm_participant'] = array(
+    'real field' => 'id',
+    'title' => t('CiviCRM Participant (starting from Event)'),
+    'help' => t('Allows a Participant Contact relationship from an Event'),
+    'relationship' => array(
+      'base' => 'civicrm_participant',
+      'base field' => 'event_id',
+      'handler' => 'civicrm_handler_relationship_participant',
+      'label' => t('CiviCRM Participant (starting from Event)'),
+    ),
+  );
+
   // Drupal ID of the contact (from uf_match.uf_id)
   $data['civicrm_contact']['drupal_id'] = array(
     'real field' => 'id',
