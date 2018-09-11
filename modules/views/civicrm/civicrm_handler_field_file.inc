@@ -61,6 +61,11 @@ class civicrm_handler_field_custom_file extends views_handler_field {
 
         $path = sprintf('%s/imagefile', $path);
       }
+      //Reset session params as we send only id and eid to retrieve the file.
+      $file = new CRM_Core_Page_File();
+      $file->set('filename', NULL);
+      $file->set('mime-type', NULL);
+
       $entityField = $this->aliases['entity_id'];
       $url = CRM_Utils_System::url($path,
         "id={$value}&eid={$values->$entityField}",
