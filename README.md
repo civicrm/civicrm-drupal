@@ -1,1 +1,0 @@
-This fork fixes a bug in the civicrm.module file around lines 587-590, regarding the error message `Error: Using $this when not in object context in civicrm_form_data() (line 591 of /path/to/site/sites/all/modules/contrib/civicrm/drupal/civicrm.module).` 
