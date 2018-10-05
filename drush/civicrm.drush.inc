@@ -226,6 +226,13 @@ function civicrm_drush_command() {
     'aliases' => array('cvsqlc'),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_CONFIGURATION,
   );
+  $items['civicrm-sql-rebuild-triggers'] = array(
+    'description' => 'Rebuild SQL triggers',
+    'aliases' => array('cvsqlrt'),
+    'options' => array(
+      'table' => 'Specific table to target. If omitted, triggers for all tables are rebuilt.',
+    ),
+  );
   $items['civicrm-process-mail-queue'] = array(
     'description' => "Process pending CiviMail mailing jobs.",
     'examples' => array(
@@ -1604,4 +1611,18 @@ function drush_civicrm_sync_users_contacts() {
     );
   drush_print(dt($status));
   return $result;
+}
+
+function drush_civicrm_sql_rebuild_triggers() {
+  $table = drush_get_option('table', NULL);
+  civicrm_initialize();
+  $triggerService = Civi::service('sql_triggers');
+  $triggerService->rebuild($table, TRUE);
+  if (\Civi::settings()->get('logging_no_trigger_permission')) {
+    $file = $triggerService->getFile();
+    drush_print("Trigger SQL written to $file");
+  }
+  else {
+    drush_print("Triggers rebuilt");
+  }
 }
