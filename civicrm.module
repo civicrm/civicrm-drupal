@@ -214,6 +214,17 @@ function civicrm_initialize() {
     // initialize the system by creating a config object
     $config = CRM_Core_Config::singleton();
 
+    // Get the menu items.
+    $args = explode('?', $_GET['q']);
+    $path = $args[0];
+
+    // Get the menu for above URL.
+    $item = CRM_Core_Menu::get($path);
+
+    if (!empty(CRM_Utils_Array::value('is_public', $item))) {
+      $config->userFrameworkFrontend = TRUE;
+    }
+
     // Add module-specific header elements
     $header = civicrm_html_head();
     if (!empty($header)) {
