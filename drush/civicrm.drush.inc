@@ -1087,13 +1087,6 @@ function drush_civicrm_restore() {
 }
 
 /**
- * ?? for command 'civicrm-civimail'
- */
-function drush_civicrm_civimail_cron() {
-  civicrm_api('Mailing', 'Process', array('version' => 3));
-}
-
-/**
  * Implementation of command 'civicrm-member-records'
  */
 function drush_civicrm_member_records() {
@@ -1625,4 +1618,20 @@ function drush_civicrm_sql_rebuild_triggers() {
   else {
     drush_print("Triggers rebuilt");
   }
+}
+
+/**
+ * Callback function for civicrm-process-mail-queue.
+ *
+ * Call the process_mailing job to process any outstanding mailing jobs. This
+ * command will need to be run as a user with the correct permissions to
+ * process mailings.
+ *
+ * @see civicrm_drush_command()
+ */
+function drush_civicrm_process_mail_queue() {
+  $init = _civicrm_init();
+  $facility = new CRM_Core_JobManager();
+  $facility->setSingleRunParams('Job', 'process_mailing', array(), 'Started by drush');
+  $facility->executeJobByAction('Job', 'process_mailing');
 }
