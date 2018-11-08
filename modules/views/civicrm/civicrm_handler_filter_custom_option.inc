@@ -97,17 +97,18 @@ class civicrm_handler_filter_custom_option extends views_handler_filter_in_opera
         //     'Sponsor' => int 0
         // As you can see in the above example the value Student is selected.
         // The value all means any of the values
-        $allValuesSelected = false;
+        $allValuesSelected = FALSE;
         if (isset($value['all']) && $value['all']) {
-          $allValuesSelected = true;
+          $allValuesSelected = TRUE;
         }
         unset($value['all']);
-        foreach($value as $subvalue => $isset) {
+        foreach ($value as $subvalue => $isset) {
           if ($isset || $allValuesSelected) {
             $clauses[] = "$this->table_alias.$this->real_field " . $op . " '%" . $sep . CRM_Core_DAO::escapeString($subvalue) . $sep . "%' ";
           }
         }
-      } else {
+      }
+      else {
         $clauses[] = "$this->table_alias.$this->real_field " . $op . " '%" . $sep . CRM_Core_DAO::escapeString($value) . $sep . "%' ";
       }
     }
