@@ -149,18 +149,18 @@ function civicrm_rules_options_list() {
  * Options list callback for listing of CiviCRM Tags
  */
 function civicrm_rules_tags_list() {
-  if(!civicrm_initialize()) {
+  if (!civicrm_initialize()) {
     return array();
   }
   $result = civicrm_api3('tag', 'get', array(
-              'used_for' => 'civicrm_contact',
-              'options'  => array(
-                'limit' => 0,
-                'sort'  => 'name ASC'
-              )
-            ));
+    'used_for' => 'civicrm_contact',
+    'options' => array(
+      'limit' => 0,
+      'sort' => 'name ASC'
+    )
+  ));
   $values = array();
-  foreach($result['values'] as $tag) {
+  foreach ($result['values'] as $tag) {
     $values[$tag['id']] = $tag['name'];
   }
   return $values;
