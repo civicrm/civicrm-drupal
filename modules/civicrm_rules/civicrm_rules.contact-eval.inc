@@ -156,8 +156,8 @@ function civicrm_rules_tags_list() {
     'used_for' => 'civicrm_contact',
     'options' => array(
       'limit' => 0,
-      'sort' => 'name ASC'
-    )
+      'sort' => 'name ASC',
+    ),
   ));
   $values = array();
   foreach ($result['values'] as $tag) {
