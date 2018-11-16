@@ -2454,6 +2454,20 @@ function _civicrm_core_data(&$data, $enabled) {
     ),
   );
 
+  // Link to Contribution table
+  if (isset($enabled['CiviContribute'])) {
+    $data['civicrm_contact']['contribution_id'] = array(
+      'title' => t('Contribution Records'),
+      'help' => 'Contributions records for this Contact',
+      'relationship' => array(
+        'base' => 'civicrm_contribution',
+        'base field' => 'id',
+        'handler' => 'civicrm_handler_relationship_contacts_contributions',
+        'label' => t('Contact -> Contribution'),
+      ),
+    );
+  }
+
   //----------------------------------------------------------------
   // CIVICRM Relationships are here with all the connections, base tabling it up.
   //----------------------------------------------------------------

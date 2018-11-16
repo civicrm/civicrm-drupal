@@ -89,6 +89,7 @@ files[] = modules/views/civicrm/views_handler_argument_civicrm_year_month.inc
 files[] = modules/views/civicrm/civicrm_handler_relationship.inc
 files[] = modules/views/civicrm/civicrm_handler_relationship_relationship.inc
 files[] = modules/views/civicrm/civicrm_handler_relationship_contact2users.inc
+files[] = modules/views/civicrm/civicrm_handler_relationship_contacts_contributions.inc
 files[] = modules/views/civicrm/civicrm_handler_relationship_memberships_contributions.inc
 files[] = modules/views/civicrm/civicrm_handler_relationship_location.inc
 files[] = modules/views/civicrm/civicrm_handler_relationship_mail.inc
