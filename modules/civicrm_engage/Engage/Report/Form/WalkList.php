@@ -51,7 +51,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
         'fields' => array(
           $this->_demoLangCol => array(
             'type' => CRM_Report_Form::OP_STRING,
-            'required' => TRUE,
+            'required' => true,
             'title' => ts('Language'),
           ),
         ),
@@ -70,12 +70,12 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
         'fields' => array(
           $this->_coreTypeCol => array(
             'type' => CRM_Report_Form::OP_STRING,
-            'required' => TRUE,
+            'required' => true,
             'title' => ts('Constituent Type'),
           ),
           $this->_coreOtherCol => array(
             'type' => CRM_Report_Form::OP_STRING,
-            'required' => TRUE,
+            'required' => true,
             'title' => ts('Other Name'),
           ),
         ),
@@ -94,21 +94,21 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
         'fields' => array(
           'gender_id' => array(
             'title' => ts('Sex'),
-            'required' => TRUE,
+            'required' => true,
           ),
           'birth_date' => array(
             'title' => ts('Age'),
-            'required' => TRUE,
+            'required' => true,
             'type' => CRM_Report_Form::OP_INT,
           ),
           'id' => array(
             'title' => ts('Contact ID'),
-            'required' => TRUE,
+            'required' => true,
           ),
           'display_name' => array(
             'title' => ts('Contact Name'),
-            'required' => TRUE,
-            'no_repeat' => TRUE,
+            'required' => true,
+            'no_repeat' => true,
           ),
         ),
         'filters' => array(
@@ -127,7 +127,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
         'order_bys' => array(
           'sort_name' => array(
             'title' => ts('Contact Name'),
-            'required' => TRUE,
+            'required' => true,
           ),
         ),
       ),
@@ -135,40 +135,40 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
         'dao' => 'CRM_Core_DAO_Address',
         'fields' => array(
           'street_number' => array(
-            'required' => TRUE,
+            'required' => true,
             'title' => ts('Street#'),
           ),
           'street_name' => array(
             'title' => ts('Street Name'),
-            'nodisplay' => TRUE,
-            'required' => TRUE,
+            'nodisplay' => true,
+            'required' => true,
           ),
           'street_address' => array(
-            'required' => TRUE,
+            'required' => true,
             'title' => ts('Street Address'),
           ),
           'street_unit' => array(
-            'required' => TRUE,
+            'required' => true,
             'title' => ts('Apt.'),
           ),
           'city' => array(
-            'required' => TRUE,
+            'required' => true,
           ),
           'postal_code' => array(
             'title' => 'Zip',
-            'required' => TRUE,
+            'required' => true,
           ),
           'state_province_id' => array(
             'title' => ts('State/Province'),
-            'required' => TRUE,
+            'required' => true,
           ),
           'country_id' => array(
             'title' => ts('Country'),
           ),
         ),
         'filters' => array(
-          'street_address' => NULL,
-          'city' => NULL,
+          'street_address' => null,
+          'city' => null,
           'postal_code' => array('title' => 'Zip'),
         ),
         'grouping' => 'location-fields',
@@ -177,8 +177,8 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
         'dao' => 'CRM_Core_DAO_Phone',
         'fields' => array(
           'phone' => array(
-            'default' => TRUE,
-            'required' => TRUE,
+            'default' => true,
+            'required' => true,
           ),
         ),
         'grouping' => 'location-fields',
@@ -186,7 +186,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
       'civicrm_email' => array(
         'dao' => 'CRM_Core_DAO_Email',
         'fields' => array(
-          'email' => NULL,
+          'email' => null,
         ),
         'grouping' => 'location-fields',
       ),
@@ -195,12 +195,12 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
         'fields' => array(
           $this->_partyCol => array(
             'type' => CRM_Report_Form::OP_STRING,
-            'required' => TRUE,
+            'required' => true,
             'title' => ts('Party Reg'),
           ),
           $this->_vhCol => array(
             'type' => CRM_Report_Form::OP_STRING,
-            'required' => TRUE,
+            'required' => true,
             'title' => ts('VH'),
           ),
         ),
@@ -215,7 +215,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
             'name' => 'group_id',
             'title' => ts('Group'),
             'operatorType' => CRM_Report_Form::OP_MULTISELECT,
-            'group' => TRUE,
+            'group' => true,
             'options' => CRM_Core_PseudoConstant::group(),
           ),
         ),
@@ -228,11 +228,11 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
         'alias' => 'cont',
         'fields' => array(
           'receive_date' => array(
-            'default' => TRUE,
+            'default' => true,
             'title' => 'Last Receipt',
           ),
           'total_amount' => array(
-            'default' => TRUE,
+            'default' => true,
             'title' => 'Amount received',
           ),
         ),
@@ -254,7 +254,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
       if (array_key_exists('filters', $table)) {
         foreach ($table['filters'] as $fieldName => $field) {
           //echo "&nbsp;&nbsp;&nbsp;field name $fieldName<br>";
-          $clause = NULL;
+          $clause = null;
 
           if (CRM_Utils_Array::value('type', $field) & CRM_Utils_Type::T_DATE) {
             $relative = CRM_Utils_Array::value("{$fieldName}_relative", $this->_params);
@@ -271,7 +271,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
           else {
             $op = CRM_Utils_Array::value("{$fieldName}_op", $this->_params);
             if ($op == 'mand') {
-              $clause = TRUE;
+              $clause = true;
             }
             elseif ($op) {
               $clause = $this->whereClause($field,
@@ -319,14 +319,14 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
     // custom code to alter rows
     //var_dump($rows);
     $genderList = CRM_Core_PseudoConstant::get('CRM_Contact_DAO_Contact', 'gender_id');
-    $entryFound = FALSE;
+    $entryFound = false;
     foreach ($rows as $rowNum => $row) {
       // handle state province
       if (array_key_exists('civicrm_address_state_province_id', $row)) {
         if ($value = $row['civicrm_address_state_province_id']) {
           $rows[$rowNum]['civicrm_address_state_province_id'] = CRM_Core_PseudoConstant::stateProvince($value);
         }
-        $entryFound = TRUE;
+        $entryFound = true;
       }
 
       // handle country
@@ -334,31 +334,31 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
         if ($value = $row['civicrm_address_country_id']) {
           $rows[$rowNum]['civicrm_address_country_id'] = CRM_Core_PseudoConstant::country($value);
         }
-        $entryFound = TRUE;
+        $entryFound = true;
       }
 
       // Handle contactType
       if (!empty($row[$this->_coreInfoTable . '_' . $this->_coreTypeCol])) {
         $rows[$rowNum][$this->_coreInfoTable . '_' . $this->_coreTypeCol] = $this->hexOne2str($rows[$rowNum][$this->_coreInfoTable . '_' . $this->_coreTypeCol]);
-        $entryFound = TRUE;
+        $entryFound = true;
       }
 
       // date of birth to age
       if (!empty($row['civicrm_contact_birth_date'])) {
         $rows[$rowNum]['civicrm_contact_birth_date'] = $this->dob2age($row['civicrm_contact_birth_date'] . " 00:00:00");
-        $entryFound = TRUE;
+        $entryFound = true;
       }
 
       // gender label
       if (!empty($row['civicrm_contact_gender_id'])) {
         $rows[$rowNum]['civicrm_contact_gender_id'] = $genderList[$row['civicrm_contact_gender_id']];
-        $entryFound = TRUE;
+        $entryFound = true;
       }
 
       //  Abbreviate party registration to first letter
       if (!empty($row["{$this->_voterInfoTable}_{$this->_partyCol}"])) {
         $rows[$rowNum]["{$this->_voterInfoTable}_{$this->_partyCol}"] = substr($row["{$this->_voterInfoTable}_{$this->_partyCol}"], 0, 1);
-        $entryFound = TRUE;
+        $entryFound = true;
       }
 
       // skip looking further in rows, if first row itself doesn't
@@ -509,7 +509,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
       }
       if (!empty($receiveDate)) {
         $query        .= ",date_received  = %20";
-        $date_received = $value['civicrm_contribution_cont_receive_date'] ? CRM_Utils_Date::isoToMysql($value['civicrm_contribution_cont_receive_date']) : NULL;
+        $date_received = $value['civicrm_contribution_cont_receive_date'] ? CRM_Utils_Date::isoToMysql($value['civicrm_contribution_cont_receive_date']) : null;
         $params[20]    = array($date_received, 'Timestamp');
       }
       CRM_Core_DAO::executeQuery($query, $params);
@@ -522,7 +522,7 @@ class Engage_Report_Form_WalkList extends Engage_Report_Form_List {
     $dao = CRM_Core_DAO::executeQuery($query);
 
     //  Initialize output state
-    $first       = TRUE;
+    $first       = true;
     $state       = '';
     $city        = '';
     $zip         = '';

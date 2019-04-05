@@ -55,84 +55,84 @@ class Engage_Report_Form_List extends CRM_Report_Form {
    * Address information needed in output
    * @var boolean
    */
-  protected $_addressField = FALSE;
+  protected $_addressField = false;
 
   /**
    * Email address needed in output
    * @var boolean
    */
-  protected $_emailField = FALSE;
+  protected $_emailField = false;
 
   /**
    * Demographic information needed in output
    * @var boolean
    */
-  protected $_demoField = FALSE;
+  protected $_demoField = false;
 
-  protected $_coreField = FALSE;
+  protected $_coreField = false;
 
   /**
    * Phone number needed in output
    * @var boolean
    */
-  protected $_phoneField = FALSE;
+  protected $_phoneField = false;
 
   /**
    * Group membership information needed in output
    * @var boolean
    */
-  protected $_groupField = FALSE;
+  protected $_groupField = false;
 
   /**
    * Voter Info information needed in output
    * @var boolean
    */
-  protected $_voterInfoField = FALSE;
+  protected $_voterInfoField = false;
 
-  protected $_contributionField = FALSE;
+  protected $_contributionField = false;
 
   /**
    * Constituent individual table name has changed
    * between versions of civicrm. Populate this field
    * dynamically to ensure backward compatability
    */
-  protected $_constituentIndividualTable = FALSE;
+  protected $_constituentIndividualTable = false;
 
   /**
    * Langauage field might be primary or secondary
    * depending on version...
    */
-  protected $_langaugeName = FALSE;
+  protected $_langaugeName = false;
 
-  protected $_summary = NULL;
+  protected $_summary = null;
 
   /**
    * Available contact type options
    * @var string[]
    */
-  protected $_contactType = NULL;
+  protected $_contactType = null;
 
   /**
    * Available gender options
    * @var string[]
    */
-  protected $_gender = NULL;
+  protected $_gender = null;
 
   /**
    * Available group options
    * @var string[]
    */
-  protected $_groups = NULL;
+  protected $_groups = null;
 
-  protected $_groupDescr = NULL;
+  protected $_groupDescr = null;
 
   /**
    * Available primary language options
    * @var string
    */
-  protected $_languages = NULL;
+  protected $_languages = null;
 
-  protected $_orgName = NULL;
+  protected $_orgName = null;
 
   /**
    * Table with Voter Info group information
@@ -283,7 +283,7 @@ ORDER BY ov.label
     parent::__construct();
   }
 
-  public function setDefaultValues($freeze = TRUE) {
+  public function setDefaultValues($freeze = true) {
     $defaults = parent::setDefaultValues($freeze);
     $defaults['report_header'] = '
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -350,7 +350,7 @@ ORDER BY ov.label
     parent::preProcess();
   }
 
-  public function getOperationPair($type = "string", $fieldName = NULL) {
+  public function getOperationPair($type = "string", $fieldName = null) {
     if ($fieldName == 'gid' && $type == CRM_Report_Form::OP_MULTISELECT) {
       return array(
         'in' => ts('Is one of'),
@@ -428,28 +428,28 @@ ORDER BY ov.label
           //var_dump($this->_params['fields'][$fieldName]);
           if (!empty($field['required']) || !empty($this->_params['fields'][$fieldName])) {
             if ($tableName == 'civicrm_address') {
-              $this->_addressField = TRUE;
+              $this->_addressField = true;
             }
             elseif ($tableName == 'civicrm_email') {
-              $this->_emailField = TRUE;
+              $this->_emailField = true;
             }
             elseif ($tableName == 'civicrm_phone') {
-              $this->_phoneField = TRUE;
+              $this->_phoneField = true;
             }
             elseif ($tableName == 'civicrm_group_contact') {
-              $this->_groupField = TRUE;
+              $this->_groupField = true;
             }
             elseif ($tableName == $this->_demoTable) {
-              $this->_demoField = TRUE;
+              $this->_demoField = true;
             }
             elseif ($tableName == $this->_coreInfoTable) {
-              $this->_coreField = TRUE;
+              $this->_coreField = true;
             }
             elseif ($tableName == $this->_voterInfoTable) {
-              $this->_voterInfoField = TRUE;
+              $this->_voterInfoField = true;
             }
             elseif ($tableName == "civicrm_contribution_cont") {
-              $this->_contributionField = TRUE;
+              $this->_contributionField = true;
             }
 
             $select[] = "{$table['alias']}.{$fieldName} as {$tableName}_{$fieldName}";
