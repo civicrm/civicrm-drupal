@@ -404,6 +404,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'filter' => array(
       'handler' => 'civicrm_handler_filter_datetime',
       'is date' => TRUE,
+      'allow empty' => TRUE,
     ),
     'sort' => array(
       'handler' => 'civicrm_handler_sort_date',
@@ -425,6 +426,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
     'filter' => array(
       'handler' => 'civicrm_handler_filter_datetime',
       'is date' => TRUE,
+      'allow empty' => TRUE,
     ),
     'sort' => array(
       'handler' => 'civicrm_handler_sort_date',
