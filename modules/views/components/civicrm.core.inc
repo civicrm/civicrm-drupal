@@ -1989,7 +1989,8 @@ function _civicrm_core_data(&$data, $enabled) {
       'click sortable' => TRUE,
       'pseudo class' => 'CRM_Core_PseudoConstant',
       'pseudo method' => 'activityType',
-      'pseudo args' => array(TRUE, TRUE), // Include cases (if CiviCase is enabled)
+      // Include cases (if CiviCase is enabled)
+      'pseudo args' => array(TRUE, TRUE),
     ),
     'argument' => array(
       'handler' => 'views_handler_argument',
