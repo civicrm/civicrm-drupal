@@ -1071,7 +1071,7 @@ function _civicrm_contribute_data(&$data, $enabled) {
   );
   civicrm_views_add_date_arguments($data['civicrm_contribution_recur'], array(
     'title' => 'Recurring Contribution Next Date',
-      'name' => 'next_sched_contribution_date',
+    'name' => 'next_sched_contribution_date',
     ));
   //How many times has the contribution failed
   $data['civicrm_contribution_recur']['failure_count'] = array(
