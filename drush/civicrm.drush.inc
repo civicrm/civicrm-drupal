@@ -1456,6 +1456,13 @@ function _civicrm_init($fail = TRUE, $load_config = TRUE) {
     return $init;
   }
 
+  if (!version_compare(phpversion(), CIVICRM_DRUPAL_PHP_MINIMUM, '>=')) {
+    return drush_set_error('CIVICRM_PHP_MINIMUM', dt('CiviCRM requires PHP @required+. Drush is running PHP @current.', [
+      '@current' => phpversion(),
+      '@required' => CIVICRM_DRUPAL_PHP_MINIMUM,
+    ]));
+  }
+
   global $cmsPath;
   $cmsPath = $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
   $site_root = drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE);
