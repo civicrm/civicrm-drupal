@@ -1,5 +1,5 @@
 name = CiviCRM OG Sync
-description = Synchronize Organic Groups and CiviCRM Groups and ACL's. More information at: http://wiki.civicrm.org/confluence/display/CRMDOC/CiviCRM+vs.+Organic+Groups
+description = Synchronize Organic Groups and CiviCRM Groups and ACL's. More information at: https://docs.civicrm.org/sysadmin/en/latest/integration/drupal/#civicrm-organic-groups-sync
 version = 7.x-4.7
 core = 7.x
 package = CiviCRM
