@@ -37,19 +37,19 @@ class Engage_Report_Form_List extends CRM_Report_Form {
 
   /**
    * Address information needed in output
-   * @var boolean
+   * @var bool
    */
   protected $_addressField = FALSE;
 
   /**
    * Email address needed in output
-   * @var boolean
+   * @var bool
    */
   protected $_emailField = FALSE;
 
   /**
    * Demographic information needed in output
-   * @var boolean
+   * @var bool
    */
   protected $_demoField = FALSE;
 
@@ -57,19 +57,19 @@ class Engage_Report_Form_List extends CRM_Report_Form {
 
   /**
    * Phone number needed in output
-   * @var boolean
+   * @var bool
    */
   protected $_phoneField = FALSE;
 
   /**
    * Group membership information needed in output
-   * @var boolean
+   * @var bool
    */
   protected $_groupField = FALSE;
 
   /**
    * Voter Info information needed in output
-   * @var boolean
+   * @var bool
    */
   protected $_voterInfoField = FALSE;
 
