@@ -80,7 +80,7 @@ The content of the email is:
       'civicrm_tags' => array(
         'type' => 'list<integer>',
         'label' => t('CiviCRM Tags'),
-        'options list' => 'civicrm_rules_options_list',
+        'options list' => 'civicrm_rules_tags_list',
       ),
     ),
     'group' => t('CiviCRM Contact'),
