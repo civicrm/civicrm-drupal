@@ -4,7 +4,7 @@ version = 7.x-4.7
 package = CiviCRM
 core = 7.x
 project = civicrm
-php = 7.0
+php = 7.1
 
 files[] = civicrm.module
 files[] = civicrm.install

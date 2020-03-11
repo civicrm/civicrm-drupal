@@ -43,7 +43,7 @@ define('CIVICRM_UF_HEAD', TRUE);
  * @see CRM_Upgrade_Form::MINIMUM_PHP_VERSION
  * @see CiviDrupal\PhpVersionTest::testConstantMatch()
  */
-define('CIVICRM_DRUPAL_PHP_MINIMUM', '7.0.0');
+define('CIVICRM_DRUPAL_PHP_MINIMUM', '7.1.0');
 
 /**
  * Adds CiviCRM CSS and JS resources into the header.
