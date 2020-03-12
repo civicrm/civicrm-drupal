@@ -15,7 +15,9 @@ class PhpVersionTest extends \PHPUnit\Framework\TestCase implements EndToEndInte
     $this->assertFileExists($constantFile);
     $content = file_get_contents($constantFile);
     if (preg_match(";define\\('CIVICRM_DRUPAL_PHP_MINIMUM', '(.*)'\\);", $content, $m)) {
-      $this->assertEquals(\CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER, $m[1]);
+      $a = preg_replace(';^(\d+\.\d+(?:\.[1-9]\d*)?).*$;', '\1', \CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER);
+      $b = preg_replace(';^(\d+\.\d+(?:\.[1-9]\d*)?).*$;', '\1', $m[1]);
+      $this->assertEquals($a, $b);
     }
     else {
       $this->fail('Failed to find CIVICRM_DRUPAL_PHP_MINIMUM in ' . $constantFile);
@@ -30,7 +32,7 @@ class PhpVersionTest extends \PHPUnit\Framework\TestCase implements EndToEndInte
     $infoFile = $this->getDrupalModulePath() . '/civicrm.info';
     $this->assertFileExists($infoFile);
     $info = drupal_parse_info_file($infoFile);
-    $expectMajorMinor = preg_replace(';^(\d+\.\d+)\..*$;', '\1', \CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER);
+    $expectMajorMinor = preg_replace(';^(\d+\.\d+(?:\.[1-9]\d*)?).*$;', '\1', \CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER);
     $this->assertEquals($expectMajorMinor, $info['php']);
   }
 
