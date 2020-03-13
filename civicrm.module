@@ -35,12 +35,10 @@ define('CIVICRM_UF_HEAD', TRUE);
 /**
  * Minimum required PHP
  *
- * Note: This duplicates CRM_Upgrade_Form::MINIMUM_PHP_VERSION. The
- * duplication helps avoid a dependency-loop. (Reading `Form::MINIMUM_PHP_VERSION`
- * requires loading `civicrm.settings.php`, but that triggers a parse-error
- * on PHP 5.x.)
+ * Note: This duplicates CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER.
+ * The duplication helps avoid a dependency-loop.
  *
- * @see CRM_Upgrade_Form::MINIMUM_PHP_VERSION
+ * @see CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER
  * @see CiviDrupal\PhpVersionTest::testConstantMatch()
  */
 define('CIVICRM_DRUPAL_PHP_MINIMUM', '7.1.0');
