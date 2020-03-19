@@ -201,7 +201,8 @@ function civicrm_views_url($path, $query, $absolute = FALSE) {
  *   (optional) Array of fields not to add form the $fields table
  */
 function civicrm_views_add_fields(&$fields, &$data, $tableName, &$skipFields = NULL) {
-  foreach ($fields as $name => $value) {
+  foreach ($fields as $value) {
+    $name = $value['name'];
     // Only add fields not in $data or $skipFields and has a ['title']
     if (isset($value['custom_field_id']) ||
       CRM_Utils_Array::value($name, $skipFields) ||
