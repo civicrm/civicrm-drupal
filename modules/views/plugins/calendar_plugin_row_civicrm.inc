@@ -190,8 +190,19 @@ class calendar_plugin_row_civicrm extends calendar_plugin_row {
       }
       elseif (!$is_field && !empty($item)) {
         $item_start_date = new dateObject($item, $db_tz);
-        $item_end_date   = $item_start_date;
-        $node->date_id   = array('calendar.' . $node->id . '.' . $field_name . '.0');
+        $node->date_id = array('calendar.' . $node->id . '.' . $field_name . '.0');
+        // If we have a civicrm_activity_duration let's use it!
+        // Calculate the end_date so that the calendar item can have the correct height in the week and day displays.
+        // NOTE: imported views can have a bug that causes $view->style_options['groupby_times'] not to be set.
+        // Solution (for each display/page): go into the View -> Calendar -> Settings: Time Grouping -> save;
+        if (isset($row->civicrm_activity_duration)) {
+          $duration = $row->civicrm_activity_duration;
+          $item_value2 = date("Y-m-d H:i:s", strtotime($item . '+' . $duration . 'minutes'));
+          $item_end_date = new dateObject($item_value2, $db_tz);
+        }
+        else {
+          $item_end_date = $item_start_date;
+        }
       }
 
       // If we don't have date value, go no further.
