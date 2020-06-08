@@ -136,7 +136,7 @@ function civicrm_engage_civicrm_pageRun(&$page) {
     }
     $contactId = $page->getVar('_contactId');
     if (empty($contactId)) {
-      $contactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this, TRUE, NULL, $_REQUEST);
+      $contactId = CRM_Utils_Request::retrieve('cid', 'Positive', $page, TRUE, NULL, $_REQUEST);
     }
     $groupTree = CRM_Core_BAO_CustomGroup::getTree('Individual',
       NULL,
