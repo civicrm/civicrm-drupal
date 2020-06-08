@@ -600,12 +600,7 @@ function civicrm_form_data($edit, &$user, $category, $reset, $doNotProcess = FAL
     }
   }
   $ctype = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_Contact', $userID, 'contact_type');
-  try {
-    $profileID = _civicrm_get_user_profile_id($category, $userID, $ctype);
-  }
-  catch (Exception $e) {
-    CRM_Core_Error::fatal($e->getMessage());
-  }
+  $profileID = _civicrm_get_user_profile_id($category, $userID, $ctype);
 
   $html = CRM_Core_BAO_UFGroup::getEditHTML($userID, $category, NULL, FALSE, $reset, $profileID, $doNotProcess, $ctype);
 
