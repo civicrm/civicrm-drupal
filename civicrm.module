@@ -44,6 +44,17 @@ define('CIVICRM_UF_HEAD', TRUE);
 define('CIVICRM_DRUPAL_PHP_MINIMUM', '7.1.0');
 
 /**
+ * Minimum required MySQL
+ *
+ * Note: This duplicates CRM_Upgrade_Incremental_General::MIN_INSTALL_MYSQL_VER.
+ * The duplication helps avoid a dependency-loop.
+ *
+ * @see CRM_Upgrade_Incremental_General::MIN_INSTALL_MYSQL_VER
+ * @see CiviDrupal\PhpVersionTest::testConstantMatch()
+ */
+define('CIVICRM_DRUPAL_MYSQL_MINIMUM', '5.6.5');
+
+/**
  * Adds CiviCRM CSS and JS resources into the header.
  */
 function civicrm_html_head() {
@@ -164,6 +175,18 @@ function civicrm_initialize() {
     echo "CiviCRM requires PHP " . CIVICRM_DRUPAL_PHP_MINIMUM . "+. The web server is running PHP " . PHP_VERSION . ".<p>";
     exit();
   }
+
+  try {
+    $db_version = db_query('SELECT VERSION()')->fetchField();
+  }
+  catch (PDOException $e) {
+    $db_version = 0;
+  }
+  if (version_compare($db_version, CIVICRM_DRUPAL_MYSQL_MINIMUM) < 0) {
+    echo "CiviCRM requires MySQL " . CIVICRM_DRUPAL_MYSQL_MINIMUM . "+ The web server is running MySQL/MariaDB " . CIVICRM_DRUPAL_MYSQL_MINIMUM . ".<p>";
+    exit();
+  }
+
   _civicrm_registerClassLoader();
 
   $initialized = &drupal_static('civicrm_initialize', FALSE);

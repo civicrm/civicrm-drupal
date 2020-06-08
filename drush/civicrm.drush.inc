@@ -1447,6 +1447,19 @@ function _civicrm_init($fail = TRUE, $load_config = TRUE) {
     ]));
   }
 
+  try {
+    $db_version = db_query('SELECT VERSION()')->fetchField();
+  }
+  catch (PDOException $e) {
+    $db_version = 0;
+  }
+  if (!version_compare($db_version, CIVICRM_DRUPAL_MYSQL_MINIMUM, '>=')) {
+    return drush_set_error('CIVICRM_MYSQL_MINIMUM', dt('CiviCRM requires MYSQL @required+. Drush is running MYSQL @current.', [
+      '@current' => $db_version,
+      '@required' => CIVICRM_DRUPAL_MYSQL_MINIMUM,
+    ]));
+  }
+
   global $cmsPath;
   $cmsPath = $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
   $site_root = drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE);
