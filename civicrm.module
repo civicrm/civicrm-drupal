@@ -90,7 +90,7 @@ function civicrm_permission() {
  */
 function civicrm_block_info() {
   if (!civicrm_initialize()) {
-    return;
+    return [];
   }
   $block = CRM_Core_Block::getInfo();
   return $block;
@@ -887,7 +887,9 @@ function civicrm_user_admin_permissions_submit($form, &$form_state) {
   if ($rid === FALSE) {
     return;
   }
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    return;
+  }
   $roles = user_roles();
   $permissions = array_filter($form_state['values'][$rid]);
   $warning_permissions = CRM_Core_Permission::validateForPermissionWarnings($permissions);
@@ -1025,7 +1027,10 @@ function _civicrm_filter_tips($filter, $format, $long = FALSE) {
  * @return bool|mixed|string
  */
 function _civicrm_filter_process($text, $filter, $format, $langcode, $cache, $cache_id) {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    return t('(Content unavailable. CiviCRM is not installed.)');
+  }
+
   $config = CRM_Core_Config::singleton();
   $smarty = CRM_Core_Smarty::singleton();
   // as this file is not a class (not sure why) we need the require once
@@ -1218,7 +1223,9 @@ function civicrm_reviews() {
  * Implements hook_modules_installed().
  */
 function civicrm_modules_installed($modules) {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    return;
+  }
   CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
 }
 
@@ -1226,7 +1233,9 @@ function civicrm_modules_installed($modules) {
  * Implements hook_modules_enabled().
  */
 function civicrm_modules_enabled($modules) {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    return;
+  }
   CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
 }
 
@@ -1234,7 +1243,9 @@ function civicrm_modules_enabled($modules) {
  * Implements hook_modules_disabled().
  */
 function civicrm_modules_disabled($modules) {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    return;
+  }
   CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
 }
 
@@ -1242,7 +1253,9 @@ function civicrm_modules_disabled($modules) {
  * Implements hook_modules_uninstalled().
  */
 function civicrm_modules_uninstalled($modules) {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    return;
+  }
   CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
 }
 
