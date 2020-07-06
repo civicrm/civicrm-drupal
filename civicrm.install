@@ -65,35 +65,6 @@ function civicrm_uninstall() {
   CRM_Core_DAO::dropAllTables();
 }
 
-function civicrm_requirements($phase) {
-  global $base_url;
-  $civicrm_path = drupal_get_path('module', 'civicrm');
-
-  //remove the last occurrence of 'drupal' from path
-  $pos = strrpos($civicrm_path, 'drupal');
-
-  if ($pos !== FALSE) {
-    $civicrm_path = substr_replace($civicrm_path, '', $pos, strlen($civicrm_path));
-  }
-
-  $url = $base_url . '/' . $civicrm_path . 'install/index.php';
-
-  $settings = glob('sites/*/civicrm.settings.php');
-  $problems = array();
-  $t = get_t();
-  if (empty($settings) && $phase == 'install') {
-    $problems[] = array(
-      'title' => $t('CiviCRM settings does not exist'),
-      'value' =>
-      $t('CiviCRM settings file does not exist. It should be created by CiviCRM <a href="!link">install</a>',
-        array('!link' => $url)),
-      'severity' => REQUIREMENT_ERROR,
-    );
-  }
-
-  return $problems;
-}
-
 /**
  * Update CiviCRM module weight
  */

@@ -111,10 +111,6 @@ function civicrm_block_view($delta = '0') {
  * Implements hook_menu().
  */
 function civicrm_menu() {
-  if (!civicrm_initialize()) {
-    return;
-  }
-
   return array(
     'civicrm' => array(
       'title' => 'CiviCRM',
@@ -197,13 +193,16 @@ function civicrm_initialize() {
       )
     );
 
-    if (!include_once $settingsFile) {
+    $loadedSettings = (bool) @include_once $settingsFile;
+    if (!$loadedSettings) {
       $failure = TRUE;
-      $message = t("<strong><p class='error'> Oops! - The CiviCRM settings file (civicrm.settings.php) was not found in the expected location (!1) </p><p class='error'> !2 </p></strong>", array(
-        '!1' => $settingsFile,
-        '!2' => $errorMsgAdd,
-      ));
-      drupal_set_message($message);
+      if (user_access('administer modules')) {
+        $installLink = url('civicrm');
+        $message = t('<p class="error"><strong>CiviCRM is almost ready.</strong> You must <a href="@url">configure CiviCRM</a> for it to work.</p>', [
+          '@url' => $installLink,
+        ]);
+        drupal_set_message($message);
+      }
       return FALSE;
     }
 
@@ -386,7 +385,9 @@ function civicrm_invoke() {
 
   // make sure the system is initialized
   if (!civicrm_initialize()) {
-    return drupal_not_found();
+    require_once __DIR__ . '/civicrm.setup.inc';
+    // NOTE: The setup page has a built-in authorization check.
+    return civicrm_setup_page();
   }
 
   civicrm_cache_disable();
