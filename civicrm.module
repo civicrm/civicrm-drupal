@@ -487,6 +487,10 @@ function _civicrm_categories_access($profile_id) {
  * Translating profile menu title dynamicaly to overide caching
  */
 function civicrm_menu_alter(&$items) {
+  if (!civicrm_initialize()) {
+    return;
+  }
+
   $categories = civicrm_user_categories();
   foreach ($categories as $cat) {
     $path = 'user/%user_category/edit/' . $cat['name'];
