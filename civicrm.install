@@ -36,6 +36,11 @@ function civicrm_enable() {
   menu_link_save($options);
 
   if (!civicrm_initialize()) {
+    $installLink = url('civicrm/setup');
+    $message = t('<p class="error"><strong>CiviCRM is almost ready.</strong> You must <a href="@url">configure CiviCRM</a> for it to work.</p>', [
+      '@url' => $installLink,
+    ]);
+    drupal_set_message($message);
     return;
   }
 
@@ -63,6 +68,27 @@ function civicrm_uninstall() {
 
   require_once 'CRM/Core/DAO.php';
   CRM_Core_DAO::dropAllTables();
+}
+
+function civicrm_requirements($phase) {
+  $requirements = array();
+  $t = get_t();
+  switch ($phase) {
+    case 'runtime':
+      if (!civicrm_initialize()) {
+        $installLink = url('civicrm/setup');
+        $requirements['civicrm'] = array(
+          'title' => $t("CiviCRM"),
+          'severity' => REQUIREMENT_ERROR,
+          'value' => $t('<p class="error"><strong>CiviCRM is almost ready.</strong> You must <a href="@url">configure CiviCRM</a> for it to work.</p>', [
+            '@url' => $installLink,
+          ]),
+        );
+        return $requirements;
+      }
+      break;
+  }
+  return $requirements;
 }
 
 /**

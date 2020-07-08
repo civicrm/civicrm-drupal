@@ -119,6 +119,14 @@ function civicrm_menu() {
       'type' => 4,
       'weight' => 0,
     ),
+    'civicrm/setup' => array(
+      'title' => 'CiviCRM Setup',
+      'access callback' => TRUE,
+      'page callback' => 'civicrm_setup_page',
+      'file' => 'civicrm.setup.inc',
+      'type' => 4,
+      'weight' => 0,
+    ),
     // administration section for civicrm integration modules.
     'admin/config/civicrm' => array(
       'title' => 'CiviCRM',
@@ -197,11 +205,7 @@ function civicrm_initialize() {
     if (!$loadedSettings) {
       $failure = TRUE;
       if (user_access('administer modules')) {
-        $installLink = url('civicrm');
-        $message = t('<p class="error"><strong>CiviCRM is almost ready.</strong> You must <a href="@url">configure CiviCRM</a> for it to work.</p>', [
-          '@url' => $installLink,
-        ]);
-        drupal_set_message($message);
+
       }
       return FALSE;
     }
