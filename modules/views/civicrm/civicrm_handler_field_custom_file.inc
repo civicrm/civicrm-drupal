@@ -67,7 +67,7 @@ class civicrm_handler_field_custom_file extends views_handler_field {
       $fileHash = CRM_Core_BAO_File::generateFileHash($values->$entityField, $value);
       return CRM_Utils_System::url($path,
         "id={$value}&eid={$values->$entityField}&fcs={$fileHash}",
-        TRUE, FALSE, FALSE, TRUE
+        TRUE, NULL, FALSE, TRUE
       );
     }
     return NULL;
