@@ -36,6 +36,11 @@ function civicrm_enable() {
   menu_link_save($options);
 
   if (!civicrm_initialize()) {
+    $installLink = url('civicrm/setup');
+    $message = t('<p class="error"><strong>CiviCRM is almost ready.</strong> You must <a href="@url">configure CiviCRM</a> for it to work.</p>', [
+      '@url' => $installLink,
+    ]);
+    drupal_set_message($message);
     return;
   }
 
@@ -66,32 +71,24 @@ function civicrm_uninstall() {
 }
 
 function civicrm_requirements($phase) {
-  global $base_url;
-  $civicrm_path = drupal_get_path('module', 'civicrm');
-
-  //remove the last occurrence of 'drupal' from path
-  $pos = strrpos($civicrm_path, 'drupal');
-
-  if ($pos !== FALSE) {
-    $civicrm_path = substr_replace($civicrm_path, '', $pos, strlen($civicrm_path));
-  }
-
-  $url = $base_url . '/' . $civicrm_path . 'install/index.php';
-
-  $settings = glob('sites/*/civicrm.settings.php');
-  $problems = array();
+  $requirements = array();
   $t = get_t();
-  if (empty($settings) && $phase == 'install') {
-    $problems[] = array(
-      'title' => $t('CiviCRM settings does not exist'),
-      'value' =>
-      $t('CiviCRM settings file does not exist. It should be created by CiviCRM <a href="!link">install</a>',
-        array('!link' => $url)),
-      'severity' => REQUIREMENT_ERROR,
-    );
+  switch ($phase) {
+    case 'runtime':
+      if (!civicrm_initialize()) {
+        $installLink = url('civicrm/setup');
+        $requirements['civicrm'] = array(
+          'title' => $t("CiviCRM"),
+          'severity' => REQUIREMENT_ERROR,
+          'value' => $t('<p class="error"><strong>CiviCRM is almost ready.</strong> You must <a href="@url">configure CiviCRM</a> for it to work.</p>', [
+            '@url' => $installLink,
+          ]),
+        );
+        return $requirements;
+      }
+      break;
   }
-
-  return $problems;
+  return $requirements;
 }
 
 /**

@@ -540,7 +540,10 @@ function civicrm_drush_help($section) {
  * Implementation of command 'civicrm-ext-list'
  */
 function drush_civicrm_ext_list() {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    drush_print(dt("CiviCRM is not setup."));
+    return;
+  }
   try {
     $result = civicrm_api3('extension', 'get', array(
       'options' => array(
@@ -570,7 +573,10 @@ function drush_civicrm_ext_list() {
  * Implementation of command 'civicrm-ext-install'
  */
 function drush_civicrm_ext_install($extension_name) {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    drush_print(dt("CiviCRM is not setup."));
+    return;
+  }
   try {
     $result = civicrm_api('extension', 'install', array('key' => $extension_name, 'version' => 3));
     if ($result['values'] && $result['values'] == 1) {
@@ -593,7 +599,10 @@ function drush_civicrm_ext_install($extension_name) {
  * Implementation of command 'civicrm-ext-disable'
  */
 function drush_civicrm_ext_disable($extension_name) {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    drush_print(dt("CiviCRM is not setup."));
+    return;
+  }
   try {
     $result = civicrm_api('extension', 'disable', array('key' => $extension_name, 'version' => 3));
     if ($result['values'] && $result['values'] == 1) {
@@ -616,7 +625,10 @@ function drush_civicrm_ext_disable($extension_name) {
  * Implementation of command 'civicrm-ext-uninstall'
  */
 function drush_civicrm_ext_uninstall($extension_name) {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    drush_print(dt("CiviCRM is not setup."));
+    return;
+  }
   try {
     $result = civicrm_api('extension', 'uninstall', array('key' => $extension_name, 'version' => 3));
     if ($result['values'] && $result['values'] == 1) {
@@ -1538,7 +1550,10 @@ function drush_civicrm_api() {
       break;
   }
 
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    drush_print(dt("CiviCRM is not setup."));
+    return;
+  }
 
   global $user;
   CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal',
@@ -1569,7 +1584,10 @@ function drush_civicrm_api() {
  * Implementation of command 'civicrm-sync-users-contacts'
  */
 function drush_civicrm_sync_users_contacts() {
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    drush_print(dt("CiviCRM is not setup."));
+    return;
+  }
   $result = CRM_Utils_System::synchronizeUsers();
   $status = ts('Checked one user record.',
     array(
@@ -1598,7 +1616,10 @@ function drush_civicrm_sync_users_contacts() {
 
 function drush_civicrm_sql_rebuild_triggers() {
   $table = drush_get_option('table', NULL);
-  civicrm_initialize();
+  if (!civicrm_initialize()) {
+    drush_print(dt("CiviCRM is not setup."));
+    return;
+  }
   $triggerService = Civi::service('sql_triggers');
   $triggerService->rebuild($table, TRUE);
   if (\Civi::settings()->get('logging_no_trigger_permission')) {

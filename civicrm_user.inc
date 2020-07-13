@@ -123,7 +123,7 @@ function civicrm_user_delete($account) {
  */
 function civicrm_user_categories() {
   if (!civicrm_initialize()) {
-    return;
+    return [];
   }
   $urlParts = explode('/', CRM_Utils_Array::value('q', $_GET, array()));
 
