@@ -13,8 +13,6 @@
  *
  * @package CRM
  * @copyright CiviCRM LLC https://civicrm.org/licensing
- * $Id$
- *
  */
 
 define('CIVICRM_ENGAGE_CG_DEMOGRAPHICS_NAME', 'Demographics');

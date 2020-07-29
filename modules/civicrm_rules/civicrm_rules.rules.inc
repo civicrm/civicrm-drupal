@@ -13,8 +13,6 @@
  *
  * @package CRM
  * @copyright CiviCRM LLC https://civicrm.org/licensing
- * $Id$
- *
  */
 require_once 'civicrm_rules_utils.inc';
 require_once 'civicrm_rules.contact-eval.inc';

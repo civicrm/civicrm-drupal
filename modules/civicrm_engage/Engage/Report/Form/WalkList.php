@@ -14,7 +14,6 @@
  * @package CRM
  * @copyright CiviCRM LLC https://civicrm.org/licensing
  * @copyright DharmaTech  (c) 2009
- * $Id$
  *
  */
 
