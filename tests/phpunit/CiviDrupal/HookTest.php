@@ -21,7 +21,7 @@ namespace CiviDrupal {
 
       \CRM_Utils_Hook::singleton()
         ->invoke(
-          2,
+          ['arg1', 'arg2'],
           $arg1,
           $arg2,
           \CRM_Utils_Hook::$_nullObject,
