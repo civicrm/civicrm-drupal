@@ -31,15 +31,10 @@ class civicrm_handler_filter_custom_option extends views_handler_filter_in_opera
         $this->value_options = CRM_Contact_BAO_ContactType::subTypePairs();
       }
       else {
-        // extract the field id from the name
-        if (preg_match('/_(\d+)$/', $this->real_field, $match)) {
-          require_once 'CRM/Core/BAO/CustomOption.php';
-          $options = CRM_Core_BAO_CustomOption::getCustomOption($match[1]);
-        }
-        if (is_array($options)) {
-          foreach ($options as $id => $opt) {
-            $this->value_options[$opt['value']] = strip_tags($opt['label']);
-          }
+        $customFieldID = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_CustomField', $this->real_field, 'id', 'column_name');
+        $options = (array) CRM_Core_BAO_CustomOption::getCustomOption($customFieldID);
+        foreach ($options as $id => $opt) {
+          $this->value_options[$opt['value']] = strip_tags($opt['label']);
         }
       }
     }
