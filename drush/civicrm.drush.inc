@@ -1358,6 +1358,20 @@ function drush_civicrm_post_civicrm_sqlcli() {
   _civicrm_dsn_close();
 }
 
+/**
+ * Creates a db_url based on CIVICRM_DSN or cli_db_url setting
+ */
+function civicrm_db_array() {
+  if (defined('CIVICRM_DRUSH_DSN')) {
+    $url = CIVICRM_DRUSH_DSN;
+  }
+  else {
+    $url = CIVICRM_DSN;
+  }
+  return drush_convert_db_from_db_url($url);
+}
+
+
 function _civicrm_dsn_init($reset = FALSE) {
   static $globalDbUrl = NULL;
 
@@ -1376,7 +1390,7 @@ function _civicrm_dsn_init($reset = FALSE) {
         $globalDbUrl = $GLOBALS['databases'][$database][$target];
       }
       // now modify $GLOBALS so that drush works on CIVICRM_DSN instead of drupal's
-      $GLOBALS['databases'][$database][$target] = drush_convert_db_from_db_url(CIVICRM_DSN);
+      $GLOBALS['databases'][$database][$target] = civicrm_db_array();
     }
   }
   else {
