@@ -691,41 +691,16 @@ function drush_civicrm_upgrade_db_validate() {
  * Implementation of command 'civicrm-upgrade-db'
  */
 function drush_civicrm_upgrade_db() {
-  if (class_exists('CRM_Upgrade_Headless')) {
-    // Note: CRM_Upgrade_Headless introduced in 4.2 -- at the same time as class auto-loading
-    $codeVer = CRM_Utils_System::version();
-    $dbVer = CRM_Core_BAO_Domain::version();
-    if (version_compare($codeVer, $dbVer) == 0) {
-      drush_print(dt("You are already upgraded to CiviCRM @version", array('@version' => $codeVer)));
-      return TRUE;
-    }
-    $upgradeHeadless = new CRM_Upgrade_Headless();
-    // FIXME Exception handling?
-    $result = $upgradeHeadless->run();
-    drush_print("Upgrade outputs:\n" . $result['text']);
+  $codeVer = CRM_Utils_System::version();
+  $dbVer = CRM_Core_BAO_Domain::version();
+  if (version_compare($codeVer, $dbVer) == 0) {
+    drush_print(dt('You are already upgraded to CiviCRM @version', ['@version' => $codeVer]));
+    return TRUE;
   }
-  else {
-    require_once 'CRM/Core/Smarty.php';
-    $template = CRM_Core_Smarty::singleton();
-
-    require_once 'CRM/Upgrade/Page/Upgrade.php';
-    $upgrade = new CRM_Upgrade_Page_Upgrade();
-
-    // new since CiviCRM 4.1
-    if (is_callable(array(
-      $upgrade, 'setPrint',
-    ))) {
-      $upgrade->setPrint(TRUE);
-    }
-
-    // to suppress html output /w source code.
-    ob_start();
-    $upgrade->run();
-    // capture the required message.
-    $result = $template->get_template_vars('message');
-    ob_end_clean();
-    drush_print("Upgrade outputs: " . "\"$result\"");
-  }
+  $upgradeHeadless = new CRM_Upgrade_Headless();
+  // FIXME Exception handling?
+  $result = $upgradeHeadless->run();
+  drush_print("Upgrade outputs:\n" . $result['text']);
 }
 
 /**
