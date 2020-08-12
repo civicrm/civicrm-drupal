@@ -1362,8 +1362,8 @@ function drush_civicrm_post_civicrm_sqlcli() {
  * Creates a db_url based on CIVICRM_DSN or cli_db_url setting
  */
 function civicrm_db_array() {
-  if (defined('CIVICRM_DRUSH_DSN')) {
-    $url = CIVICRM_DRUSH_DSN;
+  if (defined('CIVICRM_CLI_DSN')) {
+    $url = CIVICRM_CLI_DSN;
   }
   else {
     $url = CIVICRM_DSN;
