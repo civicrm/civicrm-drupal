@@ -1371,7 +1371,6 @@ function civicrm_db_array() {
   return drush_convert_db_from_db_url($url);
 }
 
-
 function _civicrm_dsn_init($reset = FALSE) {
   static $globalDbUrl = NULL;
 
