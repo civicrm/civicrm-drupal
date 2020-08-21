@@ -392,7 +392,7 @@ function civicrm_views_custom_data_cache(&$data, $entity_type, $group_id, $sub_t
         'help' => empty($current_field['help_post']) ? t('Custom Data Field') : $current_field['help_post'],
         'field' => civicrm_views_get_field($current_field['data_type'], $current_field['html_type']),
         'argument' => civicrm_views_get_argument($current_field['data_type']),
-        'filter' => civicrm_views_get_filter($current_field['data_type'], $current_field['html_type'], $option_group_id),
+        'filter' => civicrm_views_get_filter($current_field['data_type'], $current_field['html_type'], $option_group_id, ($current_field['serialize'] ?? 0)),
         'sort' => civicrm_views_get_sort($current_field['data_type']),
         'relationship' => civicrm_views_get_relationship($current_field['data_type']),
       );
@@ -565,32 +565,30 @@ function civicrm_views_get_argument($type) {
 /**
  * Acquire the proper filter handler by checking against the field's data_type as defined by CRM_Utils_Type.
  *
- * @param $data_type
- *   A String containing the field data type
- * @param $html_type
- *   A string containing the field html type
+ * @param string $data_type
+ *   Field data type
+ * @param string $html_type
+ *   Field html type
+ * @param int $option_group_id
+ *   Option Group id incase of option list field.
+ * @param bool $isMultiSelect
+ *   Multi-select field?
  *
  * @return array
  *   An array containing the handler name and any extra settings
  */
-function civicrm_views_get_filter($data_type, $html_type = NULL, $option_group_id = NULL) {
-  // Relying on html types as opposed to data types seems like a code smell.
-  // Would love to be able to remove this logic.
-  $customMultiValueHTMLTypes = array(
-    'Multi-Select', 'CheckBox', 'Multi-Select Country',
-    'Multi-Select State/Province',
-  );
-  if ($html_type == 'Multi-Select Country') {
+function civicrm_views_get_filter($data_type, $html_type = NULL, $option_group_id = NULL, $isMultiSelect = 0) {
+  if ($html_type == 'Country' && $isMultiSelect) {
     return array(
       'handler' => 'civicrm_handler_filter_country_multi',
     );
   }
-  elseif ($html_type == 'Multi-Select State/Province') {
+  elseif ($html_type == 'State/Province' && $isMultiSelect) {
     return array(
       'handler' => 'civicrm_handler_filter_state_multi',
     );
   }
-  elseif (!empty($option_group_id) && in_array($html_type, $customMultiValueHTMLTypes)) {
+  elseif (!empty($option_group_id) && $isMultiSelect) {
     return array(
       'handler' => 'civicrm_handler_filter_custom_option',
     );
