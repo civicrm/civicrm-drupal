@@ -578,12 +578,12 @@ function civicrm_views_get_argument($type) {
  *   An array containing the handler name and any extra settings
  */
 function civicrm_views_get_filter($data_type, $html_type = NULL, $option_group_id = NULL, $isMultiSelect = 0) {
-  if ($html_type == 'Country' && $isMultiSelect) {
+  if ($html_type == 'Select Country' && $isMultiSelect) {
     return array(
       'handler' => 'civicrm_handler_filter_country_multi',
     );
   }
-  elseif ($html_type == 'State/Province' && $isMultiSelect) {
+  elseif ($html_type == 'Select State/Province' && $isMultiSelect) {
     return array(
       'handler' => 'civicrm_handler_filter_state_multi',
     );
