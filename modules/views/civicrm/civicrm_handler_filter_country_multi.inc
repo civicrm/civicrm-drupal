@@ -62,12 +62,12 @@ class civicrm_handler_filter_country_multi extends views_handler_filter_in_opera
     $op = $glue = NULL;
     switch ($this->operator) {
       case 'in':
-        $op = ' = ';
+        $op = ' LIKE ';
         $glue = ' OR ';
         break;
 
       case 'not in':
-        $op = ' != ';
+        $op = ' NOT LIKE ';
         $glue = ' AND ';
         break;
 
@@ -78,7 +78,7 @@ class civicrm_handler_filter_country_multi extends views_handler_filter_in_opera
 
     if ($op) {
       foreach ($this->value as $value) {
-        $clauses[] = "$this->table_alias.$this->real_field " . $op . $value;
+        $clauses[] = "$this->table_alias.$this->real_field " . $op . "'%" . $value . "%'";
       }
       $clause = implode($glue, $clauses);
     }
