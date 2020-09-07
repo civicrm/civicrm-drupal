@@ -800,13 +800,7 @@ function civicrm_views_query_alter(&$view, &$query) {
   }
 
   // check if we are in multilingual mode, otherwise return
-  // TODO: should be a simple call - is_multiligual ?
-  $domain = new CRM_Core_DAO_Domain();
-  $domain->find(TRUE);
-
-  $multilingual = (bool) $domain->locales;
-
-  if ($multilingual) {
+  if (CRM_Core_I18n::isMultilingual()) {
     global $dbLocale;
     $columns = CRM_Core_I18n_SchemaStructure::columns();
 
