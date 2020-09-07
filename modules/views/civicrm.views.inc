@@ -460,11 +460,7 @@ function civicrm_views_get_join_table($entity_type) {
 function civicrm_views_get_field($data_type, $html_type = NULL) {
   // Relying on html types as opposed to data types seems like a code smell.
   // Would love to be able to remove this logic.
-  $customHTMLTypes = array(
-    'Select', 'Multi-Select', 'Radio', 'CheckBox',
-    'Select State/Province', 'Select Country', 'Multi-Select Country',
-    'Multi-Select State/Province', 'Autocomplete-Select',
-  );
+  $customHTMLTypes = ['Select', 'Radio', 'CheckBox', 'Autocomplete-Select'];
   if (in_array($html_type, $customHTMLTypes)) {
     return array(
       'handler' => 'civicrm_handler_field_custom',
@@ -564,12 +560,12 @@ function civicrm_views_get_argument($type) {
  *   An array containing the handler name and any extra settings
  */
 function civicrm_views_get_filter($data_type, $html_type = NULL, $option_group_id = NULL, $isMultiSelect = 0) {
-  if ($html_type == 'Select Country' && $isMultiSelect) {
+  if ($data_type == 'Country' && $isMultiSelect) {
     return array(
       'handler' => 'civicrm_handler_filter_country_multi',
     );
   }
-  elseif ($html_type == 'Select State/Province' && $isMultiSelect) {
+  elseif ($data_type == 'StateProvince' && $isMultiSelect) {
     return array(
       'handler' => 'civicrm_handler_filter_state_multi',
     );
