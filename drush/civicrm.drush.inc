@@ -75,8 +75,14 @@ function civicrm_drush_command() {
   ];
   $items['civicrm-ext-list'] = [
     'description' => "List of CiviCRM extensions enabled.",
+    'options' => [
+      'status' => 'Filter by extension status (installed, uninstalled, disabled).',
+      'out' => 'Output type: "pretty" (STDOUT) by default, "json" (STDOUT)',
+    ],
     'examples' => [
       'Standard example' => 'drush civicrm-ext-list',
+      'Display installed extensions' => 'drush civicrm-ext-list --status=installed',
+      'Display disabled extensions as json' => 'drush civicrm-ext-list --status=disabled --out=json',
     ],
     'aliases' => ['cel'],
   ];
@@ -544,21 +550,44 @@ function drush_civicrm_ext_list() {
     drush_print(dt("CiviCRM is not setup."));
     return;
   }
+  $status = drush_get_option('status', FALSE);
+  $params = [
+    'options' => [
+      'limit' => 0,
+    ],
+  ];
+  if ($status) {
+    if (!in_array($status, ['installed', 'uninstalled', 'disabled'])) {
+      return drush_set_error('CIVICRM_INVALID_STATUS', dt("Extension status {$status} is invalid."));
+    }
+    $params['status'] = $status;
+  }
+
   try {
-    $result = civicrm_api3('extension', 'get', [
-      'options' => [
-        'limit' => 0,
-      ],
-    ]);
-    $rows = [[dt('App name'), dt('Status')]];
+    $result = civicrm_api3('extension', 'get', $params);
+    $rows = [[dt('App name'), dt('Status'), dt('Version')]];
     foreach ($result['values'] as $k => $extension_data) {
       $rows[] = [
         $extension_data['key'],
         $extension_data['status'],
+        $extension_data['version'],
       ];
     }
     unset($result);
-    drush_print_table($rows, TRUE);
+
+    $format = drush_get_option('out', 'pretty');
+    switch ($format) {
+      case 'pretty':
+        drush_print_table($rows, TRUE);
+        break;
+
+      case 'json':
+        drush_print(json_encode($rows));
+        break;
+
+      default:
+        return drush_set_error('CIVICRM_UNKNOWN_FORMAT', dt('Unknown format: @format', array('@format' => $format)));
+    }
   }
   catch (CiviCRM_API3_Exception $e) {
     // handle error here
