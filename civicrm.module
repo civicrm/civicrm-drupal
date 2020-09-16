@@ -191,13 +191,13 @@ function civicrm_initialize() {
     // get ready for problems
     $docLinkInstall = "https://docs.civicrm.org/installation/en/latest/drupal7/";
     $docLinkTrouble = "https://docs.civicrm.org/installation/en/latest/general/troubleshooting/";
-    $forumLink      = "https://civicrm.stackexchange.com/questions/tagged/drupal";
+    $seLink      = "https://civicrm.stackexchange.com";
 
-    $errorMsgAdd = t("Please review the <a href='!1'>Drupal Installation Guide</a> and the <a href='!2'>Trouble-shooting page</a> for assistance. If you still need help installing, you can often find solutions to your issue by searching for the error message in the <a href='!3'>installation support section of the community forum</a>.</strong></p>",
+    $errorMsgAdd = t("Please review the <a href='!1'>Drupal 7 Installation Guide</a> and the <a href='!2'>Trouble-shooting page</a> for assistance. If you still need help installing, you can often find solutions to your issue by searching for the error message on <a href='!3'>CiviCRM StackExchange</a>.</strong></p>",
       array(
         '!1' => $docLinkInstall,
         '!2' => $docLinkTrouble,
-        '!3' => $forumLink,
+        '!3' => $seLink,
       )
     );
 
