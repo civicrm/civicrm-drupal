@@ -123,7 +123,7 @@ class civicrm_handler_field_contact_image extends views_handler_field {
       'alt' => $this->options['alt'],
     );
     $directory = $this->get_civi_relative_upload_path();
-    if ($this->options['image_style'] && module_exists('image') && $directory !== FALSE) {
+    if (!empty($this->options['image_style']) && module_exists('image') && $directory !== FALSE) {
       $image['style_name'] = empty($this->options['image_style']) ? '' : $this->options['image_style'];
       $image_path = $directory . substr(strstr($value, 'photo='), 6);
       $image['path'] = str_replace('\\', '/', $image_path);
