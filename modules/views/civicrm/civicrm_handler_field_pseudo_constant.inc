@@ -49,7 +49,10 @@ class civicrm_handler_field_pseudo_constant extends views_handler_field {
       $val = $values->{$this->field_alias};
       // TODO This fix should be replaced as described in  CRM-12853
       $val = str_replace("\x01", '', $val);
-      return $this->_pseudo_constant[$val];
+      if (isset($this->_pseudo_constant[$val])) {
+        return $this->_pseudo_constant[$val];
+      }
+      return '';
     }
   }
 
