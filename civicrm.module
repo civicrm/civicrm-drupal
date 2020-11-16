@@ -189,7 +189,7 @@ function civicrm_initialize() {
     }
 
     // get ready for problems
-    $docLinkInstall = "http://wiki.civicrm.org/confluence/display/CRMDOC/Drupal+Installation+Guide";
+    $docLinkInstall = "http://www.sorry-no-idea";
     $docLinkTrouble = "http://wiki.civicrm.org/confluence/display/CRMDOC/Installation+and+Configuration+Trouble-shooting";
     $forumLink      = "http://forum.civicrm.org/index.php/board,6.0.html";
 
