@@ -203,10 +203,8 @@ function civicrm_initialize() {
 
     $loadedSettings = (bool) @include_once $settingsFile;
     if (!$loadedSettings) {
+      // Note the failure variable is tied by reference to a static.
       $failure = TRUE;
-      if (user_access('administer modules')) {
-
-      }
       return FALSE;
     }
 
