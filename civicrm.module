@@ -212,8 +212,9 @@ function civicrm_initialize() {
 
     // this does pretty much all of the civicrm initialization
     if (!include_once 'CRM/Core/Config.php') {
+      // Note the failure variable is tied by reference to a static.
       $failure = TRUE;
-      drupal_set_message(t("<strong><p class='error'>Oops! - The path for including CiviCRM code files is not set properly. Most likely there is an error in the <em>civicrm_root</em> setting in your CiviCRM settings file (!1). </p><p class='error'> &raquo; civicrm_root is currently set to: <em>!2</em></p><p class='error'>!3</p></strong>", array(
+      drupal_set_message(t("<strong><p class='error'>Oops! - Unable to load CRM/Core/Config.php. Most likely the file is missing or there is an error in your CiviCRM settings file (!1). </p><p class='error'> &raquo; civicrm_root is currently set to: <em>!2</em></p><p class='error'>!3</p></strong>", array(
         '!1' => $settingsFile,
         '!2' => $civicrm_root,
         '!3' => $errorMsgAdd,
