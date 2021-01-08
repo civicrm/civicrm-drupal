@@ -487,7 +487,8 @@ function _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $mo
     'CMSdbPass' => $db_spec['password'],
     'CMSdbHost' => $db_spec['host'],
     'CMSdbName' => $db_spec['database'],
-    'siteKey' => md5(uniqid('', TRUE) . $baseUrl),
+    'siteKey' => preg_replace(';[^a-zA-Z0-9];', '', base64_encode(random_bytes(32))),
+    'credKeys' => 'aes-cbc:hkdf-sha256:' . preg_replace(';[^a-zA-Z0-9];', '', base64_encode(random_bytes(32))),
   ];
   $str = file_get_contents($settingsTplFile);
   foreach ($params as $key => $value) {
