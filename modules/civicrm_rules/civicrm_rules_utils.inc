@@ -41,7 +41,7 @@ function _civicrm_get_groups() {
 }
 
 /**
- * Function to add contacts to group
+ * Function to add/remove contacts to group
  */
 function _civicrm_rules_group_contact($contactId, $groupId, $action = 'create') {
   civicrm_initialize();
@@ -50,8 +50,11 @@ function _civicrm_rules_group_contact($contactId, $groupId, $action = 'create') 
     'group_id' => $groupId,
     'version' => 3,
   );
+  if ($action == 'delete') {
+    $params['status'] = 'Removed';
+  }
   // This used to be civicrm_group_contact_common($params, $action);
-  civicrm_api('group_contact', $action, $params);
+  civicrm_api('group_contact', 'create', $params);
 }
 
 /**
