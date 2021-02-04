@@ -604,34 +604,40 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL, $sync_type = N
           }
         }
       }
-      if (count($addRoles) > 0 || count($expRoles) > 0) {
-        $addRoles = array_unique($addRoles);
-        $expRoles = array_unique($expRoles);
-        $account  = user_load($uid, TRUE);
-        if ($account !== FALSE) {
-          // Remove expired roles
-          $userNeedsUpdate = FALSE;
-          if (!empty($expRoles)) {
-            foreach ($expRoles as $expiredRole) {
-              if (isset($account->roles[$expiredRole])) {
-                unset($account->roles[$expiredRole]);
-                $userNeedsUpdate = TRUE;
-              }
-            }
-          }
-
-          // Add new roles
-          foreach ($addRoles as $addRole) {
-            if (!user_has_role($addRole, $account)) {
-              $account->roles[$addRole] = $allRoles[$addRole];
+    }
+    $account  = user_load($uid, TRUE);
+    foreach ($memberroles as $membership_type_id => $rolerule) {
+      if (user_has_role($rolerule['rid'], $account) && !in_array($rolerule['rid'], $addRoles)) {
+	      // This will only happen if the membership is deleted.
+        $expRoles[] = $rolerule['rid'];
+      }
+    }
+    if (count($addRoles) > 0 || count($expRoles) > 0) {
+      $addRoles = array_unique($addRoles);
+      $expRoles = array_unique($expRoles);
+      if ($account !== FALSE) {
+        // Remove expired roles
+        $userNeedsUpdate = FALSE;
+        if (!empty($expRoles)) {
+          foreach ($expRoles as $expiredRole) {
+            if (isset($account->roles[$expiredRole])) {
+              unset($account->roles[$expiredRole]);
               $userNeedsUpdate = TRUE;
             }
           }
+        }
 
-          if ($userNeedsUpdate) {
-            // Overwrite the user's roles to the ones we've set
-            user_save($account, ['roles' => $account->roles]);
+        // Add new roles
+        foreach ($addRoles as $addRole) {
+          if (!user_has_role($addRole, $account)) {
+            $account->roles[$addRole] = $allRoles[$addRole];
+            $userNeedsUpdate = TRUE;
           }
+        }
+
+        if ($userNeedsUpdate) {
+          // Overwrite the user's roles to the ones we've set
+          user_save($account, ['roles' => $account->roles]);
         }
       }
     }
