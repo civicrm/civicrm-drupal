@@ -608,7 +608,7 @@ function drush_civicrm_ext_install($extension_name) {
     return;
   }
   try {
-    $result = civicrm_api('extension', 'install', ['key' => $extension_name, 'version' => 3]);
+    $result = civicrm_api3('extension', 'install', ['key' => $extension_name]);
     if ($result['values'] && $result['values'] == 1) {
       drush_print(dt('Extension !ename installed.', ['!ename' => $extension_name]));
     }
@@ -634,7 +634,7 @@ function drush_civicrm_ext_disable($extension_name) {
     return;
   }
   try {
-    $result = civicrm_api('extension', 'disable', ['key' => $extension_name, 'version' => 3]);
+    $result = civicrm_api3('extension', 'disable', ['key' => $extension_name]);
     if ($result['values'] && $result['values'] == 1) {
       drush_print(dt("Extension !ename disabled.", ['!ename' => $extension_name]));
     }
@@ -660,7 +660,7 @@ function drush_civicrm_ext_uninstall($extension_name) {
     return;
   }
   try {
-    $result = civicrm_api('extension', 'uninstall', ['key' => $extension_name, 'version' => 3]);
+    $result = civicrm_api3('extension', 'uninstall', ['key' => $extension_name]);
     if ($result['values'] && $result['values'] == 1) {
       drush_print(dt('Extension !ename uninstalled.', ['!ename' => $extension_name]));
     }
@@ -810,12 +810,11 @@ function drush_civicrm_cacheclear() {
     $params['session'] = 1;
   }
 
-  // Need to set API version or drush cc civicrm fails
-  $params['version'] = 3;
-  $result = civicrm_api('System', 'flush', $params);
-
-  if ($result['is_error']) {
-    drush_log(dt('An error occurred: !message', ['!message' => $result['error_message']]), 'error');
+  try {
+    $result = civicrm_api3('System', 'flush', $params);
+  }
+  catch (CiviCRM_API3_Exception $e) {
+    drush_log(dt('An error occurred: !message', ['!message' => $e->getMessage()]), 'error');
     return;
   }
 
@@ -836,10 +835,11 @@ function drush_civicrm_enable_debug() {
   ];
 
   foreach ($settings as $key => $val) {
-    $result = civicrm_api('Setting', 'create', ['version' => 3, $key => $val]);
-
-    if ($result['is_error']) {
-      drush_log(dt('An error occurred: !message', ['!message' => $result['error_message']]), 'error');
+    try {
+      $result = civicrm_api3('Setting', 'create', [$key => $val]);
+    }
+    catch (CiviCRM_API3_Exception $e) {
+      drush_log(dt('An error occurred: !message', ['!message' => $e->getMessage()]), 'error');
       return;
     }
   }
@@ -861,10 +861,11 @@ function drush_civicrm_disable_debug() {
   ];
 
   foreach ($settings as $key => $val) {
-    $result = civicrm_api('Setting', 'create', ['version' => 3, $key => $val]);
-
-    if ($result['is_error']) {
-      drush_log(dt('An error occurred: !message', ['!message' => $result['error_message']]), 'error');
+    try {
+      $result = civicrm_api3('Setting', 'create', [$key => $val]);
+    }
+    catch (CiviCRM_API3_Exception $e) {
+      drush_log(dt('An error occurred: !message', ['!message' => $e->getMessage()]), 'error');
       return;
     }
   }
@@ -1577,9 +1578,31 @@ function drush_civicrm_api() {
     civicrm_get_ctype('Individual')
   );
 
-  $result = civicrm_api($entity, $action, $params);
-  if (!empty($result['is_error'])) {
-    drush_set_error('CIVICRM api error', $result['error_message']);
+  switch ($params['version']) {
+    case 3:
+      try {
+        unset($params['version']);
+        $result = civicrm_api3($entity, $action, $params);
+      }
+      catch (CiviCRM_API3_Exception $e) {
+        drush_set_error('CIVICRM api error', $e->getMessage());
+      }
+      break;
+
+    case 4:
+      try {
+        unset($params['version']);
+        $result = civicrm_api4($entity, $action, $params);
+      }
+      catch (API_Exception $e) {
+        drush_set_error('CIVICRM api error', $e->getMessage());
+      }
+      break;
+
+    default:
+      drush_set_error(dt('Unknown api version: @version', ['@version' => $params['version']]));
+      break;
+
   }
 
   $format = drush_get_option('out', 'pretty');
