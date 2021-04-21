@@ -576,9 +576,11 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL, $sync_type = N
     }
     $account  = user_load($uid, TRUE);
     foreach ($memberroles as $membership_type_id => $rolerule) {
-      if (user_has_role($rolerule['rid'], $account) && !in_array($rolerule['rid'], $addRoles)) {
-	      // This will only happen if the membership is deleted.
-        $expRoles[] = $rolerule['rid'];
+      foreach ($rolerule as $rule) {
+        if (user_has_role($rule['rid'], $account) && !in_array($rule['rid'], $addRoles)) {
+          // This will only happen if the membership is deleted.
+          $expRoles[] = $rule['rid'];
+        }
       }
     }
     if (count($addRoles) > 0 || count($expRoles) > 0) {
