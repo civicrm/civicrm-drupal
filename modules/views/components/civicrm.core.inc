@@ -707,6 +707,22 @@ function _civicrm_core_data(&$data, $enabled) {
       'handler' => 'civicrm_handler_sort_date',
     ),
   );
+  // Created date
+  $data['civicrm_contact']['created_date'] = array(
+    'title' => t('Created date'),
+    'help' => t("The date the contact's record was created."),
+    'field' => array(
+      'handler' => 'civicrm_handler_field_datetime',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'civicrm_handler_filter_datetime',
+      'is date' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'civicrm_handler_sort_date',
+    ),
+  );
   // Image URL
   $data['civicrm_contact']['image_URL'] = array(
     'title' => t('Contact Image'),
