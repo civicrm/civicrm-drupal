@@ -1159,7 +1159,8 @@ function _civicrm_core_data(&$data, $enabled) {
   $data['civicrm_note']['table']['group'] = t('CiviCRM Note');
   $data['civicrm_note']['table']['join'] = array();
 
-  foreach (array_keys(CRM_Core_BAO_Note::entityTables()) as $entityTable) {
+  $noteEntities = civicrm_api3('Note', 'getoptions', ['field' => "entity_table"])['values'];
+  foreach (array_keys($noteEntities) as $entityTable) {
     // Explain how this table joins to others.
     $data['civicrm_note']['table']['join'][$entityTable] = array(
       'left_field' => 'id',
