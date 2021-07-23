@@ -401,7 +401,7 @@ function _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname,
   civicrm_source($dsn, $acl_file);
 
   if ($loadGeneratedData) {
-    civicrm_source($dsn, $sqlPath . DIRECTORY_SEPARATOR . 'civicrm_generated.mysql', TRUE);
+    civicrm_source($dsn, $sqlPath . DIRECTORY_SEPARATOR . 'civicrm_generated.mysql');
   }
   drush_log(dt('CiviCRM database loaded successfully.'), 'ok');
 }
