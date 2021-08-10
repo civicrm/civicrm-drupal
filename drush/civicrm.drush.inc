@@ -69,7 +69,6 @@ function civicrm_drush_command() {
       'langtarfile' => 'Path to your l10n tar.gz file.',
       'site_url' => 'Base Url for your drupal/CiviCRM website without http (e.g. mysite.com)',
       'ssl' => 'Using ssl for your drupal/CiviCRM website if set to on (e.g. --ssl=on)',
-      'load_generated_data' => 'Loads the demo generated data. Defaults to FALSE.',
     ],
     'aliases' => ['cvi'],
   ];
@@ -309,7 +308,6 @@ function drush_civicrm_install() {
   $drupalRoot = drush_get_context('DRUSH_DRUPAL_ROOT');
   $modPath = "$drupalRoot/$crmpath";
   $lang = drush_get_option('lang', '');
-  $loadGeneratedData = drush_get_option('load_generated_data', FALSE);
 
   if (!is_dir("$modPath/civicrm")) {
     // extract tarfile at right place
@@ -333,7 +331,7 @@ function drush_civicrm_install() {
   }
 
   // install database
-  _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname, $modPath, $lang, $loadGeneratedData);
+  _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname, $modPath, $lang);
 
   // generate civicrm.settings.php file
   _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $modPath);
@@ -352,7 +350,7 @@ function _civicrm_extract_tarfile($destinationPath, $option = 'tarfile') {
 }
 
 function _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname,
-  $modPath, $lang, $loadGeneratedData
+  $modPath, $lang
 ) {
   $drupalRoot = drush_get_context('DRUSH_DRUPAL_ROOT');
   $siteRoot = drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE);
@@ -400,9 +398,6 @@ function _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname,
   civicrm_source($dsn, $data_file);
   civicrm_source($dsn, $acl_file);
 
-  if ($loadGeneratedData) {
-    civicrm_source($dsn, $sqlPath . DIRECTORY_SEPARATOR . 'civicrm_generated.mysql', TRUE);
-  }
   drush_log(dt('CiviCRM database loaded successfully.'), 'ok');
 }
 
