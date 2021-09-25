@@ -231,6 +231,19 @@ function civicrm_initialize() {
       drupal_add_html_head($header);
     }
 
+    // Prevent autoload conflicts if HTML_Purifier is already in Drupal libraries
+    if (
+      !class_exists('HTMLPurifier_Bootstrap', FALSE) &&
+      function_exists('libraries_get_path') &&
+      libraries_get_path('htmlpurifier')
+    ) {
+      $file = libraries_get_path('htmlpurifier') . '/library/HTMLPurifier/Bootstrap.php';
+      if (file_exists($file)) {
+        require_once $file;
+        spl_autoload_register(['HTMLPurifier_Bootstrap', 'autoload']);
+      }
+    }
+
     CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
   }
 
