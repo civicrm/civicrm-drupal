@@ -67,6 +67,11 @@ function civicrm_views_data_alter(&$data) {
 
   // Get list of enabled CiviCRM components
   $enabled = CRM_Core_Component::getEnabledComponents();
+  // CiviGrant is now an extension
+  $civiGrant = civicrm_api3('Extension', 'get', [
+    'key' => 'civigrant',
+    'status' => 'installed',
+  ]);
 
   // $data = array();
   // Load Core CiviCRM data
@@ -91,7 +96,7 @@ function civicrm_views_data_alter(&$data) {
     include_once 'components/civicrm.event.inc';
     _civicrm_event_data($data, $enabled);
   }
-  if (isset($enabled['CiviGrant'])) {
+  if (!empty($civiGrant['values'])) {
     include_once 'components/civicrm.grant.inc';
     _civicrm_grant_data($data, $enabled);
   }
