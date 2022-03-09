@@ -136,6 +136,18 @@ function civicrm_drush_command() {
   $items['civicrm-disable-debug'] = [
     'description' => "Disable CiviCRM Debugging.",
   ];
+  $items['civicrm-pipe'] = [
+    'description' => 'Start a Civi::pipe session (JSON-RPC 2.0)',
+    'examples' => [
+      'drush civicrm-pipe' => 'Begin a session with default flags',
+      'drush civicrm-pipe vt' => 'Begin a session with connection flags (ex: version, trusted)',
+      'drush civicrm-pipe vu' => 'Begin a session with connection flags (ex: version, untrusted)',
+    ],
+    'arguments' => [
+      'connection-flags' => 'List of connection flags (https://docs.civicrm.org/dev/en/latest/framework/pipe#flags)',
+    ],
+    'aliases' => ['cvpipe'],
+  ];
   $items['civicrm-upgrade'] = [
     'description' => 'Replace CiviCRM codebase with new specified tarfile and upgrade database by executing the CiviCRM upgrade process - civicrm/upgrade?reset=1.',
     'examples' => [
@@ -1613,6 +1625,26 @@ function drush_civicrm_api() {
 
     default:
       return drush_set_error('CIVICRM_UNKNOWN_FORMAT', dt('Unknown format: @format', ['@format' => $format]));
+  }
+}
+
+/**
+ * (Drush callback)
+ *
+ * Implementation of command 'civicrm-pipe'
+ */
+function drush_civicrm_pipe(?string $connection_flags = NULL) {
+  if (!civicrm_initialize()) {
+    return drush_set_error('CIVICRM_UNINSTALLED', dt('CiviCRM is not setup.'));
+  }
+  if (!is_callable(['Civi', 'pipe'])) {
+    return drush_set_error('CIVICRM_PIPE_UNSUPPORTED', dt('This version of CiviCRM does not include Civi::pipe() support.'));
+  }
+  if (!empty($connection_flags)) {
+    Civi::pipe($connection_flags);
+  }
+  else {
+    Civi::pipe();
   }
 }
 
