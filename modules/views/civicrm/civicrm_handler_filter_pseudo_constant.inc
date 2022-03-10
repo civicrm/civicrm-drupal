@@ -40,7 +40,6 @@ class civicrm_handler_filter_pseudo_constant extends views_handler_filter_in_ope
       $pseudo_args = array();
     }
 
-    require_once str_replace('_', DIRECTORY_SEPARATOR, $this->definition['pseudo class']) . '.php';
     // Include and call the Pseudo Class method
     $this->_pseudo_constant = call_user_func_array($this->definition['pseudo class'] . "::" . $this->definition['pseudo method'], $pseudo_args);
   }
