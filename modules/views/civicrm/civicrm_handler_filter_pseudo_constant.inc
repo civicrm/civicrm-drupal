@@ -40,8 +40,15 @@ class civicrm_handler_filter_pseudo_constant extends views_handler_filter_in_ope
       $pseudo_args = array();
     }
 
-    // Include and call the Pseudo Class method
-    $this->_pseudo_constant = call_user_func_array($this->definition['pseudo class'] . "::" . $this->definition['pseudo method'], $pseudo_args);
+    $callback = $this->definition['pseudo class'] . "::" . $this->definition['pseudo method'];
+    if (is_callable($callback)) {
+      $this->_pseudo_constant = call_user_func_array($callback, $pseudo_args);
+      // Do we really need to resolve this during `construct()`ion? There's on-demand caching in `get_value_options()`.
+    }
+    else {
+      vpr('civicrm_handler_filter_pseudo_constant - handler @callback is unavailable ', ['@callback' => $callback]);
+      $this->_pseudo_constant = [];
+    }
   }
 
   public function get_value_options() {
