@@ -67,7 +67,32 @@ class civicrm_handler_filter_custom_option extends views_handler_filter_in_opera
     $op = ($this->operator == 'in' || $this->operator == 'all') ? 'LIKE' : 'NOT LIKE';
     $glue = ($this->operator == 'in') ? 'OR ' : 'AND ';
     foreach ($this->value as $value) {
-      $clauses[] = "$this->table_alias.$this->real_field " . $op . " '%" . $sep . CRM_Core_DAO::escapeString($value) . $sep . "%' ";
+      if (is_array($value)) {
+        // When an exposed group filter is used the $value
+        // is an array. This array looks like:
+        //   'Student' => string 'Student' (length=7)
+        //    'all' => int 0
+        //    'Parent' => int 0
+        //    'Staff' => int 0
+        //    'Volunteer' => int 0
+        //     'Team' => int 0
+        //     'Sponsor' => int 0
+        // As you can see in the above example the value Student is selected.
+        // The value all means any of the values
+        $allValuesSelected = FALSE;
+        if (isset($value['all']) && $value['all']) {
+          $allValuesSelected = TRUE;
+        }
+        unset($value['all']);
+        foreach ($value as $subvalue => $isset) {
+          if ($isset || $allValuesSelected) {
+            $clauses[] = "$this->table_alias.$this->real_field " . $op . " '%" . $sep . CRM_Core_DAO::escapeString($subvalue) . $sep . "%' ";
+          }
+        }
+      }
+      else {
+        $clauses[] = "$this->table_alias.$this->real_field " . $op . " '%" . $sep . CRM_Core_DAO::escapeString($value) . $sep . "%' ";
+      }
     }
     $clause = implode($glue, $clauses);
     $this->query->add_where_expression($this->options['group'], $clause);
