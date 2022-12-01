@@ -604,7 +604,7 @@ function _civicrm_member_roles_sync($ext_uid = NULL, $cid = NULL, $sync_type = N
         if (!empty($rid)) {
           db_delete('users_roles')->condition('uid', $uid)->condition('rid', $rid, $roleCondition)->execute();
         }
-        if (is_array($memberroles[$membership['membership_type_id']])) {
+        if (isset($memberroles[$membership['membership_type_id']]) && is_array($memberroles[$membership['membership_type_id']])) {
           foreach ($memberroles[$membership['membership_type_id']] as $rolerule) {
             if (in_array($membership['status_id'], $rolerule['codes']['current'])) {
               $addRoles[] = $rolerule['rid'];
