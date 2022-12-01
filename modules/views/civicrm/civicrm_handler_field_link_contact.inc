@@ -94,8 +94,9 @@ class civicrm_handler_field_link_contact extends views_handler_field {
             "reset=1&cid={$values->id}"
           );
         }
+        break;
 
-        // LINKING TO CONTACT EDIT PAGE
+      // LINKING TO CONTACT EDIT PAGE
       case 'edit':
         if (user_access('edit all contacts') && $link_text !== NULL && $link_text !== '') {
           return civicrm_views_href($link_text,
@@ -103,8 +104,9 @@ class civicrm_handler_field_link_contact extends views_handler_field {
             "reset=1&action=update&cid={$values->id}"
           );
         }
+        break;
 
-        // LINKING TO CONTACT DELETE PAGE
+      // LINKING TO CONTACT DELETE PAGE
       case 'delete':
         if (user_access('edit all contacts') && $link_text !== NULL && $link_text !== '') {
           return civicrm_views_href($link_text,
@@ -112,16 +114,17 @@ class civicrm_handler_field_link_contact extends views_handler_field {
             "reset=1&delete=1&cid={$values->id}"
           );
         }
+        break;
 
-        // CUSTOM NODE LINKAGE, GOOD FOR LINKING TO OTHER VIEWS WITH AN ARGUMENT
+      // CUSTOM NODE LINKAGE, GOOD FOR LINKING TO OTHER VIEWS WITH AN ARGUMENT
       case 'custom':
         if ($custom_link !== NULL && $custom_link !== '' && $link_text !== NULL && $link_text !== '') {
           return l($link_text, $custom_link . "{$values->id}");
         }
-        // IF THE OTHER CASES AREN'T IN PLAY, THEN JUST PRINT THE TEXT
-      default:
-        return $link_text;
+        break;
+
     }
+    return $link_text;
   }
 
   public function query() {
