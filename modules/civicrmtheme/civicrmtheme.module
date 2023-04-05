@@ -88,9 +88,6 @@ function civicrmtheme_custom_theme() {
   if (arg(0) != 'civicrm') {
     return;
   }
-  if (arg(1) == 'upgrade') {
-    return;
-  }
 
   $admin_theme = variable_get('civicrmtheme_theme_admin', 0);
   $public_theme = variable_get('civicrmtheme_theme_public', 0);
