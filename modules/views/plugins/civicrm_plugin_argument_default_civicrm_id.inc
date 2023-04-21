@@ -39,6 +39,7 @@ class civicrm_plugin_argument_default_civicrm_id extends views_plugin_argument_d
       '#options' => array(
         'Contact' => t('Contact'),
         'Contribution page' => t('Contribution page'),
+        'Event Info page' => t('Event Info page'),
       ),
       '#default_value' => $this->options['id_type'],
       '#required' => TRUE,
@@ -70,6 +71,15 @@ class civicrm_plugin_argument_default_civicrm_id extends views_plugin_argument_d
         }
         break;
 
+      case 'Event Info page':
+        if (
+          strpos(current_path(), 'event/info') !== FALSE
+          && !empty($_GET['id'])
+          && is_numeric($_GET['id'])
+        ) {
+          return $_GET['id'];
+        }
+        break;
     }
 
     // Return FALSE if we haven't returned yet
