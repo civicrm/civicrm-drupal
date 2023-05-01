@@ -109,20 +109,23 @@ function civicrm_group_roles_add_groups_oncreate($account, $roles) {
  */
 function civicrm_group_roles_form_alter(&$form, &$form_state, $form_id) {
   // append this to change user edit submit function
-  if (($form['#id'] == 'user-profile-form' && isset($form['#user']) && (module_exists('content_profile') ||
-    isset($form['account']))) || $form['#id'] == 'user-edit-form') {
-    $uid = $form['#user']->uid;
-    if (!$uid) {
-      return;
-    }
-    // make sure there is a civicrm record
-    civicrm_initialize(TRUE);
-    require_once 'CRM/Core/BAO/UFMatch.php';
-    $contact_id = CRM_Core_BAO_UFMatch::getContactId($uid);
-    if (!$contact_id) {
-      return;
+  //  Form ID isset Check added for situation when CiviCRM form is being referenced in Drupal node add/edit form
+  if (isset($form['#id'])) {
+    if (($form['#id'] == 'user-profile-form' && isset($form['#user']) && (module_exists('content_profile') ||
+      isset($form['account']))) || $form['#id'] == 'user-edit-form') {
+      $uid = $form['#user']->uid;
+      if (!$uid) {
+        return;
+      }
+      // make sure there is a civicrm record
+      civicrm_initialize(TRUE);
+      require_once 'CRM/Core/BAO/UFMatch.php';
+      $contact_id = CRM_Core_BAO_UFMatch::getContactId($uid);
+      if (!$contact_id) {
+        return;
     }
     array_unshift($form['#submit'], '_civicrm_group_update');
+    }
   }
 }
 
