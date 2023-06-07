@@ -1494,25 +1494,31 @@ function _civicrm_init($fail = TRUE, $load_config = TRUE) {
     ]));
   }
 
-  global $cmsPath;
-  $cmsPath = $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
-  $site_root = drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE);
-  $civicrmSettingsFile = "$drupal_root/$site_root/civicrm.settings.php";
+  if (defined('CIVICRM_SETTINGS_PATH')) {
+    $civicrmSettingsFile = CIVICRM_SETTINGS_PATH;
+  }
+  else {
+    global $cmsPath;
+    $cmsPath = $drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT');
+    $site_root = drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE);
+    $civicrmSettingsFile = "$drupal_root/$site_root/civicrm.settings.php";
 
-  if (!file_exists($civicrmSettingsFile)) {
-    $sites_subdir = drush_get_option('sites-subdir', 'default');
-    $civicrmSettingsFile = "$drupal_root/sites/$sites_subdir/civicrm.settings.php";
     if (!file_exists($civicrmSettingsFile)) {
-      if ($fail) {
-        return drush_set_error('CIVICRM_INIT_SETTINGS_NOT_FOUND', dt('Could not locate civicrm settings file.'));
-      }
-      else {
-        return FALSE;
+      $sites_subdir = drush_get_option('sites-subdir', 'default');
+      $civicrmSettingsFile = "$drupal_root/sites/$sites_subdir/civicrm.settings.php";
+      if (!file_exists($civicrmSettingsFile)) {
+        if ($fail) {
+          return drush_set_error('CIVICRM_INIT_SETTINGS_NOT_FOUND', dt('Could not locate civicrm settings file.'));
+        }
+        else {
+          return FALSE;
+        }
       }
     }
+    // include settings file
+    define('CIVICRM_SETTINGS_PATH', $civicrmSettingsFile);
   }
-  // include settings file
-  define('CIVICRM_SETTINGS_PATH', $civicrmSettingsFile);
+
   include_once $civicrmSettingsFile;
   global $civicrm_root;
   if (!is_dir($civicrm_root)) {
