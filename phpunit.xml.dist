@@ -15,10 +15,4 @@
       <directory>./tests/phpunit</directory>
     </testsuite>
   </testsuites>
-
-  <filter>
-    <whitelist>
-      <directory suffix=".php">./CiviDrupal</directory>
-    </whitelist>
-  </filter>
 </phpunit>
