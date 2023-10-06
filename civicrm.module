@@ -1055,7 +1055,7 @@ function _civicrm_filter_process($text, $filter, $format, $langcode, $cache, $ca
 
   $was_secure       = $smarty->security;
   $smarty->security = TRUE;
-  $text             = $smarty->fetch("string:${text}");
+  $text             = $smarty->fetch("string:{$text}");
   $smarty->security = $was_secure;
 
   // In the use-case of embedding Smarty codes inside a Drupal page, one is likely
