@@ -744,6 +744,7 @@ function drush_civicrm_upgrade_db() {
     return TRUE;
   }
   $upgradeHeadless = new CRM_Upgrade_Headless();
+  drush_print("Pre Upgrade Message:\n" . $upgradeHeadless->getPreUpgradeMessage());
   // FIXME Exception handling?
   $result = $upgradeHeadless->run();
   drush_print("Upgrade outputs:\n" . $result['text']);
