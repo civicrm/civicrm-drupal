@@ -154,10 +154,9 @@ function civicrm_views_url($path, $query, $absolute = FALSE) {
   // Force alphabetical order of query params, for consistent support
   // of Drupal aliases. This is required because $query is a string that may
   // be coming to us in any order; but query parameter order matters when
-  // passing that query string as part of $path in url($path). Admittedly it's
-  // not common to passt the query string as part of $path in url($path) (you
-  // would normally pass it as $options['query'] in url($path, $options)), but
-  // doing so is required for Drupal alias support.
+  // passing that query string as part of $path in drupal_get_path_alias().
+  $original_path = $path;
+  $query_data = array();
   if (!empty($query)) {
     if (is_array($query)) {
       $query_data = $query;
@@ -172,6 +171,15 @@ function civicrm_views_url($path, $query, $absolute = FALSE) {
   $options = array(
     'absolute' => $absolute,
   );
+  $alias = drupal_get_path_alias($path);
+  if ($alias != $path) {
+    $path = $alias;
+    $options['alias'] = TRUE;
+  }
+  else {
+    $path = $original_path;
+    $options['query'] = $query_data;
+  }
   $url = url($path, $options);
   return $url;
 }
