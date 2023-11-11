@@ -102,7 +102,7 @@ function civicrm_block_info()
  * Implements hook_block_view().
  */
 function civicrm_block_view($delta = '0') {
-  if (!civicrm_initialize()) {
+  if (! civicrm_initialize()) {
     return array();
   }
   $block = CRM_Core_Block::getContent($delta);
