@@ -88,7 +88,9 @@ function civicrm_permission() {
 /**
  * Implements hook_block_info().
  */
-function civicrm_block_info() {
+function civicrm_block_info()
+
+{
   if (!civicrm_initialize()) {
     return [];
   }
