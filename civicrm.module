@@ -1251,7 +1251,7 @@ function civicrm_modules_installed($modules) {
  * Implements hook_modules_enabled().
  */
 function civicrm_modules_enabled($modules) {
-  if (!civicrm_initialize()) {
+  if (! civicrm_initialize()) {
     return;
   }
   CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
