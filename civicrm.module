@@ -88,7 +88,9 @@ function civicrm_permission() {
 /**
  * Implements hook_block_info().
  */
-function civicrm_block_info() {
+function civicrm_block_info()
+
+{
   if (!civicrm_initialize()) {
     return [];
   }
@@ -100,7 +102,7 @@ function civicrm_block_info() {
  * Implements hook_block_view().
  */
 function civicrm_block_view($delta = '0') {
-  if (!civicrm_initialize()) {
+  if (! civicrm_initialize()) {
     return array();
   }
   $block = CRM_Core_Block::getContent($delta);
@@ -1249,7 +1251,7 @@ function civicrm_modules_installed($modules) {
  * Implements hook_modules_enabled().
  */
 function civicrm_modules_enabled($modules) {
-  if (!civicrm_initialize()) {
+  if (! civicrm_initialize()) {
     return;
   }
   CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
