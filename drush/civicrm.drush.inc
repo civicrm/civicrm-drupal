@@ -27,6 +27,8 @@
  *     3. In an arbitrary folder specified with the --include option.
  */
 
+use Civi\Core\Exception\DBQueryException;
+
 /**
  * Implements hook_drush_command().
  *
@@ -1605,7 +1607,12 @@ function drush_civicrm_api() {
         unset($params['version']);
         $result = civicrm_api4($entity, $action, $params);
       }
-      catch (API_Exception $e) {
+      catch (DBQueryException $e) {
+        drush_set_error('CIVICRM api error', $e->getDBErrorMessage() . ' ' . $e->getUserMessage()
+          . (in_array('debug=1', $args, TRUE) ? "\n" . $e->getSQL() : '')
+        );
+      }
+      catch (CRM_Core_Exception $e) {
         drush_set_error('CIVICRM api error', $e->getMessage());
       }
       break;
