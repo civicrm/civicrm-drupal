@@ -287,7 +287,8 @@ function drush_civicrm_install_validate() {
     drush_set_option('dbpass', $db_spec['password']);
   }
   if (!drush_get_option('dbhost', FALSE)) {
-    drush_set_option('dbhost', $db_spec['host']);
+    $suffix = empty($db_spec['port']) ? '' : (':' . $db_spec['port']);
+    drush_set_option('dbhost', $db_spec['host'] . $suffix);
   }
   if (!drush_get_option('dbname', FALSE)) {
     drush_set_option('dbname', $db_spec['database']);
@@ -373,24 +374,22 @@ function _civicrm_install_db($dbuser = NULL, $dbpass = NULL, $dbhost = NULL, $db
       // This is just enough information to get going. Drupal.civi-setup.php does more scanning.
       'cms' => 'Drupal',
       'srcPath' => $corePath,
-      'lang' => $lang,
-      'db' => [
-        'server' => $dbhost,
-        'username' => $dbuser,
-        'password' => $dbpass,
-        'database' => $dbname,
-      ],
     ], NULL, $log);
-    $ctrl = \Civi\Setup::instance()->createController()->getCtrl();
-    $ctrl->setUrls(array(
-      'ctrl' => url('civicrm'),
-      'res' => $coreUrl . '/setup/res/',
-      'jquery.js' => $coreUrl . '/bower_components/jquery/dist/jquery.min.js',
-      'font-awesome.css' => $coreUrl . '/bower_components/font-awesome/css/font-awesome.min.css',
-    ));
+
+    // init() made the initial guess. Now we can overwrite with user-supplied data.
+    $setup = \Civi\Setup::instance();
+    $model = $setup->getModel();
+    $model->db = [
+      'server' => $dbhost,
+      'username' => $dbuser,
+      'password' => $dbpass,
+      'database' => $dbname,
+    ];
+    if ($lang) {
+      $model->lang = $lang;
+    }
 
     // Validate system requirements
-    $setup = $ctrl->getSetup();
     $reqs = $setup->checkRequirements();
     foreach ($reqs->getWarnings() as $msg) {
       drush_log(dt("WARNING: (@section) @name: @message", ['@section' => $msg['section'], '@name' => $msg['name'], '@message' => $msg['message']]), 'warning');
