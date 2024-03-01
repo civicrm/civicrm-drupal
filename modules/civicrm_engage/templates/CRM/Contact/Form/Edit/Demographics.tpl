@@ -7,10 +7,10 @@
  | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
 *}
-<div class="crm-accordion-wrapper crm-demographics-accordion collapsed">
- <div class="crm-accordion-header">
+<details class="crm-accordion-bold crm-demographics-accordion">
+ <summary>
     {$title}
-  </div><!-- /.crm-accordion-header -->
+  </summary>
   <div id="demographics" class="crm-accordion-body">
   <div class="form-item">
         <span class="label">{$form.gender_id.label}</span>
@@ -39,7 +39,7 @@
      {/foreach}
   {/foreach}{/if}
  </div><!-- /.crm-accordion-body -->
-</div><!-- /.crm-accordion-wrapper -->
+</details>
 
 {literal}
 <script type="text/javascript">
