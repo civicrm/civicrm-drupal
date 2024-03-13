@@ -287,7 +287,8 @@ function drush_civicrm_install_validate() {
     drush_set_option('dbpass', $db_spec['password']);
   }
   if (!drush_get_option('dbhost', FALSE)) {
-    drush_set_option('dbhost', $db_spec['host']);
+    $suffix = empty($db_spec['port']) ? '' : (':' . $db_spec['port']);
+    drush_set_option('dbhost', $db_spec['host'] . $suffix);
   }
   if (!drush_get_option('dbname', FALSE)) {
     drush_set_option('dbname', $db_spec['database']);
@@ -327,28 +328,13 @@ function drush_civicrm_install() {
     drush_log(dt('Tarfile unpacked.'), 'ok');
   }
 
-  // include civicrm installer helper file
-  $civicrmInstallerHelper = "$modPath/civicrm/install/civicrm.php";
-  if (!file_exists($civicrmInstallerHelper)) {
-    return drush_set_error('CIVICRM_NOT_PRESENT', dt('CiviCRM installer helper file is missing.'));
-  }
-
   if ($lang != '') {
     _civicrm_extract_tarfile($modPath, "langtarfile");
   }
 
-  // setup all required files/civicrm/* directories
-  if (!_civicrm_create_files_dirs($civicrmInstallerHelper, $modPath)) {
-    return FALSE;
-  }
-
-  // install database
+  // Invokes \Civi\Setup
+  // Function name kept somewhat for backwards compatibility (ex: Aegir)
   _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname, $modPath, $lang);
-
-  // generate civicrm.settings.php file
-  _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $modPath);
-
-  module_enable(['civicrm']);
 
   drush_log(dt("CiviCRM installed."), 'ok');
 }
@@ -361,73 +347,91 @@ function _civicrm_extract_tarfile($destinationPath, $option = 'tarfile') {
   drush_shell_exec("tar -xf $tarpath -C \"$destinationPath\"");
 }
 
-function _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname,
-  $modPath, $lang
-) {
-  $drupalRoot = drush_get_context('DRUSH_DRUPAL_ROOT');
-  $siteRoot = drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE);
+/**
+ * Wrapper around \Civi\Setup, kept for backwards compatibility
+ *
+ * @var string|null $dbuser
+ * @var string|null $dbpass
+ * @var string|null $dbhost
+ * @var string|null $dbname
+ * @var string|null $modPath
+ *       This variable is not used. Kept for backwards-compatibility only.
+ * @var string|null $lang
+ *       CiviCRM default language for the interface and defaults configurations.
+ *       The installer defaults to en_US.
+ */
+function _civicrm_install_db($dbuser = NULL, $dbpass = NULL, $dbhost = NULL, $dbname = NULL, $modPath = NULL, $lang = NULL) {
+  $coreUrl = dirname(file_create_url(drupal_get_path('module', 'civicrm')));
+  $corePath = dirname(dirname(__DIR__));
+  $classLoader = implode(DIRECTORY_SEPARATOR, [$corePath, 'CRM', 'Core', 'ClassLoader.php']);
 
-  $sqlPath = "$modPath/civicrm/sql";
+  if (file_exists($classLoader)) {
+    require_once $classLoader;
+    CRM_Core_ClassLoader::singleton()->register();
+    $log = new CiviCRMDrushLog();
+    \Civi\Setup::assertProtocolCompatibility(1.0);
+    \Civi\Setup::init([
+      // This is just enough information to get going. Drupal.civi-setup.php does more scanning.
+      'cms' => 'Drupal',
+      'srcPath' => $corePath,
+    ], NULL, $log);
 
-  if (function_exists('mysqli_connect')) {
-    $dbhostParts = explode(':', $dbhost);
-    $conn = @mysqli_connect($dbhostParts[0], $dbuser, $dbpass, '', isset($dbhostParts[1]) ? $dbhostParts[1] : NULL);
-    $dbOK = ($a = @mysqli_select_db($conn, $dbname)) || ($b = @mysqli_query($conn, "CREATE DATABASE $dbname"));
-  }
-  elseif (function_exists('mysql_connect')) {
-    $conn = @mysql_connect($dbhost, $dbuser, $dbpass);
-    $dbOK = @mysql_select_db($dbname, $conn) || @mysql_query("CREATE DATABASE $dbname", $conn);
-  }
-  else {
-    $dbOK = FALSE;
-  }
-  if (!$dbOK) {
-    drush_die(dt('CiviCRM database was not found. Failed to create one.'));
-  }
+    // init() made the initial guess. Now we can overwrite with user-supplied data.
+    $setup = \Civi\Setup::instance();
+    $model = $setup->getModel();
+    $model->db = [
+      'server' => $dbhost,
+      'username' => $dbuser,
+      'password' => $dbpass,
+      'database' => $dbname,
+    ];
+    if ($lang) {
+      $model->lang = $lang;
+    }
 
-  // setup database with civicrm structure and data
-  $dsn = "mysql://{$dbuser}:{$dbpass}@{$dbhost}/{$dbname}?new_link=true";
-  drush_log(dt('Loading CiviCRM database structure ..'));
-  civicrm_source($dsn, $sqlPath . '/civicrm.mysql');
-  drush_log(dt('Loading CiviCRM database with required data ..'));
-  // testing the translated sql files availability
-  $data_file = $sqlPath . '/civicrm_data.mysql';
-  $acl_file = $sqlPath . '/civicrm_acl.mysql';
-  if ($lang != '') {
-    if (file_exists($sqlPath . '/civicrm_data.' . $lang . '.mysql')
-      and file_exists($sqlPath . '/civicrm_acl.' . $lang . '.mysql')
-      and $lang != ''
-    ) {
-      $data_file = $sqlPath . '/civicrm_data.' . $lang . '.mysql';
-      $acl_file = $sqlPath . '/civicrm_acl.' . $lang . '.mysql';
+    // Validate system requirements
+    $reqs = $setup->checkRequirements();
+    foreach ($reqs->getWarnings() as $msg) {
+      drush_log(dt("WARNING: (@section) @name: @message", ['@section' => $msg['section'], '@name' => $msg['name'], '@message' => $msg['message']]), 'warning');
+    }
+    $errors = $reqs->getErrors();
+    if ($errors) {
+      foreach ($errors as $msg) {
+        drush_log(dt("ERROR: (@section) @name: @message", ['@section' => $msg['section'], '@name' => $msg['name'], '@message' => $msg['message']]), 'error');
+      }
+      drush_set_error('CIVICRM_INSTALL_REQUIREMENTS_FAILED', dt('Requirements check failed.'));
+      return;
+    }
+
+    $installed = $setup->checkInstalled();
+    if (!$installed->isSettingInstalled()) {
+      drush_log(dt("Creating file @file", ['@file' => $setup->getModel()->settingsPath]), 'info');
+      $setup->installFiles();
     }
     else {
-      drush_log(dt('No sql files could be retrieved for "' . $lang .
-        "\", using default language."
-      ), 'warning');
+      drush_log(dt("Found existing @file in @dir", ['@file' => basename($setup->getModel()->settingsPath), '@dir' => dirname($setup->getModel()->settingsPath)]), 'error');
+      drush_set_error('CIVICRM_INSTALL_SETTINGS_EXIST', dt('Found existing civicrm.settings.php file.'));
+      return;
+    }
+
+    if (!$installed->isDatabaseInstalled()) {
+      drush_log(dt("Creating <comment>civicrm_*</comment> database tables in @db", ['@db' => $setup->getModel()->db['database']]), 'info');
+      $setup->installDatabase();
     }
   }
-  civicrm_source($dsn, $data_file);
-  civicrm_source($dsn, $acl_file);
+  else {
+    return drush_set_error('CIVICRM_NOT_PRESENT', dt('Cannot perform setup for CiviCRM. The file "@file" is missing..', ['@file' => $classLoader]));
+  }
 
   drush_log(dt('CiviCRM database loaded successfully.'), 'ok');
 }
 
+/**
+ * Kept only for backwards compatiblity
+ * File creation is now part of \Civi\Setup
+ */
 function _civicrm_create_files_dirs($civicrmInstallerHelper, $modPath) {
-  $drupalRoot = drush_get_context('DRUSH_DRUPAL_ROOT');
-  $siteRoot = drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE);
-
-  if (!file_exists($civicrmInstallerHelper)) {
-    return drush_set_error('CIVICRM_INSTALLER_HELP_MISSING', dt("CiviCRM installer helper file is missing."));
-  }
-  require_once "$civicrmInstallerHelper";
-
-  // create files/civicrm/* dirs
-  global $crmPath;
-  $crmPath = "$modPath/civicrm";
-  civicrm_setup("$drupalRoot/$siteRoot/files");
-  @drush_op('chmod', "$drupalRoot/$siteRoot/files/civicrm", 0777);
-
+  drush_log(dt("CiviCRM: function _civicrm_create_files_dirs is deprecated. Use \\Civi\\Setup installFiles"), 'warning');
   return TRUE;
 }
 
@@ -435,82 +439,8 @@ function _civicrm_create_files_dirs($civicrmInstallerHelper, $modPath) {
  * Generates civicrm.settings.php file
  */
 function _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $modPath) {
-  $drupalRoot = drush_get_context('DRUSH_DRUPAL_ROOT');
-  $siteRoot = drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE);
-  $crmPath = "$modPath/civicrm";
-
-  $files = [
-    "$crmPath/templates/CRM/common/civicrm.settings.php.template",
-    "$crmPath/templates/CRM/common/civicrm.settings.php.tpl",
-  ];
-
-  $settingsTplFile = NULL;
-  foreach ($files as $file) {
-    if (file_exists($file)) {
-      $settingsTplFile = $file;
-    }
-  }
-
-  if (!$settingsTplFile) {
-    drush_die(dt('Could not find CiviCRM settings template and therefore could not create settings file.'));
-  }
-
-  drush_log(dt('Generating civicrm settings file ..'));
-  if ($baseUrl = drush_get_option('site_url', FALSE)) {
-    $ssl = drush_get_option('ssl', FALSE);
-    if ($ssl == 'on') {
-      $protocol = 'https';
-    }
-    else {
-      $protocol = 'http';
-    }
-  }
-
-  $baseUrl = !$baseUrl ? ($GLOBALS['base_url']) : ($protocol . '://' . $baseUrl);
-  $db_spec = drush_civicrm_get_db_spec();
-
-  // Check version: since 4.1, Drupal6 must be used for the UF in D6
-  // The file civicrm-version.php appeared around 4.0, so it is safe to assume
-  // that if it's not there, it's 3.x, in which case the CMS 'Drupal' is D6.
-  $cms = 'Drupal';
-
-  if (file_exists("$crmPath/civicrm-version.php")) {
-    require_once "$crmPath/civicrm-version.php";
-    $v = civicrmVersion();
-    $cms = $v['cms'];
-  }
-
-  $params = [
-    'crmRoot' => $crmPath,
-    'templateCompileDir' => "$drupalRoot/$siteRoot/files/civicrm/templates_c",
-    'frontEnd' => 0,
-    'cms' => $cms,
-    'baseURL' => $baseUrl,
-    'dbUser' => $dbuser,
-    'dbPass' => $dbpass,
-    'dbHost' => $dbhost,
-    'dbName' => $dbname,
-    'CMSdbUser' => $db_spec['username'],
-    'CMSdbPass' => $db_spec['password'],
-    'CMSdbHost' => $db_spec['host'],
-    'CMSdbName' => $db_spec['database'],
-    // These two are only filled in when using the newer civicrm-setup.
-    'dbSSL' => '',
-    'CMSdbSSL' => '',
-    'siteKey' => preg_replace(';[^a-zA-Z0-9];', '', base64_encode(random_bytes(37))),
-    'credKeys' => 'aes-cbc:hkdf-sha256:' . preg_replace(';[^a-zA-Z0-9];', '', base64_encode(random_bytes(37))),
-    'signKeys' => 'jwt-hs256:hkdf-sha256:' . preg_replace(';[^a-zA-Z0-9];', '', base64_encode(random_bytes(37))),
-  ];
-  $str = file_get_contents($settingsTplFile);
-  foreach ($params as $key => $value) {
-    $str = str_replace('%%' . $key . '%%', $value, $str);
-  }
-  $str = trim($str);
-
-  $configFile = "$drupalRoot/$siteRoot/civicrm.settings.php";
-  civicrm_write_file($configFile, $str);
-  @drush_op('chmod', "$configFile", 0644);
-  drush_log(dt('Settings file generated: !file', ['!file' => $configFile]), 'ok');
+  drush_log(dt("CiviCRM: function _civicrm_generate_settings_file is deprecated. Use \\Civi\\Setup installFiles"), 'warning');
+  return TRUE;
 }
 
 /**
@@ -1716,4 +1646,47 @@ function drush_civicrm_process_mail_queue() {
   $facility = new CRM_Core_JobManager();
   $facility->setSingleRunParams('Job', 'process_mailing', [], 'Started by drush');
   $facility->executeJobByAction('Job', 'process_mailing');
+}
+
+/**
+ * Very minimal implementation of \Psr\Log to get log messages from \Civi\Setup
+ */
+class CiviCRMDrushLog {
+
+  public function emergency($message, array $context = []) {
+    drush_log('CiviCRM emergency: ' . $message . (!empty($context) ? ' ' . print_r($context, 1) : ''), 'error');
+  }
+
+  public function alert($message, array $context = []) {
+    drush_log('CiviCRM alert: ' . $message . (!empty($context) ? ' ' . print_r($context, 1) : ''), 'error');
+  }
+
+  public function critical($message, array $context = []) {
+    drush_log('CiviCRM ' . __FUNCTION__ . ': ' . $message . (!empty($context) ? ' ' . print_r($context, 1) : ''), 'error');
+  }
+
+  public function error($message, array $context = []) {
+    drush_log('CiviCRM ' . __FUNCTION__ . ': ' . $message . (!empty($context) ? ' ' . print_r($context, 1) : ''), 'error');
+  }
+
+  public function warning($message, array $context = []) {
+    drush_log('CiviCRM ' . __FUNCTION__ . ': ' . $message . (!empty($context) ? ' ' . print_r($context, 1) : ''), 'warning');
+  }
+
+  public function notice($message, array $context = []) {
+    drush_log('CiviCRM ' . __FUNCTION__ . ': ' . $message . (!empty($context) ? ' ' . print_r($context, 1) : ''), 'warning');
+  }
+
+  public function info($message, array $context = []) {
+    drush_log('CiviCRM ' . __FUNCTION__ . ': ' . $message . (!empty($context) ? ' ' . print_r($context, 1) : ''), 'info');
+  }
+
+  public function debug($message, array $context = []) {
+    drush_log('CiviCRM ' . __FUNCTION__ . ': ' . $message . (!empty($context) ? ' ' . print_r($context, 1) : ''), 'debug');
+  }
+
+  public function log($level, $message, array $context = []) {
+    drush_log('CiviCRM ' . $level . ': ' . $message . ' ' . print_r($context, 1), 'info');
+  }
+
 }
