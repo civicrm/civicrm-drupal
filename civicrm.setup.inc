@@ -24,7 +24,7 @@ function civicrm_setup_page() {
       'ctrl' => url('civicrm'),
       'res' => $coreUrl . '/setup/res/',
       'jquery.js' => $coreUrl . '/bower_components/jquery/dist/jquery.min.js',
-      'font-awesome.css' => $coreUrl . '/bower_components/font-awesome/css/font-awesome.min.css',
+      'font-awesome.css' => $coreUrl . '/bower_components/font-awesome/css/all.min.css',
       // Not used? 'finished' => url('civicrm/dashboard', ['query' => ['reset' => 1],]),
     ));
     \Civi\Setup\BasicRunner::run($ctrl);
