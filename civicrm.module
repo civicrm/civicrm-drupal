@@ -30,8 +30,6 @@
  */
 require_once 'civicrm_user.inc';
 
-define('CIVICRM_UF_HEAD', TRUE);
-
 /**
  * Minimum required PHP
  *
