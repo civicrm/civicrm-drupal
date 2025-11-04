@@ -1043,25 +1043,7 @@ function _civicrm_filter_process($text, $filter, $format, $langcode, $cache, $ca
     return t('(Content unavailable. CiviCRM is not installed.)');
   }
 
-  $config = CRM_Core_Config::singleton();
-  $smarty = CRM_Core_Smarty::singleton();
-  // as this file is not a class (not sure why) we need the require once
-  require_once 'CRM/Core/Smarty/resources/String.php';
-  civicrm_smarty_register_string_resource();
-
-  $was_secure       = $smarty->security;
-  $smarty->security = TRUE;
-  $text             = $smarty->fetch("string:{$text}");
-  $smarty->security = $was_secure;
-
-  // In the use-case of embedding Smarty codes inside a Drupal page, one is likely
-  // to load data using 'pull MVC' instead of 'push MVC', so the interesting
-  // data isn't loaded until after processing the main content. Therefore, we
-  // evaluate debug codes after the main content.
-  if ($config->debug) {
-    $text .= $smarty->fetch('CRM/common/debug.tpl');
-  }
-  return $text;
+  return CRM_Utils_String::parseOneOffStringThroughSmarty($text);
 }
 
 /**
