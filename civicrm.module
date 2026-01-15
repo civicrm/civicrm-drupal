@@ -39,7 +39,7 @@ require_once 'civicrm_user.inc';
  * @see CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER
  * @see CiviDrupal\PhpVersionTest::testConstantMatch()
  */
-define('CIVICRM_DRUPAL_PHP_MINIMUM', '8.0.0');
+define('CIVICRM_DRUPAL_PHP_MINIMUM', '8.1.2');
 
 /**
  * Adds CiviCRM CSS and JS resources into the header.
