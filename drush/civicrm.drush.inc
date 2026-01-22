@@ -1525,8 +1525,9 @@ function drush_civicrm_api() {
         unset($params['version']);
         $result = civicrm_api3($entity, $action, $params);
       }
-      catch (CiviCRM_API3_Exception $e) {
+      catch (CRM_Core_Exception $e) {
         drush_set_error('CIVICRM api error', $e->getMessage());
+        return;
       }
       break;
 
@@ -1535,14 +1536,15 @@ function drush_civicrm_api() {
         unset($params['version']);
         $result = civicrm_api4($entity, $action, $params);
       }
-      catch (API_Exception $e) {
+      catch (CRM_Core_Exception $e) {
         drush_set_error('CIVICRM api error', $e->getMessage());
+        return;
       }
       break;
 
     default:
       drush_set_error(dt('Unknown api version: @version', ['@version' => $params['version']]));
-      break;
+      return;
 
   }
 
