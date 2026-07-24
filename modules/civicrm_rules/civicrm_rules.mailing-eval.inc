@@ -28,24 +28,25 @@ function civicrm_rules_rules_action_mailing_send_email($to,
   RulesPlugin $element
 ) {
   if (isset($state->variables['mailing']) && $state->variables['mailing']->id) {
-    $to = str_replace(array("\r", "\n"), ',', $to);
+    $to = str_replace(["\r", "\n"], ',', $to);
     $toEmails = explode(',', $to);
     if (empty($toEmails)) {
       return;
     }
 
-    $tokens['mailing'] = array(
+    $tokens['mailing'] = [
       'mailing.editUrl',
       'mailing.scheduleUrl',
       'mailing.html',
       'mailing.creatorEmail',
       'mailing.creator',
-    );
+    ];
 
-    $params            = array();
-    $params['from']    = !empty($from) ? str_replace(array(
-      "\r", "\n",
-    ), '', $from) : 'Admin';
+    $params = [];
+    $params['from'] = !empty($from) ? str_replace([
+      "\r",
+      "\n",
+    ], '', $from) : 'Admin';
 
     $mailingContext = $state->variables['mailing']->id ? ['mailingId' => $state->variables['mailing']->id] : [];
     $tokenProcessor = new TokenProcessor(\Civi::dispatcher(), $mailingContext + [
@@ -61,11 +62,11 @@ function civicrm_rules_rules_action_mailing_send_email($to,
     $params['html'] = $tokenProcessor->getRow(0)->render('html');
 
     // also allow some user permission tokens for the toEmail
-    $tokens['user'] = array(
+    $tokens['user'] = [
       'user.permission-schedule mailings',
       'user.permission-create mailings',
       'user.permission-approve mailings',
-    );
+    ];
     foreach ($toEmails as $toEmail) {
       $tokenProcessor = new TokenProcessor(\Civi::dispatcher(), $mailingContext + [
         'controller' => __CLASS__,
@@ -80,7 +81,7 @@ function civicrm_rules_rules_action_mailing_send_email($to,
       //only process user permission tokens if used in toEmail
       if (in_array(trim($toEmail, '{}'), $tokens['user'])) {
         //we require a TO email, but can only send one; so we strip the first off and send the rest as CCs
-        $userEmails = explode(',', CRM_Utils_Token::replaceUserTokens($params['toEmail'], $tokens));
+        $userEmails = explode(',', _civicrm_rules_replaceUserTokens($params['toEmail'], $tokens));
         $params['toEmail'] = $userEmails[0];
         array_shift($userEmails);
         $params['cc'] = implode(',', $userEmails);
@@ -97,4 +98,88 @@ function civicrm_rules_condition_mailing_approved($mailing, $settings) {
 
 function civicrm_rules_condition_mailing_rejected($mailing, $settings) {
   return $mailing->approval_status_id != 1;
+}
+
+/**
+ * Replace all user tokens in $str
+ *
+ * @param string $str
+ *   The string with tokens to be replaced.
+ *
+ * @param null $knownTokens
+ * @param bool $escapeSmarty
+ *
+ * @return string
+ *   The processed string
+ *
+ */
+function _civicrm_rules_replaceUserTokens($str, $knownTokens = NULL, $escapeSmarty = FALSE) {
+  $key = 'user';
+  if (!$knownTokens || !isset($knownTokens[$key])) {
+    return $str;
+  }
+
+  $str = preg_replace_callback(
+    _civicrm_rules_tokenRegex($key),
+    function($matches) use ($escapeSmarty) {
+      return _civicrm_rules_getUserTokenReplacement($matches[1], $escapeSmarty);
+    },
+    $str
+  );
+  return $str;
+}
+
+/**
+ * @param $token
+ * @param bool $escapeSmarty
+ *
+ * @return string
+ */
+function _civicrm_rules_getUserTokenReplacement($token, $escapeSmarty = FALSE) {
+  $value = '';
+
+  [$objectName, $objectValue] = explode('-', $token, 2);
+
+  switch ($objectName) {
+    case 'permission':
+      $value = CRM_Core_Config::singleton()->userPermissionClass->permissionEmails($objectValue);
+      break;
+
+    case 'role':
+      $value = CRM_Core_Config::singleton()->userRoleClass->roleEmails($objectValue);
+      break;
+  }
+
+  if ($escapeSmarty) {
+    $value = _civicrm_rules_tokenEscapeSmarty($value);
+  }
+
+  return $value;
+}
+
+/**
+ * Get the regex for token replacement
+ *
+ * @param string $token_type
+ *   A string indicating the the type of token to be used in the expression.
+ *
+ * @return string
+ *   regular expression suitable for using in preg_replace
+ */
+function _civicrm_rules_tokenRegex(string $token_type) {
+  return '/(?<!\{|\\\\)\{' . $token_type . '\.([\w]+(:|\.)?\w*(\-[\w\s]+)?)\}(?!\})/';
+}
+
+/**
+ * Escape the string so a malicious user cannot inject smarty code into the template.
+ *
+ * @param string $string
+ *   A string that needs to be escaped from smarty parsing.
+ *
+ * @return string
+ *   the escaped string
+ */
+function _civicrm_rules_tokenEscapeSmarty($string) {
+  // need to use negative look-behind, as both str_replace() and preg_replace() are sequential
+  return preg_replace(['/{/', '/(?<!{ldelim)}/'], ['{ldelim}', '{rdelim}'], $string);
 }
