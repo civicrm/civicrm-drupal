@@ -46,12 +46,16 @@ class civicrm_handler_field_pseudo_constant extends views_handler_field {
   public function render($values) {
     if (!empty($values->{$this->field_alias})) {
       $val = $values->{$this->field_alias};
-      // TODO This fix should be replaced as described in  CRM-12853
-      $val = str_replace("\x01", '', $val);
-      if (isset($this->_pseudo_constant[$val])) {
-        return $this->_pseudo_constant[$val];
+      // Handle multi-value fields stored with \x01 separator
+      // (e.g. participant role_id). Fixes dev/drupal#205.
+      $ids = array_filter(explode("\x01", $val));
+      $labels = array();
+      foreach ($ids as $id) {
+        if (isset($this->_pseudo_constant[$id])) {
+          $labels[] = $this->_pseudo_constant[$id];
+        }
       }
-      return '';
+      return implode(', ', $labels);
     }
   }
 
