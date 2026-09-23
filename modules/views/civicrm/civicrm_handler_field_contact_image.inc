@@ -42,7 +42,7 @@ class civicrm_handler_field_contact_image extends views_handler_field {
 
     $form['title'] = array(
       '#title' => t('Title attribute'),
-      '#description' => t('The text to use as value for the <code>img</code> tag <code>title</code> attribute.'),
+      '#description' => t('The text to use as value for the <code>img</code> tag <code>title</code> attribute. You may enter data from this view as per the "Replacement patterns" below.'),
       '#type' => 'textfield',
       '#default_value' => $this->options['title'],
       '#dependency' => array(
@@ -52,7 +52,7 @@ class civicrm_handler_field_contact_image extends views_handler_field {
 
     $form['alt'] = array(
       '#title' => t('Alt attribute'),
-      '#description' => t('The text to use as value for the <code>img</code> tag <code>alt</code> attribute.'),
+      '#description' => t('The text to use as value for the <code>img</code> tag <code>alt</code> attribute. You may enter data from this view as per the "Replacement patterns" below.'),
       '#type' => 'textfield',
       '#default_value' => $this->options['alt'],
       '#dependency' => array(
@@ -117,10 +117,13 @@ class civicrm_handler_field_contact_image extends views_handler_field {
     if ($this->options['url_only']) {
       return $value;
     }
+    $tokens = $this->get_render_tokens([]);
+    $title = $this->render_altered(['text' => $this->options['title']], $tokens);
+    $alt = $this->render_altered(['text' => $this->options['alt']], $tokens);
     $image = array(
       'path' => $value,
-      'title' => $this->options['title'],
-      'alt' => $this->options['alt'],
+      'title' => $title,
+      'alt' => $alt,
     );
     $directory = $this->get_civi_relative_upload_path();
     if (!empty($this->options['image_style']) && module_exists('image') && $directory !== FALSE) {
