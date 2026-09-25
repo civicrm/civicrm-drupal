@@ -217,9 +217,13 @@ function civicrm_initialize() {
     $config = CRM_Core_Config::singleton();
 
     // Add module-specific header elements
-    $header = civicrm_html_head();
-    if (!empty($header)) {
-      drupal_add_html_head($header);
+    // civicrm_html_head() can get called during cache clears before AllCoreTables is populated.
+    // We can't even use `isUpgradePending()` for that reason. But we can check CIVICRM_UPGRADE_ACTIVE.
+    if (!defined('CIVICRM_UPGRADE_ACTIVE')) {
+      $header = civicrm_html_head();
+      if (!empty($header)) {
+        drupal_add_html_head($header);
+      }
     }
 
     // Prevent autoload conflicts if HTML_Purifier is already in Drupal libraries
