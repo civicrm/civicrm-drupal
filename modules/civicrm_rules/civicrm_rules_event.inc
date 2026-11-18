@@ -29,7 +29,7 @@ function civicrm_rules_get_event() {
     ),
     'contact_edit' =>
     array(
-      'label' => t('Contact has been updated'),
+      'label' => t('Contact has been updated (CiviCRM Event Rule)'),
       'group' => 'CiviCRM Contact',
       'variables' => civicrm_rules_rules_events_variables(t('update contact')),
     ),
